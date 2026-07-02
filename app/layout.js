@@ -1,16 +1,21 @@
-import { Archivo_Black, Inter } from "next/font/google";
+import { Barlow, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 import JsonLd from "./components/JsonLd";
 import { LanguageProvider } from "./i18n/LanguageContext";
 import { SITE } from "./site.config";
 
-const displayFont = Archivo_Black({
-  weight: "400",
+// Barlow Condensed (display) reads like garage / highway signage; Barlow
+// (body) shares that American industrial-signage heritage — a grounded
+// pairing for a San José auto shop, deliberately not the generic Inter.
+const displayFont = Barlow_Condensed({
+  weight: ["600", "700", "800"],
+  style: ["normal", "italic"],
   subsets: ["latin"],
   variable: "--font-display",
 });
 
-const bodyFont = Inter({
+const bodyFont = Barlow({
+  weight: ["400", "500", "600"],
   subsets: ["latin"],
   variable: "--font-body",
 });
@@ -70,7 +75,7 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "#f86000",
+  themeColor: "#14100c",
 };
 
 export default function RootLayout({ children }) {

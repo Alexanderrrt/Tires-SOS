@@ -41,7 +41,7 @@ export const SITE = {
 export const SERVICES = [
   {
     id: "new-tires",
-    icon: "🛞",
+    icon: "tire",
     title: { en: "New Tires", es: "Llantas Nuevas" },
     desc: {
       en: "All major brands and sizes, at the best prices in the Bay Area.",
@@ -50,7 +50,7 @@ export const SERVICES = [
   },
   {
     id: "flat-repair",
-    icon: "🔧",
+    icon: "wrench",
     title: { en: "Flat Repair", es: "Reparación de Ponchaduras" },
     desc: {
       en: "Fast, reliable patch and plug repairs while you wait.",
@@ -59,7 +59,7 @@ export const SERVICES = [
   },
   {
     id: "alignment",
-    icon: "📐",
+    icon: "alignment",
     title: { en: "Wheel Alignment", es: "Alineación" },
     desc: {
       en: "Precise alignment to extend tire life and improve handling.",
@@ -68,7 +68,7 @@ export const SERVICES = [
   },
   {
     id: "brakes",
-    icon: "🛑",
+    icon: "brakes",
     title: { en: "Brakes", es: "Frenos" },
     desc: {
       en: "Pads, rotors, and full brake inspections done right.",
@@ -77,7 +77,7 @@ export const SERVICES = [
   },
   {
     id: "oil-change",
-    icon: "🛢️",
+    icon: "oil",
     title: { en: "Oil Change", es: "Cambio de Aceite" },
     desc: {
       en: "Quick, affordable oil changes to keep your engine healthy.",
@@ -86,7 +86,7 @@ export const SERVICES = [
   },
   {
     id: "batteries",
-    icon: "🔋",
+    icon: "battery",
     title: { en: "Batteries", es: "Baterías" },
     desc: {
       en: "Free testing and same-day battery replacement.",
@@ -95,7 +95,7 @@ export const SERVICES = [
   },
   {
     id: "rims",
-    icon: "⚙️",
+    icon: "rim",
     title: { en: "Rims", es: "Rines" },
     desc: {
       en: "New and used rims to fit your ride and your budget.",
@@ -174,8 +174,8 @@ export const COPY = {
   },
   hero: {
     kicker: { en: "San José, CA", es: "San José, CA" },
-    callNow: { en: "📞 Call Now", es: "📞 Llamar Ahora" },
-    directions: { en: "📍 Get Directions", es: "📍 Cómo Llegar" },
+    callNow: { en: "Call Now", es: "Llamar Ahora" },
+    directions: { en: "Get Directions", es: "Cómo Llegar" },
     note: {
       en: "Walk-ins welcome. Shop service only — no mobile dispatch.",
       es: "Se aceptan clientes sin cita. Servicio solo en tienda — no ofrecemos servicio móvil.",

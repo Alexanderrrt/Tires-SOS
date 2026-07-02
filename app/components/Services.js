@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useT } from "../i18n/LanguageContext";
 import { COPY, SERVICES } from "../site.config";
+import Icon from "./Icons";
 import Reveal from "./Reveal";
 
 export default function Services() {
@@ -29,7 +30,9 @@ export default function Services() {
                 onClick={() => setActiveId(isActive ? null : service.id)}
                 aria-expanded={isActive}
               >
-                <span className="service-card__icon">{service.icon}</span>
+                <span className="service-card__icon">
+                  <Icon name={service.icon} />
+                </span>
                 <span className="service-card__title">{t(service.title)}</span>
                 <span className={`service-card__reveal ${isActive ? "service-card__reveal--open" : ""}`}>
                   <span className="service-card__desc">{t(service.desc)}</span>

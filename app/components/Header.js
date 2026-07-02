@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useLanguage, useT } from "../i18n/LanguageContext";
 import { useOpenStatus } from "../hooks/useOpenStatus";
 import { COPY, SITE } from "../site.config";
+import Icon from "./Icons";
 
 export default function Header() {
   const { lang, toggleLang } = useLanguage();
@@ -50,8 +51,8 @@ export default function Header() {
             {lang === "en" ? "ES" : "EN"}
           </button>
 
-          <a href={SITE.phoneHref} className="btn btn--primary btn--small btn--pulse">
-            {t(COPY.nav.callNow)}
+          <a href={SITE.phoneHref} className="btn btn--primary btn--small">
+            <Icon name="phone" /> {t(COPY.nav.callNow)}
           </a>
         </div>
       </div>

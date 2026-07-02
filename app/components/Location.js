@@ -2,6 +2,7 @@
 
 import { useT } from "../i18n/LanguageContext";
 import { COPY, SITE } from "../site.config";
+import Icon from "./Icons";
 import Reveal from "./Reveal";
 
 export default function Location() {
@@ -35,9 +36,9 @@ export default function Location() {
                 href={SITE.mapsHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn--secondary btn--small location-directions"
+                className="btn btn--ghost btn--small location-directions"
               >
-                {t(COPY.hero.directions)}
+                <Icon name="pin" /> {t(COPY.hero.directions)}
               </a>
             </div>
 

@@ -2,6 +2,7 @@
 
 import { useT } from "../i18n/LanguageContext";
 import { COPY, REELS, SITE } from "../site.config";
+import Icon from "./Icons";
 import Reveal from "./Reveal";
 
 // Featured Instagram reels, embedded via Instagram's iframe endpoint
@@ -10,7 +11,7 @@ export default function Gallery() {
   const t = useT();
 
   return (
-    <section id="gallery" className="section section--muted section--angled">
+    <section id="gallery" className="section section--muted">
       <div className="section__inner">
         <Reveal>
           <h2 className="section__heading">{t(COPY.gallery.heading)}</h2>
@@ -38,7 +39,7 @@ export default function Gallery() {
             rel="noopener noreferrer"
             className="btn btn--primary gallery-cta"
           >
-            📸 Follow @tiressosrescue
+            <Icon name="instagram" /> Follow @tiressosrescue
           </a>
         </Reveal>
       </div>

@@ -8,7 +8,7 @@ export default function Reviews() {
   const t = useT();
 
   return (
-    <section id="reviews" className="section section--muted section--angled">
+    <section id="reviews" className="section section--muted">
       <div className="section__inner">
         <Reveal>
           <h2 className="section__heading">{t(COPY.reviews.heading)}</h2>
