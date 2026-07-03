@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import AdminLoader from "../AdminLoader";
 
 export const dynamic = "force-dynamic";
 
@@ -20,18 +21,20 @@ export default function AdminLogin() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password }),
     });
-    setBusy(false);
     if (res.ok) {
       router.push("/admin");
       router.refresh();
-    } else {
-      const { error } = await res.json().catch(() => ({}));
-      setError(error || "Login failed.");
+      return;
     }
+    setBusy(false);
+    const { error } = await res.json().catch(() => ({}));
+    setError(error || "Login failed.");
   }
 
   return (
-    <main className="admin-auth">
+    <>
+      {busy && <AdminLoader message="Signing in…" />}
+      <main className="admin-auth">
       <form className="admin-card" onSubmit={submit}>
         <h1>Admin — Pricing</h1>
         <p className="admin-muted">Enter the admin password to edit quote pricing.</p>
@@ -49,5 +52,6 @@ export default function AdminLogin() {
         </button>
       </form>
     </main>
+    </>
   );
 }

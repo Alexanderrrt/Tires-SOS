@@ -1469,6 +1469,139 @@ h3 {
   }
 }
 
+/* ---------- Admin loader ---------- */
+
+.admin-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  animation: admin-loader-in 0.35s ease;
+}
+
+.admin-loader__backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 45%, rgba(248, 96, 0, 0.08), transparent 70%),
+    var(--ink);
+}
+
+.admin-loader__backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--tread);
+  opacity: 0.55;
+}
+
+.admin-loader__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  text-align: center;
+  max-width: 22rem;
+}
+
+.admin-loader__visual {
+  position: relative;
+  width: 9.5rem;
+  height: 9.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.admin-loader__ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--steel);
+}
+
+.admin-loader__ring--outer {
+  opacity: 0.55;
+  animation: admin-loader-spin 18s linear infinite;
+}
+
+.admin-loader__ring--inner {
+  color: var(--orange);
+  opacity: 0.85;
+  animation: admin-loader-spin 9s linear infinite reverse;
+}
+
+.admin-loader__mark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--display);
+  font-size: 1.55rem;
+  letter-spacing: 0.06em;
+  color: var(--paper);
+}
+
+.admin-loader__brand {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--paper);
+}
+
+.admin-loader__message {
+  margin: 0;
+  color: var(--paper-dim);
+  font-size: 0.95rem;
+}
+
+.admin-loader__track {
+  width: min(14rem, 72vw);
+  height: 3px;
+  margin-top: 0.55rem;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.admin-loader__track-fill {
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, var(--orange), transparent);
+  animation: admin-loader-progress 1.35s ease-in-out infinite;
+}
+
+@keyframes admin-loader-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes admin-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes admin-loader-progress {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
 /* ---------- Admin ---------- */
 
 .admin-auth {
@@ -1679,7 +1812,14 @@ h3 {
   }
 
   .hero__ring,
-  .marquee__track {
+  .marquee__track,
+  .admin-loader__ring--outer,
+  .admin-loader__ring--inner,
+  .admin-loader__track-fill {
     animation: none !important;
+  }
+
+  .admin-loader {
+    animation: none;
   }
 }
