@@ -3,6 +3,7 @@ import Hero from "./components/Hero";
 import Marquee from "./components/Marquee";
 import Services from "./components/Services";
 import Gallery from "./components/Gallery";
+import Promos from "./components/Promos";
 import OwnersRide from "./components/OwnersRide";
 import Location from "./components/Location";
 import Reviews from "./components/Reviews";
@@ -17,6 +18,7 @@ export default function HomePage() {
         <Marquee />
         <Services />
         <Gallery />
+        <Promos />
         <OwnersRide />
         <Location />
         <Reviews />
