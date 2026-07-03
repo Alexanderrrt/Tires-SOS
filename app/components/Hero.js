@@ -46,7 +46,7 @@ export default function Hero() {
           </div>
 
           <p className="hero__afterpay hero__enter" style={{ "--d": "380ms" }}>
-            <span className="afterpay-chip">Afterpay</span>
+            <span className="afterpay-chip">Snap Finance</span>
             {t(COPY.hero.afterpay)}
           </p>
 
@@ -55,9 +55,13 @@ export default function Hero() {
           </p>
         </div>
 
-        <div className="hero__visual hero__enter" style={{ "--d": "240ms" }} aria-hidden="true">
+        <div className="hero__visual hero__enter" style={{ "--d": "240ms" }}>
           <TreadRing />
-          <img className="hero__logo" src="/logo-mark.png" alt="" />
+          <img
+            className="hero__portrait"
+            src="/owner.jpg"
+            alt="Owner of Tires SOS Rescue in branded uniform"
+          />
         </div>
       </div>
     </section>

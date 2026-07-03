@@ -16,6 +16,15 @@ export default function Location() {
           <h2 className="section__heading">{t(COPY.location.heading)}</h2>
         </Reveal>
 
+        <Reveal className="location-storefront">
+          <img
+            className="location-storefront__img"
+            src="/storefront.jpg"
+            alt="Tires SOS Rescue storefront at 623 E Taylor St, San Jose, CA"
+            loading="lazy"
+          />
+        </Reveal>
+
         <Reveal className="location-grid">
           <div className="location-map">
             <iframe

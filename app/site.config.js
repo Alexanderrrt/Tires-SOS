@@ -7,8 +7,8 @@ export const SITE = {
   // UPDATE this once the real domain is attached in Vercel.
   url: "https://tires-sos.vercel.app",
   tagline: {
-    en: "Tire specialists. Fast service, best prices in the Bay Area.",
-    es: "Especialistas en neumáticos. Servicio rápido, los mejores precios del Bay Area.",
+    en: "Tire specialists. Fast service, best prices in the Bay Area. We speak your language.",
+    es: "Especialistas en llantas. Servicio rápido, los mejores precios del Bay Area. Aquí te atendemos como en casa.",
   },
   phone: "(408) 332-8962",
   phoneHref: "tel:+14083328962",
@@ -118,7 +118,7 @@ export const MARQUEE_ITEMS = [
   "Batteries",
   "Flat Repair",
   "Best Prices in the Bay Area",
-  "Afterpay Available",
+  "Snap Finance Available",
 ];
 
 // Instagram reels featured in the "From the Shop" section.
@@ -135,7 +135,7 @@ export const OWNERS_RIDE = {
   title: { en: "BMW M3 Competition", es: "BMW M3 Competition" },
   body: {
     en: "Our owner's daily driver is his pride and joy — and every car that rolls into the shop gets treated the exact same way. Your ride is our ride.",
-    es: "El carro diario de nuestro dueño es su orgullo — y cada carro que entra al taller recibe exactamente el mismo trato. Su carro es nuestro carro.",
+    es: "El carro del patrón es su orgullo — y cada carro que entra al taller recibe exactamente el mismo trato. Tu carro es nuestro carro, parce.",
   },
 };
 
@@ -201,12 +201,12 @@ export const COPY = {
     callNow: { en: "Call Now", es: "Llamar Ahora" },
     directions: { en: "Get Directions", es: "Cómo Llegar" },
     note: {
-      en: "Walk-ins welcome. Shop service only — no mobile dispatch.",
-      es: "Se aceptan clientes sin cita. Servicio solo en tienda — no ofrecemos servicio móvil.",
+      en: "Walk-ins welcome — no appointment needed. Shop service only.",
+      es: "Sin cita, sin problema — llegá cuando quieras. Servicio solo en tienda.",
     },
     afterpay: {
-      en: "Afterpay accepted — split it into 4 easy interest-free payments",
-      es: "Aceptamos Afterpay — divida su pago en 4 pagos fáciles sin interés",
+      en: "Snap Finance available — approvals from $300 to $5,000",
+      es: "Snap Finance disponible — aprobaciones desde $300 hasta $5,000",
     },
   },
   services: {
@@ -230,6 +230,36 @@ export const COPY = {
   },
   reviews: {
     heading: { en: "What Customers Say", es: "Lo Que Dicen Nuestros Clientes" },
+  },
+  promos: {
+    heading: { en: "Deals & Programs", es: "Ofertas y Programas" },
+    sub: {
+      en: "Flexible financing and rewards to keep you on the road.",
+      es: "Financiamiento flexible y recompensas para mantenerte en el camino.",
+    },
+    financeTitle: { en: "Buy Now, Pay Later", es: "Compra Ahora, Paga Después" },
+    financeSub: {
+      en: "Snap Finance — approvals from $300 to $5,000. No perfect credit needed. Quick approval, flexible payments.",
+      es: "Snap Finance — aprobaciones desde $300 hasta $5,000. Sin necesidad de crédito perfecto. Aprobación rápida, pagos flexibles.",
+    },
+    financeCta: { en: "Ask about Snap Finance", es: "Pregunta por Snap Finance" },
+    loyaltyTitle: { en: "Loyalty Card", es: "Tarjeta de Fidelidad" },
+    loyaltySub: {
+      en: "Get your 5th oil change FREE. Every oil change includes fluid top-off, filter, and tire pressure check.",
+      es: "Tu 5to cambio de aceite GRATIS. Cada cambio incluye llenado de líquidos, filtro y calibración de neumáticos.",
+    },
+    loyaltyCta: { en: "Ask for your card", es: "Pide tu tarjeta" },
+    driverTitle: { en: "Driver Program", es: "Programa del Conductor" },
+    driverSub: {
+      en: "4 new tires for just $340 — includes mount, balance, and alignment. Everything your car needs in one deal.",
+      es: "4 llantas nuevas por solo $340 — incluye montaje, balanceo y alineación. Todo lo que tu carro necesita en un solo paquete.",
+    },
+    driverPrice: "$340",
+    driverIncludes: {
+      en: ["4 new tires", "Mount & balance", "Wheel alignment"],
+      es: ["4 llantas nuevas", "Montaje y balanceo", "Alineación"],
+    },
+    driverCta: { en: "Claim this deal", es: "Aprovecha esta oferta" },
   },
   footer: {
     rights: {
