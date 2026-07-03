@@ -1,26 +1,38 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useLanguage, useT } from "../i18n/LanguageContext";
 import { useOpenStatus } from "../hooks/useOpenStatus";
 import { COPY, SITE } from "../site.config";
+import Icon from "./Icons";
 
 export default function Header() {
   const { lang, toggleLang } = useLanguage();
   const t = useT();
   const isOpen = useOpenStatus();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <header className="header">
+    <header className={`header ${scrolled ? "header--scrolled" : ""}`}>
       <div className="header__inner">
-        <a href="#top" className="header__brand">
-          🛞 {SITE.name}
+        <a href="/" className="header__brand">
+          <img className="header__logo" src="/logo-mark.png" alt="" />
+          <span className="header__brand-name">{SITE.name}</span>
         </a>
 
         <nav className="header__nav">
-          <a href="#services">{t(COPY.nav.services)}</a>
-          <a href="#gallery">{t(COPY.nav.gallery)}</a>
-          <a href="#location">{t(COPY.nav.location)}</a>
-          <a href="#reviews">{t(COPY.nav.reviews)}</a>
+          <a href="/#services">{t(COPY.nav.services)}</a>
+          <a href="/quote">{t(COPY.nav.quote)}</a>
+          <a href="/#gallery">{t(COPY.nav.gallery)}</a>
+          <a href="/#location">{t(COPY.nav.location)}</a>
+          <a href="/#reviews">{t(COPY.nav.reviews)}</a>
         </nav>
 
         <div className="header__actions">
@@ -41,7 +53,7 @@ export default function Header() {
           </button>
 
           <a href={SITE.phoneHref} className="btn btn--primary btn--small">
-            {t(COPY.nav.callNow)}
+            <Icon name="phone" /> {t(COPY.nav.callNow)}
           </a>
         </div>
       </div>

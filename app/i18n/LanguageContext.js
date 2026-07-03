@@ -21,6 +21,11 @@ export function LanguageProvider({ children }) {
     }
   }, []);
 
+  // Keep <html lang> in sync for SEO and screen readers.
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
   const toggleLang = useCallback(() => {
     setLang((prev) => {
       const next = prev === "en" ? "es" : "en";

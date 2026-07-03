@@ -1,7 +1,9 @@
 import Header from "./components/Header";
 import Hero from "./components/Hero";
+import Marquee from "./components/Marquee";
 import Services from "./components/Services";
 import Gallery from "./components/Gallery";
+import OwnersRide from "./components/OwnersRide";
 import Location from "./components/Location";
 import Reviews from "./components/Reviews";
 import Footer from "./components/Footer";
@@ -12,8 +14,10 @@ export default function HomePage() {
       <Header />
       <main>
         <Hero />
+        <Marquee />
         <Services />
         <Gallery />
+        <OwnersRide />
         <Location />
         <Reviews />
       </main>

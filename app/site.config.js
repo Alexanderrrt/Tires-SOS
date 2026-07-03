@@ -3,12 +3,18 @@
 
 export const SITE = {
   name: "Tires SOS Rescue",
+  // Used for canonical URLs, sitemap, robots and Open Graph.
+  // UPDATE this once the real domain is attached in Vercel.
+  url: "https://tires-sos.vercel.app",
   tagline: {
     en: "Tire specialists. Fast service, best prices in the Bay Area.",
     es: "Especialistas en neumáticos. Servicio rápido, los mejores precios del Bay Area.",
   },
   phone: "(408) 332-8962",
   phoneHref: "tel:+14083328962",
+  // WhatsApp number in international format, digits only (used by wa.me).
+  // Confirm this line is WhatsApp-enabled, or replace with the shop's WhatsApp.
+  whatsapp: "14083328962",
   address: {
     line1: "623 E Taylor St",
     line2: "San José, CA 95112",
@@ -38,7 +44,7 @@ export const SITE = {
 export const SERVICES = [
   {
     id: "new-tires",
-    icon: "🛞",
+    icon: "tire",
     title: { en: "New Tires", es: "Llantas Nuevas" },
     desc: {
       en: "All major brands and sizes, at the best prices in the Bay Area.",
@@ -47,7 +53,7 @@ export const SERVICES = [
   },
   {
     id: "flat-repair",
-    icon: "🔧",
+    icon: "wrench",
     title: { en: "Flat Repair", es: "Reparación de Ponchaduras" },
     desc: {
       en: "Fast, reliable patch and plug repairs while you wait.",
@@ -56,7 +62,7 @@ export const SERVICES = [
   },
   {
     id: "alignment",
-    icon: "📐",
+    icon: "alignment",
     title: { en: "Wheel Alignment", es: "Alineación" },
     desc: {
       en: "Precise alignment to extend tire life and improve handling.",
@@ -65,7 +71,7 @@ export const SERVICES = [
   },
   {
     id: "brakes",
-    icon: "🛑",
+    icon: "brakes",
     title: { en: "Brakes", es: "Frenos" },
     desc: {
       en: "Pads, rotors, and full brake inspections done right.",
@@ -74,7 +80,7 @@ export const SERVICES = [
   },
   {
     id: "oil-change",
-    icon: "🛢️",
+    icon: "oil",
     title: { en: "Oil Change", es: "Cambio de Aceite" },
     desc: {
       en: "Quick, affordable oil changes to keep your engine healthy.",
@@ -83,7 +89,7 @@ export const SERVICES = [
   },
   {
     id: "batteries",
-    icon: "🔋",
+    icon: "battery",
     title: { en: "Batteries", es: "Baterías" },
     desc: {
       en: "Free testing and same-day battery replacement.",
@@ -92,7 +98,7 @@ export const SERVICES = [
   },
   {
     id: "rims",
-    icon: "⚙️",
+    icon: "rim",
     title: { en: "Rims", es: "Rines" },
     desc: {
       en: "New and used rims to fit your ride and your budget.",
@@ -100,6 +106,38 @@ export const SERVICES = [
     },
   },
 ];
+
+// Strings for the scrolling marquee strip. Deliberately mixed EN/ES —
+// it reads as one bilingual banner, so it does not switch with the toggle.
+export const MARQUEE_ITEMS = [
+  "Llantas Nuevas",
+  "Brakes",
+  "Alineación",
+  "Oil Change",
+  "Rines",
+  "Batteries",
+  "Flat Repair",
+  "Best Prices in the Bay Area",
+  "Afterpay Available",
+];
+
+// Instagram reels featured in the "From the Shop" section.
+// Paste new reel permalinks here to rotate the featured content.
+export const REELS = [
+  "https://www.instagram.com/reel/DaQ2UFdSpnK/",
+  "https://www.instagram.com/reel/DZ7-m7PztjQ/",
+  "https://www.instagram.com/reel/DZsjXNexI8I/",
+  "https://www.instagram.com/reel/DZWBzaGRmS8/",
+];
+
+export const OWNERS_RIDE = {
+  kicker: { en: "The Boss's Ride", es: "El Carro del Jefe" },
+  title: { en: "BMW M3 Competition", es: "BMW M3 Competition" },
+  body: {
+    en: "Our owner's daily driver is his pride and joy — and every car that rolls into the shop gets treated the exact same way. Your ride is our ride.",
+    es: "El carro diario de nuestro dueño es su orgullo — y cada carro que entra al taller recibe exactamente el mismo trato. Su carro es nuestro carro.",
+  },
+};
 
 export const TESTIMONIALS = [
   {
@@ -131,7 +169,28 @@ export const COPY = {
     gallery: { en: "Gallery", es: "Galería" },
     location: { en: "Location", es: "Ubicación" },
     reviews: { en: "Reviews", es: "Reseñas" },
+    quote: { en: "Get a Quote", es: "Cotizar" },
     callNow: { en: "Call Now", es: "Llamar" },
+  },
+  quote: {
+    heading: { en: "Instant Price Estimate", es: "Estimado de Precio Instantáneo" },
+    sub: {
+      en: "Pick your vehicle and services for a ballpark price. We confirm the exact price at the shop.",
+      es: "Elija su vehículo y servicios para un precio aproximado. Confirmamos el precio exacto en el taller.",
+    },
+    vehicleStep: { en: "1. Your vehicle", es: "1. Su vehículo" },
+    vehicleClassLabel: { en: "Vehicle type", es: "Tipo de vehículo" },
+    vehicleTextLabel: { en: "Year / Make / Model (optional)", es: "Año / Marca / Modelo (opcional)" },
+    vehicleTextPlaceholder: { en: "e.g. 2019 Toyota Camry", es: "ej. 2019 Toyota Camry" },
+    servicesStep: { en: "2. What do you need?", es: "2. ¿Qué necesita?" },
+    qtyLabel: { en: "Quantity", es: "Cantidad" },
+    estimateLabel: { en: "Estimated total", es: "Total estimado" },
+    emptyState: {
+      en: "Select one or more services to see your estimate.",
+      es: "Seleccione uno o más servicios para ver su estimado.",
+    },
+    send: { en: "Send to shop on WhatsApp", es: "Enviar al taller por WhatsApp" },
+    ctaFromHome: { en: "Get an instant estimate", es: "Obtenga un estimado instantáneo" },
   },
   status: {
     open: { en: "Open now", es: "Abierto ahora" },
@@ -139,11 +198,15 @@ export const COPY = {
   },
   hero: {
     kicker: { en: "San José, CA", es: "San José, CA" },
-    callNow: { en: "📞 Call Now", es: "📞 Llamar Ahora" },
-    directions: { en: "📍 Get Directions", es: "📍 Cómo Llegar" },
+    callNow: { en: "Call Now", es: "Llamar Ahora" },
+    directions: { en: "Get Directions", es: "Cómo Llegar" },
     note: {
       en: "Walk-ins welcome. Shop service only — no mobile dispatch.",
       es: "Se aceptan clientes sin cita. Servicio solo en tienda — no ofrecemos servicio móvil.",
+    },
+    afterpay: {
+      en: "Afterpay accepted — split it into 4 easy interest-free payments",
+      es: "Aceptamos Afterpay — divida su pago en 4 pagos fáciles sin interés",
     },
   },
   services: {
