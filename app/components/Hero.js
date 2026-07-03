@@ -35,7 +35,7 @@ export default function Hero() {
           <div className="alignment-spotlight__media">
             <img
               src="/services/alignment.jpg"
-              alt="Car up on the computerized alignment rack at Tires SOS Rescue"
+              alt="PRECISION Wheel Alignment by HUNTER at Tires SOS Rescue"
             />
             <span className="alignment-spotlight__scan" aria-hidden="true" />
             <span className="alignment-spotlight__badge">{t(alignment.badge)}</span>

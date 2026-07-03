@@ -100,6 +100,54 @@ const BRANDS = [
       es: "Llantas Nexen — calidad accesible para cada conductor",
     },
   },
+  {
+    name: "Mobil",
+    logo: "/brands/mobil1.svg",
+    tagline: {
+      en: "Mobil oil changes — trusted protection for your engine",
+      es: "Cambios de aceite Mobil — protección confiable para tu motor",
+    },
+  },
+  {
+    name: "Castrol",
+    logo: "/brands/castrol.svg",
+    tagline: {
+      en: "Castrol oil available — engineered for peak performance",
+      es: "Aceite Castrol disponible — diseñado para máximo rendimiento",
+    },
+  },
+  {
+    name: "Pennzoil",
+    logo: "/brands/pennzoil.svg",
+    tagline: {
+      en: "Pennzoil oil changes — keep your engine running clean",
+      es: "Cambios de aceite Pennzoil — mantén tu motor limpio",
+    },
+  },
+  {
+    name: "Valvoline",
+    logo: "/brands/valvoline.svg",
+    tagline: {
+      en: "Valvoline oil in stock — 150+ years of engine protection",
+      es: "Aceite Valvoline en stock — más de 150 años protegiendo motores",
+    },
+  },
+  {
+    name: "Shell",
+    logo: "/brands/shell.svg",
+    tagline: {
+      en: "Shell motor oil — advanced formula for every engine",
+      es: "Aceite Shell — fórmula avanzada para cada motor",
+    },
+  },
+  {
+    name: "Royal Purple",
+    logo: "/brands/royalpurple.svg",
+    tagline: {
+      en: "Royal Purple oil — premium synthetic performance",
+      es: "Aceite Royal Purple — rendimiento sintético premium",
+    },
+  },
 ];
 
 const CTA = {
@@ -113,8 +161,8 @@ const CLOSE_LABEL = {
 };
 
 const WE_CARRY = {
-  en: "We carry top brands",
-  es: "Manejamos las mejores marcas",
+  en: "We carry top tire & oil brands",
+  es: "Manejamos las mejores marcas de llantas y aceite",
 };
 
 const AFTERPAY_LINE = {

@@ -6,14 +6,31 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { COPY, SITE } from "../site.config";
 import Icon from "../components/Icons";
 import { estimateTotal, formatMoney, buildWhatsAppMessage, clampQty } from "../../lib/quote";
+import { VEHICLE_BRANDS, getVehicleImagePath } from "../../lib/vehicles";
 
 export default function QuoteCalculator({ pricing }) {
   const t = useT();
   const { lang } = useLanguage();
 
   const [vehicleClass, setVehicleClass] = useState(pricing.vehicleClasses[1]?.id || pricing.vehicleClasses[0].id);
-  const [vehicleText, setVehicleText] = useState("");
+  const [brandId, setBrandId] = useState("");
+  const [modelId, setModelId] = useState("");
+  const [year, setYear] = useState("");
+  const [imgError, setImgError] = useState(false);
   const [selections, setSelections] = useState({});
+
+  const selectedBrand = VEHICLE_BRANDS.find((b) => b.id === brandId);
+  const selectedModel = selectedBrand?.models.find((m) => m.id === modelId);
+
+  const vehicleText = [
+    year,
+    selectedBrand?.name,
+    selectedModel?.name,
+  ].filter(Boolean).join(" ");
+
+  const vehicleImagePath = brandId && modelId && year
+    ? getVehicleImagePath(brandId, modelId, year)
+    : null;
 
   const toggle = (svc) =>
     setSelections((prev) => {
@@ -71,15 +88,70 @@ export default function QuoteCalculator({ pricing }) {
             ))}
           </div>
 
-          <label className="quote__field">
-            <span className="quote__label">{t(COPY.quote.vehicleTextLabel)}</span>
-            <input
-              type="text"
-              value={vehicleText}
-              onChange={(e) => setVehicleText(e.target.value)}
-              placeholder={t(COPY.quote.vehicleTextPlaceholder)}
-            />
-          </label>
+          <div className="quote__vehicle-selects">
+            <label className="quote__field">
+              <span className="quote__label">{t(COPY.quote.vehicleBrandLabel)}</span>
+              <select
+                value={brandId}
+                onChange={(e) => {
+                  setBrandId(e.target.value);
+                  setModelId("");
+                  setYear("");
+                  setImgError(false);
+                }}
+              >
+                <option value="">{t(COPY.quote.vehicleBrandPlaceholder)}</option>
+                {VEHICLE_BRANDS.map((b) => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className="quote__field">
+              <span className="quote__label">{t(COPY.quote.vehicleModelLabel)}</span>
+              <select
+                value={modelId}
+                disabled={!selectedBrand}
+                onChange={(e) => {
+                  setModelId(e.target.value);
+                  setYear("");
+                  setImgError(false);
+                }}
+              >
+                <option value="">{t(COPY.quote.vehicleModelPlaceholder)}</option>
+                {selectedBrand?.models.map((m) => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className="quote__field">
+              <span className="quote__label">{t(COPY.quote.vehicleYearLabel)}</span>
+              <select
+                value={year}
+                disabled={!selectedModel}
+                onChange={(e) => {
+                  setYear(e.target.value);
+                  setImgError(false);
+                }}
+              >
+                <option value="">{t(COPY.quote.vehicleYearPlaceholder)}</option>
+                {selectedModel?.years.slice().reverse().map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          {vehicleImagePath && !imgError && (
+            <div className="quote__vehicle-img">
+              <img
+                src={vehicleImagePath}
+                alt={vehicleText}
+                onError={() => setImgError(true)}
+              />
+            </div>
+          )}
         </fieldset>
 
         {/* Step 2 — services */}
