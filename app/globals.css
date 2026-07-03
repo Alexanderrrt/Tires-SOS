@@ -352,6 +352,87 @@ h3 {
   }
 }
 
+/* ---------- Alignment equipment banner ---------- */
+
+.alignment-banner {
+  background: linear-gradient(90deg, var(--surface-2), var(--surface));
+  border-bottom: 2px solid var(--orange);
+  overflow: hidden;
+}
+
+.alignment-banner__inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0.65rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.alignment-banner__icon {
+  width: 28px;
+  height: 28px;
+  color: var(--orange);
+  flex-shrink: 0;
+}
+
+.alignment-banner__text {
+  flex: 1;
+  margin: 0;
+  font-size: 0.9rem;
+  min-width: 0;
+}
+
+.alignment-banner__text strong {
+  font-family: var(--display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--orange);
+  font-size: 0.95rem;
+}
+
+.alignment-banner__text span {
+  color: var(--paper-dim);
+}
+
+.alignment-banner__sep {
+  margin: 0 0.45rem;
+}
+
+.alignment-banner__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--display);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: var(--orange);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+.alignment-banner__link .icon {
+  width: 1em;
+  height: 1em;
+}
+
+.alignment-banner__link:hover {
+  color: #ff7420;
+}
+
+@media (max-width: 600px) {
+  .alignment-banner__link {
+    width: 100%;
+    justify-content: center;
+    padding: 0.35rem 0 0;
+  }
+}
+
 /* ---------- Hero — asymmetric, left-aligned ---------- */
 
 .hero {

@@ -213,6 +213,18 @@ export const COPY = {
       en: "Walk-ins welcome — no appointment needed. Shop service only.",
       es: "Sin cita, sin problema — llegá cuando quieras. Servicio solo en tienda.",
     },
+    alignmentHighlight: {
+      en: "Specialized Alignment Equipment",
+      es: "Equipo Especializado de Alineación",
+    },
+    alignmentSub: {
+      en: "Precision laser alignment technology for all vehicles. Get it done right the first time.",
+      es: "Tecnología de alineación láser de precisión para todo tipo de vehículo. Bien hecho a la primera.",
+    },
+    alignmentCta: {
+      en: "Learn more",
+      es: "Más info",
+    },
     afterpay: {
       en: "Snap Finance & Afterpay available — flexible payments on your terms",
       es: "Snap Finance y Afterpay disponibles — pagos flexibles a tu manera",
