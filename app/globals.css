@@ -352,84 +352,147 @@ h3 {
   }
 }
 
-/* ---------- Alignment equipment banner ---------- */
+/* ---------- Alignment equipment spotlight ---------- */
 
-.alignment-banner {
-  background: linear-gradient(90deg, var(--surface-2), var(--surface));
-  border-bottom: 2px solid var(--orange);
+.alignment-spotlight {
+  background: linear-gradient(135deg, var(--surface-2), var(--ink-2));
+  background-image: var(--tread), linear-gradient(135deg, var(--surface-2), var(--ink-2));
+  border-bottom: 3px solid var(--orange);
   overflow: hidden;
 }
 
-.alignment-banner__inner {
+.alignment-spotlight__inner {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 0.65rem 1.25rem;
-  display: flex;
+  padding: 2.25rem 1.25rem;
+  display: grid;
+  gap: 1.75rem;
   align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
 }
 
-.alignment-banner__icon {
-  width: 28px;
-  height: 28px;
+.alignment-spotlight__media {
+  position: relative;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.alignment-spotlight__media img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: center 40%;
+}
+
+/* Sweeping laser line over the photo — sells the "precision measurement"
+   story. Disabled under reduced motion. */
+.alignment-spotlight__scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 4%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--orange) 30%, #ffb27a 50%, var(--orange) 70%, transparent);
+  box-shadow: 0 0 14px rgba(248, 96, 0, 0.85);
+  animation: scan-sweep 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes scan-sweep {
+  0% {
+    top: 4%;
+  }
+  50% {
+    top: 93%;
+  }
+  100% {
+    top: 4%;
+  }
+}
+
+.alignment-spotlight__badge {
+  position: absolute;
+  left: 0.85rem;
+  bottom: 0.85rem;
+  background: rgba(20, 16, 12, 0.85);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--orange);
+  color: var(--paper);
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+}
+
+.alignment-spotlight__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.85rem;
   color: var(--orange);
+  margin: 0 0 0.6rem;
+}
+
+.alignment-spotlight__icon {
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
 }
 
-.alignment-banner__text {
-  flex: 1;
-  margin: 0;
-  font-size: 0.9rem;
-  min-width: 0;
-}
-
-.alignment-banner__text strong {
+.alignment-spotlight__title {
   font-family: var(--display);
   font-weight: 800;
+  font-style: italic;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--orange);
-  font-size: 0.95rem;
+  line-height: 1.05;
+  font-size: clamp(1.7rem, 4.5vw, 2.6rem);
+  color: var(--paper);
+  margin: 0 0 0.75rem;
+  text-wrap: balance;
 }
 
-.alignment-banner__text span {
+.alignment-spotlight__body {
   color: var(--paper-dim);
+  font-size: 1.05rem;
+  margin: 0 0 1rem;
+  max-width: 52ch;
 }
 
-.alignment-banner__sep {
-  margin: 0 0.45rem;
+.alignment-spotlight__points {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 1.4rem;
 }
 
-.alignment-banner__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
+.alignment-spotlight__points li {
   font-family: var(--display);
   font-weight: 700;
   text-transform: uppercase;
-  font-size: 0.8rem;
-  letter-spacing: 0.04em;
-  color: var(--orange);
-  text-decoration: none;
-  white-space: nowrap;
-  transition: color 0.15s ease;
+  letter-spacing: 0.02em;
+  font-size: 0.95rem;
+  color: var(--paper);
 }
 
-.alignment-banner__link .icon {
-  width: 1em;
-  height: 1em;
+.alignment-spotlight__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
 }
 
-.alignment-banner__link:hover {
-  color: #ff7420;
-}
-
-@media (max-width: 600px) {
-  .alignment-banner__link {
-    width: 100%;
-    justify-content: center;
-    padding: 0.35rem 0 0;
+@media (min-width: 860px) {
+  .alignment-spotlight__inner {
+    grid-template-columns: 0.95fr 1.05fr;
+    gap: 2.5rem;
   }
 }
 
@@ -2049,13 +2112,6 @@ h3 {
   color: var(--orange);
 }
 
-.brand-popup__tire {
-  width: 42px;
-  height: 42px;
-  color: var(--orange);
-  margin-bottom: 0.6rem;
-}
-
 .brand-popup__kicker {
   font-family: var(--display);
   font-weight: 600;
@@ -2063,19 +2119,27 @@ h3 {
   letter-spacing: 0.12em;
   font-size: 0.72rem;
   color: var(--paper-dim);
-  margin: 0 0 0.25rem;
+  margin: 0 0 0.5rem;
 }
 
-.brand-popup__brand {
-  font-family: var(--display);
-  font-weight: 800;
-  font-style: italic;
-  text-transform: uppercase;
-  font-size: 1.6rem;
-  color: var(--orange);
-  margin: 0 0 0.35rem;
-  line-height: 1.1;
+/* Real brand logos are drawn for light backgrounds — show them on a white
+   panel. Keyed remount restarts the entrance animation on each rotation. */
+.brand-popup__logo {
+  background: #fff;
+  border-radius: var(--r-sm);
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1rem;
+  margin-bottom: 0.6rem;
   animation: popup-brand 0.35s ease;
+}
+
+.brand-popup__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 @keyframes popup-brand {
@@ -2186,7 +2250,12 @@ h3 {
     animation: none;
   }
 
-  .brand-popup__brand {
+  .brand-popup__logo {
     animation: none;
+  }
+
+  .alignment-spotlight__scan {
+    animation: none;
+    display: none;
   }
 }

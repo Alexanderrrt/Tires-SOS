@@ -213,17 +213,23 @@ export const COPY = {
       en: "Walk-ins welcome — no appointment needed. Shop service only.",
       es: "Sin cita, sin problema — llegá cuando quieras. Servicio solo en tienda.",
     },
-    alignmentHighlight: {
-      en: "Specialized Alignment Equipment",
-      es: "Equipo Especializado de Alineación",
-    },
-    alignmentSub: {
-      en: "Precision laser alignment technology for all vehicles. Get it done right the first time.",
-      es: "Tecnología de alineación láser de precisión para todo tipo de vehículo. Bien hecho a la primera.",
-    },
-    alignmentCta: {
-      en: "Learn more",
-      es: "Más info",
+    alignment: {
+      badge: { en: "Our rack, in action", es: "Nuestra rampa en acción" },
+      kicker: { en: "Our key equipment", es: "Nuestro equipo estrella" },
+      title: {
+        en: "Specialized Computerized Alignment Machine",
+        es: "Máquina Especializada de Alineación Computarizada",
+      },
+      body: {
+        en: "The heart of our shop. Our precision alignment system measures every angle digitally, so your car drives straight, your tires last longer, and you save on gas.",
+        es: "El corazón de nuestro taller. Nuestro sistema de alineación de precisión mide cada ángulo digitalmente, para que tu carro vaya derecho, tus llantas duren más y ahorres gasolina.",
+      },
+      points: {
+        en: ["Digital precision on every angle", "Sedans, SUVs & trucks", "Longer tire life, better MPG"],
+        es: ["Precisión digital en cada ángulo", "Sedanes, SUVs y camionetas", "Llantas que duran más, menos gasolina"],
+      },
+      cta: { en: "Book an alignment", es: "Agenda tu alineación" },
+      ctaSecondary: { en: "All services", es: "Todos los servicios" },
     },
     afterpay: {
       en: "Snap Finance & Afterpay available — flexible payments on your terms",

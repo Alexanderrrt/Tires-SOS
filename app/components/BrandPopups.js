@@ -6,6 +6,7 @@ import { useT } from "../i18n/LanguageContext";
 const BRANDS = [
   {
     name: "Bridgestone",
+    logo: "/brands/bridgestone.svg",
     tagline: {
       en: "Bridgestone tires in stock — engineered for performance & safety",
       es: "Llantas Bridgestone en stock — diseñadas para rendimiento y seguridad",
@@ -13,6 +14,7 @@ const BRANDS = [
   },
   {
     name: "Goodyear",
+    logo: "/brands/goodyear.svg",
     tagline: {
       en: "Goodyear tires available — trusted for over 125 years",
       es: "Llantas Goodyear disponibles — confianza por más de 125 años",
@@ -20,6 +22,7 @@ const BRANDS = [
   },
   {
     name: "Continental",
+    logo: "/brands/continental.svg",
     tagline: {
       en: "Continental tires — German engineering, Bay Area prices",
       es: "Llantas Continental — ingeniería alemana, precios del Bay Area",
@@ -27,6 +30,7 @@ const BRANDS = [
   },
   {
     name: "Pirelli",
+    logo: "/brands/pirelli.svg",
     tagline: {
       en: "Pirelli tires — premium Italian performance for your ride",
       es: "Llantas Pirelli — rendimiento premium italiano para tu carro",
@@ -34,6 +38,7 @@ const BRANDS = [
   },
   {
     name: "Hankook",
+    logo: "/brands/hankook.svg",
     tagline: {
       en: "Hankook tires — quality & value you can count on",
       es: "Llantas Hankook — calidad y valor en los que puedes confiar",
@@ -41,6 +46,7 @@ const BRANDS = [
   },
   {
     name: "BFGoodrich",
+    logo: "/brands/bfgoodrich.svg",
     tagline: {
       en: "BFGoodrich tires — built tough for every road",
       es: "Llantas BFGoodrich — hechas para cualquier camino",
@@ -48,6 +54,7 @@ const BRANDS = [
   },
   {
     name: "Yokohama",
+    logo: "/brands/yokohama.svg",
     tagline: {
       en: "Yokohama tires — innovation meets the road",
       es: "Llantas Yokohama — innovación en cada kilómetro",
@@ -55,6 +62,7 @@ const BRANDS = [
   },
   {
     name: "Toyo",
+    logo: "/brands/toyo.svg",
     tagline: {
       en: "Toyo tires in stock — designed to perform",
       es: "Llantas Toyo en stock — diseñadas para rendir",
@@ -62,6 +70,7 @@ const BRANDS = [
   },
   {
     name: "Cooper",
+    logo: "/brands/cooper.svg",
     tagline: {
       en: "Cooper tires — American-made quality at great prices",
       es: "Llantas Cooper — calidad americana a precios increíbles",
@@ -69,6 +78,7 @@ const BRANDS = [
   },
   {
     name: "Falken",
+    logo: "/brands/falken.svg",
     tagline: {
       en: "Falken tires — high performance, great value",
       es: "Llantas Falken — alto rendimiento, gran valor",
@@ -76,6 +86,7 @@ const BRANDS = [
   },
   {
     name: "Firestone",
+    logo: "/brands/firestone.svg",
     tagline: {
       en: "Firestone tires available — dependable since 1900",
       es: "Llantas Firestone disponibles — confiables desde 1900",
@@ -83,6 +94,7 @@ const BRANDS = [
   },
   {
     name: "Nexen",
+    logo: "/brands/nexen.svg",
     tagline: {
       en: "Nexen tires — affordable quality for every driver",
       es: "Llantas Nexen — calidad accesible para cada conductor",
@@ -154,16 +166,10 @@ export default function BrandPopups({ phoneHref }) {
           &times;
         </button>
 
-        <div className="brand-popup__tire" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <circle cx="24" cy="24" r="20" />
-            <circle cx="24" cy="24" r="14" />
-            <circle cx="24" cy="24" r="5" />
-          </svg>
-        </div>
-
         <p className="brand-popup__kicker">{t(WE_CARRY)}</p>
-        <p className="brand-popup__brand">{brand.name}</p>
+        <div className="brand-popup__logo" key={brand.name}>
+          <img src={brand.logo} alt={`${brand.name} logo`} />
+        </div>
         <p className="brand-popup__tagline">{t(brand.tagline)}</p>
 
         <div className="brand-popup__afterpay">

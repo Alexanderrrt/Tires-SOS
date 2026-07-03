@@ -16,7 +16,7 @@ function TreadRing() {
 
 function AlignmentIcon() {
   return (
-    <svg className="alignment-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg className="alignment-spotlight__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <circle cx="12" cy="12" r="5.5" />
       <path d="M12 2v3.5M12 18.5V22" />
       <path d="M4 7l2.4 1.6M19.9 7l-2.4 1.6M4 17l2.4-1.6M19.9 17l-2.4-1.6" />
@@ -26,22 +26,43 @@ function AlignmentIcon() {
 
 export default function Hero() {
   const t = useT();
+  const alignment = COPY.hero.alignment;
 
   return (
     <>
-      <div className="alignment-banner">
-        <div className="alignment-banner__inner">
-          <AlignmentIcon />
-          <p className="alignment-banner__text">
-            <strong>{t(COPY.hero.alignmentHighlight)}</strong>
-            <span className="alignment-banner__sep">—</span>
-            <span>{t(COPY.hero.alignmentSub)}</span>
-          </p>
-          <a href="/#services" className="alignment-banner__link">
-            {t(COPY.hero.alignmentCta)} <Icon name="arrow" />
-          </a>
+      <section className="alignment-spotlight" aria-label={t(alignment.title)}>
+        <div className="alignment-spotlight__inner">
+          <div className="alignment-spotlight__media">
+            <img
+              src="/services/alignment.jpg"
+              alt="Car up on the computerized alignment rack at Tires SOS Rescue"
+            />
+            <span className="alignment-spotlight__scan" aria-hidden="true" />
+            <span className="alignment-spotlight__badge">{t(alignment.badge)}</span>
+          </div>
+
+          <div className="alignment-spotlight__copy">
+            <p className="alignment-spotlight__kicker">
+              <AlignmentIcon /> {t(alignment.kicker)}
+            </p>
+            <p className="alignment-spotlight__title">{t(alignment.title)}</p>
+            <p className="alignment-spotlight__body">{t(alignment.body)}</p>
+            <ul className="alignment-spotlight__points">
+              {t(alignment.points).map((point) => (
+                <li key={point}>✓ {point}</li>
+              ))}
+            </ul>
+            <div className="alignment-spotlight__actions">
+              <a href={SITE.phoneHref} className="btn btn--primary">
+                <Icon name="phone" /> {t(alignment.cta)}
+              </a>
+              <a href="/#services" className="btn btn--ghost">
+                {t(alignment.ctaSecondary)} <Icon name="arrow" />
+              </a>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       <section id="top" className="hero">
         <div className="hero__inner">
