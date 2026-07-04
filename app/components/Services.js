@@ -37,7 +37,10 @@ export default function Services() {
                     <Icon name={service.icon} />
                   )}
                 </span>
-                <span className="service-card__title">{t(service.title)}</span>
+                <span className="service-card__title">
+                  {t(service.title)}
+                  <span className={`service-card__indicator ${isActive ? "service-card__indicator--open" : ""}`}>+</span>
+                </span>
                 <span className={`service-card__reveal ${isActive ? "service-card__reveal--open" : ""}`}>
                   <span className="service-card__desc">{t(service.desc)}</span>
                 </span>
