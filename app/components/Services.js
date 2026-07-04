@@ -38,6 +38,7 @@ export default function Services() {
                   )}
                 </span>
                 <span className="service-card__title">{t(service.title)}</span>
+                <span className="service-card__sub">{t(service.sub)}</span>
                 <span className={`service-card__reveal ${isActive ? "service-card__reveal--open" : ""}`}>
                   <span className="service-card__desc">{t(service.desc)}</span>
                 </span>
