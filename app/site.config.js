@@ -64,7 +64,6 @@ export const SERVICES = [
     icon: "tire",
     image: "/services/new-tires.jpg",
     title: { en: "New Tires", es: "Llantas Nuevas" },
-    sub: { en: "All major brands", es: "Todas las marcas" },
     desc: {
       en: "All major brands and sizes, at the best prices in the Bay Area.",
       es: "Todas las marcas y medidas principales, a los mejores precios del Bay Area.",
@@ -75,7 +74,6 @@ export const SERVICES = [
     icon: "wrench",
     image: "/services/flat-repair.jpg",
     title: { en: "Flat Repair", es: "Reparación de Ponchaduras" },
-    sub: { en: "While you wait", es: "Mientras espera" },
     desc: {
       en: "Fast, reliable patch and plug repairs while you wait.",
       es: "Reparaciones rápidas y confiables mientras usted espera.",
@@ -86,7 +84,6 @@ export const SERVICES = [
     icon: "alignment",
     image: "/services/alignment.jpg",
     title: { en: "Wheel Alignment", es: "Alineación" },
-    sub: { en: "Drives straight", es: "Manejo recto" },
     desc: {
       en: "Precise alignment to extend tire life and improve handling.",
       es: "Alineación precisa para prolongar la vida de sus llantas y mejorar el manejo.",
@@ -97,7 +94,6 @@ export const SERVICES = [
     icon: "brakes",
     image: "/services/brakes.jpg",
     title: { en: "Brakes", es: "Frenos" },
-    sub: { en: "Done right", es: "Bien hecho" },
     desc: {
       en: "Pads, rotors, and full brake inspections done right.",
       es: "Pastillas, discos e inspecciones completas de frenos.",
@@ -108,7 +104,6 @@ export const SERVICES = [
     icon: "oil",
     image: "/services/oil-change.jpg",
     title: { en: "Oil Change", es: "Cambio de Aceite" },
-    sub: { en: "Quick service", es: "Servicio rápido" },
     desc: {
       en: "Quick, affordable oil changes to keep your engine healthy.",
       es: "Cambios de aceite rápidos y económicos para su motor.",
@@ -119,7 +114,6 @@ export const SERVICES = [
     icon: "battery",
     image: "/services/batteries.jpg",
     title: { en: "Batteries", es: "Baterías" },
-    sub: { en: "Same day", es: "Mismo día" },
     desc: {
       en: "Free testing and same-day battery replacement.",
       es: "Prueba gratis y reemplazo de batería el mismo día.",
@@ -130,7 +124,6 @@ export const SERVICES = [
     icon: "rim",
     image: "/services/rims.jpg",
     title: { en: "Rims", es: "Rines" },
-    sub: { en: "Style & budget", es: "Estilo y presupuesto" },
     desc: {
       en: "New rims to fit your ride and your budget.",
       es: "Rines nuevos para su vehículo y su presupuesto.",

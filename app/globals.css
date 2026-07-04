@@ -1068,13 +1068,6 @@ h3 {
   letter-spacing: 0.01em;
 }
 
-.service-card__sub {
-  color: var(--paper-dim);
-  font-size: 0.8rem;
-  line-height: 1.2;
-  opacity: 0.8;
-}
-
 .service-card__reveal {
   display: grid;
   grid-template-rows: 0fr;
@@ -1089,7 +1082,7 @@ h3 {
   overflow: hidden;
   min-height: 0;
   color: var(--paper-dim);
-  font-size: 0.95rem;
+  font-size: 1.9rem;
 }
 
 /* ---------- Gallery / reels ---------- */
