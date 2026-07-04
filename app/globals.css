@@ -1099,8 +1099,13 @@ h3 {
 .service-card__desc {
   overflow: hidden;
   min-height: 0;
-  color: var(--paper-dim);
-  font-size: 1.9rem;
+  color: var(--paper);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.service-card__reveal--open .service-card__desc {
+  padding: 0.5rem 0 0;
 }
 
 /* ---------- Gallery / reels ---------- */
