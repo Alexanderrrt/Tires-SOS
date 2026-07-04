@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useT } from "../i18n/LanguageContext";
 
 const BRANDS = [
@@ -139,10 +139,23 @@ export default function BrandPopups({ phoneHref }) {
     setBrandIndex((prev) => (prev + 1) % BRANDS.length);
   }, []);
 
+  const prevBrand = useCallback(() => {
+    setBrandIndex((prev) => (prev - 1 + BRANDS.length) % BRANDS.length);
+  }, []);
+
+  const intervalRef = useRef(null);
+
+  const resetRotation = useCallback(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (visible && !dismissed) {
+      intervalRef.current = setInterval(nextBrand, 6000);
+    }
+  }, [nextBrand, visible, dismissed]);
+
   useEffect(() => {
     if (!visible || dismissed) return;
-    const interval = setInterval(nextBrand, 6000);
-    return () => clearInterval(interval);
+    intervalRef.current = setInterval(nextBrand, 6000);
+    return () => clearInterval(intervalRef.current);
   }, [visible, dismissed, nextBrand]);
 
   const dismiss = () => {
@@ -168,7 +181,23 @@ export default function BrandPopups({ phoneHref }) {
 
         <p className="brand-popup__kicker">{t(WE_CARRY)}</p>
         <div className="brand-popup__logo" key={brand.name}>
+          <button
+            type="button"
+            className="brand-popup__arrow brand-popup__arrow--prev"
+            onClick={() => { prevBrand(); resetRotation(); }}
+            aria-label="Previous brand"
+          >
+            ‹
+          </button>
           <img src={brand.logo} alt={`${brand.name} logo`} />
+          <button
+            type="button"
+            className="brand-popup__arrow brand-popup__arrow--next"
+            onClick={() => { nextBrand(); resetRotation(); }}
+            aria-label="Next brand"
+          >
+            ›
+          </button>
         </div>
         <p className="brand-popup__tagline">{t(brand.tagline)}</p>
 

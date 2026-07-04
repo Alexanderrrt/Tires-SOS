@@ -2535,6 +2535,7 @@ h3 {
 /* Real brand logos are drawn for light backgrounds — show them on a white
    panel. Keyed remount restarts the entrance animation on each rotation. */
 .brand-popup__logo {
+  position: relative;
   background: #fff;
   border-radius: var(--r-sm);
   height: 68px;
@@ -2616,15 +2617,60 @@ h3 {
   background: var(--orange);
 }
 
+.brand-popup__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 1.15rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.brand-popup__arrow:hover {
+  background: var(--orange);
+  border-color: var(--orange);
+}
+.brand-popup__arrow--prev {
+  left: 4px;
+}
+.brand-popup__arrow--next {
+  right: 4px;
+}
+
 @media (max-width: 480px) {
   .brand-popup {
     bottom: 0.75rem;
     right: 0.75rem;
-    left: 0.75rem;
+    left: auto;
   }
 
   .brand-popup__inner {
-    width: 100%;
+    width: min(300px, calc(100vw - 1.5rem));
+    padding: 1rem 1rem 0.85rem;
+  }
+
+  .brand-popup__logo {
+    height: 48px;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .brand-popup__tagline {
+    font-size: 0.82rem;
+    margin: 0 0 0.6rem;
+  }
+
+  .brand-popup__kicker {
+    font-size: 0.65rem;
   }
 
   .alignment-popup {
