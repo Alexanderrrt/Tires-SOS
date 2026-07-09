@@ -1,6 +1,9 @@
 import { SERVICES, SITE } from "../../site.config";
 import { getChatSettings } from "../../../lib/chat-settings-store";
 import { captureChatRecord } from "../../../lib/chat-records-store";
+import { notifyLead } from "../../../lib/lead-notify";
+
+const notifiedSessions = new Set();
 
 const GROQ_API_BASE = "https://api.groq.com/openai/v1/chat/completions";
 const DEFAULT_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
@@ -144,6 +147,28 @@ export async function POST(request) {
     });
   } catch (error) {
     console.error("Chat record capture failed:", error);
+  }
+
+  try {
+    if (!notifiedSessions.has(sessionId)) {
+      const userText = sanitizedMessages
+        .filter((m) => m.role === "user")
+        .map((m) => m.content)
+        .join(" ");
+      const nameMatch = userText.match(/([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/);
+      const phoneMatch = userText.match(/(\d{3}[-.\s]?\d{3}[-.\s]?\d{4})/);
+      if (nameMatch && phoneMatch) {
+        await notifyLead({
+          type: context === "quote" ? "QUOTE" : "CHAT",
+          name: nameMatch[1],
+          phone: phoneMatch[1],
+          message: userText.slice(0, 240),
+        });
+        notifiedSessions.add(sessionId);
+      }
+    }
+  } catch (err) {
+    console.error("Lead notification failed:", err);
   }
 
   return Response.json({
