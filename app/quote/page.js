@@ -1,27 +1,25 @@
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import QuoteCalculator from "./QuoteCalculator";
 import QuoteIntro from "./QuoteIntro";
-import { getPricing } from "../../lib/pricing-store";
+import QuoteLeadStarter from "./QuoteLeadStarter";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Get a Quote — Tires SOS Rescue | Tire & Auto Estimate, San José",
+  title: "Get a Quote / Cotizar | Tires SOS Rescue",
   description:
-    "Instant price estimate for tires, brakes, oil changes, alignment and more at Tires SOS Rescue in San José, CA. Pick your vehicle and services, get a ballpark, confirm on WhatsApp.",
+    "AI-assisted quote starter for tires, brakes, oil changes, alignment and more at Tires SOS Rescue in San Jose, CA. Ask the shop assistant for a quote and get guided from there.",
   alternates: { canonical: "/quote" },
 };
 
-export default async function QuotePage() {
-  const pricing = await getPricing();
+export default function QuotePage() {
   return (
     <>
       <Header />
       <main className="section">
         <div className="section__inner">
           <QuoteIntro />
-          <QuoteCalculator pricing={pricing} />
+          <QuoteLeadStarter />
         </div>
       </main>
       <Footer />

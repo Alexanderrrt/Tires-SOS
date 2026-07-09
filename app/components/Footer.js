@@ -51,6 +51,7 @@ export default function Footer() {
               Facebook
             </a>
           </div>
+          <p className="footer__label footer__label--legal">Legal</p>
           <div className="footer__legal">
             {legalLinks.map((link) => (
               <a key={link.href} href={link.href}>

@@ -7,12 +7,69 @@ import { COPY } from "../site.config";
 import AdminLoader from "./AdminLoader";
 
 const E = COPY.admin.editor;
+const CHAT_ADMIN = {
+  adminTitle: { en: "Admin", es: "Admin" },
+  chatTab: { en: "Chat", es: "Chat" },
+  pricingTab: { en: "Pricing", es: "Precios" },
+  chatTitle: { en: "Chat Settings", es: "Configuracion del chat" },
+  chatStorageWarn: {
+    en: "Chat storage is not connected - changes apply for this session only.",
+    es: "El almacenamiento del chat no esta conectado - los cambios solo aplican en esta sesion.",
+  },
+  publicText: { en: "Public chat text", es: "Texto publico del chat" },
+  publicHint: {
+    en: "These fields control the quote chat page customers see.",
+    es: "Estos campos controlan la pagina de chat de cotizacion que ven los clientes.",
+  },
+  title: { en: "Title", es: "Titulo" },
+  subtitle: { en: "Subtitle", es: "Subtitulo" },
+  intro: { en: "First message", es: "Primer mensaje" },
+  placeholder: { en: "Input placeholder", es: "Texto del campo" },
+  prompts: { en: "Starter prompts", es: "Preguntas rapidas" },
+  promptsHint: {
+    en: "Keep these short. They should start a quote quickly.",
+    es: "Mantenlas cortas. Deben iniciar una cotizacion rapido.",
+  },
+  prompt: { en: "Prompt", es: "Pregunta" },
+  behavior: { en: "Response guidance", es: "Guia de respuesta" },
+  behaviorHint: {
+    en: "Private guidance for the chat responses. Customers do not see this text.",
+    es: "Guia privada para las respuestas del chat. Los clientes no ven este texto.",
+  },
+  saved: { en: "Chat saved.", es: "Chat guardado." },
+  savedSession: {
+    en: "Chat saved for this session - connect Supabase to make it permanent.",
+    es: "Chat guardado para esta sesion - conecta Supabase para hacerlo permanente.",
+  },
+  saveFailed: { en: "Chat save failed.", es: "No se pudo guardar el chat." },
+  english: { en: "English", es: "Ingles" },
+  spanish: { en: "Spanish", es: "Espanol" },
+};
 
-export default function PricingEditor({ initialPricing, persistent, authReady }) {
+function BilingualField({ label, value, onChange, multiline = false, languageLabels }) {
+  const Control = multiline ? "textarea" : "input";
+  return (
+    <div className="editor__bi-field">
+      <p className="editor__field-title">{label}</p>
+      <label>
+        <span>{languageLabels.en}</span>
+        <Control value={value?.en || ""} onChange={(e) => onChange("en", e.target.value)} />
+      </label>
+      <label>
+        <span>{languageLabels.es}</span>
+        <Control value={value?.es || ""} onChange={(e) => onChange("es", e.target.value)} />
+      </label>
+    </div>
+  );
+}
+
+export default function PricingEditor({ initialPricing, initialChatSettings, persistent, chatPersistent, authReady }) {
   const router = useRouter();
   const { lang, toggleLang } = useLanguage();
   const t = useT();
+  const [activeTab, setActiveTab] = useState("chat");
   const [pricing, setPricing] = useState(initialPricing);
+  const [chatSettings, setChatSettings] = useState(initialChatSettings);
   const [status, setStatus] = useState(null); // {ok, msg: {en, es}}
   const [saving, setSaving] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -25,12 +82,19 @@ export default function PricingEditor({ initialPricing, persistent, authReady })
       return next;
     });
 
+  const editChat = (mutator) =>
+    setChatSettings((settings) => {
+      const next = structuredClone(settings);
+      mutator(next);
+      return next;
+    });
+
   const numHandler = (mutator) => (e) => {
     const v = e.target.value === "" ? 0 : Number(e.target.value);
     if (Number.isFinite(v)) edit((n) => mutator(n, Math.max(0, v)));
   };
 
-  async function save() {
+  async function savePricing() {
     setSaving(true);
     setStatus(null);
     const res = await fetch("/api/admin/pricing", {
@@ -51,6 +115,33 @@ export default function PricingEditor({ initialPricing, persistent, authReady })
     }
   }
 
+  async function saveChat() {
+    setSaving(true);
+    setStatus(null);
+    const res = await fetch("/api/admin/chat", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(chatSettings),
+    });
+    setSaving(false);
+    const body = await res.json().catch(() => ({}));
+    if (res.ok) {
+      setStatus({ ok: true, msg: body.persisted ? CHAT_ADMIN.saved : CHAT_ADMIN.savedSession });
+      router.refresh();
+    } else {
+      const detail = body.error ? ` (${body.error})` : "";
+      setStatus({
+        ok: false,
+        msg: { en: CHAT_ADMIN.saveFailed.en + detail, es: CHAT_ADMIN.saveFailed.es + detail },
+      });
+    }
+  }
+
+  async function save() {
+    if (activeTab === "chat") return saveChat();
+    return savePricing();
+  }
+
   async function logout() {
     setLoggingOut(true);
     await fetch("/api/admin/logout", { method: "POST" });
@@ -64,8 +155,9 @@ export default function PricingEditor({ initialPricing, persistent, authReady })
       <div className="editor">
       <header className="editor__bar">
         <div>
-          <h1>{t(E.title)}</h1>
-          {!persistent && <p className="editor__warn">{t(E.storageWarn)}</p>}
+          <h1>{activeTab === "chat" ? t(CHAT_ADMIN.chatTitle) : t(E.title)}</h1>
+          {activeTab === "pricing" && !persistent && <p className="editor__warn">{t(E.storageWarn)}</p>}
+          {activeTab === "chat" && !chatPersistent && <p className="editor__warn">{t(CHAT_ADMIN.chatStorageWarn)}</p>}
         </div>
         <div className="editor__actions">
           {status && (
@@ -82,6 +174,108 @@ export default function PricingEditor({ initialPricing, persistent, authReady })
           </button>
         </div>
       </header>
+
+      <nav className="editor__tabs" aria-label={t(CHAT_ADMIN.adminTitle)}>
+        <button
+          type="button"
+          className={`editor__tab ${activeTab === "chat" ? "editor__tab--on" : ""}`}
+          onClick={() => setActiveTab("chat")}
+        >
+          {t(CHAT_ADMIN.chatTab)}
+        </button>
+        <button
+          type="button"
+          className={`editor__tab ${activeTab === "pricing" ? "editor__tab--on" : ""}`}
+          onClick={() => setActiveTab("pricing")}
+        >
+          {t(CHAT_ADMIN.pricingTab)}
+        </button>
+      </nav>
+
+      {activeTab === "chat" ? (
+        <>
+          <section className="editor__group">
+            <h2>{t(CHAT_ADMIN.publicText)}</h2>
+            <p className="editor__hint">{t(CHAT_ADMIN.publicHint)}</p>
+            <div className="editor__bi-grid">
+              <BilingualField
+                label={t(CHAT_ADMIN.title)}
+                value={chatSettings.title}
+                languageLabels={{ en: t(CHAT_ADMIN.english), es: t(CHAT_ADMIN.spanish) }}
+                onChange={(key, value) => editChat((n) => (n.title[key] = value))}
+              />
+              <BilingualField
+                label={t(CHAT_ADMIN.subtitle)}
+                value={chatSettings.subtitle}
+                languageLabels={{ en: t(CHAT_ADMIN.english), es: t(CHAT_ADMIN.spanish) }}
+                onChange={(key, value) => editChat((n) => (n.subtitle[key] = value))}
+                multiline
+              />
+              <BilingualField
+                label={t(CHAT_ADMIN.intro)}
+                value={chatSettings.intro}
+                languageLabels={{ en: t(CHAT_ADMIN.english), es: t(CHAT_ADMIN.spanish) }}
+                onChange={(key, value) => editChat((n) => (n.intro[key] = value))}
+                multiline
+              />
+              <BilingualField
+                label={t(CHAT_ADMIN.placeholder)}
+                value={chatSettings.placeholder}
+                languageLabels={{ en: t(CHAT_ADMIN.english), es: t(CHAT_ADMIN.spanish) }}
+                onChange={(key, value) => editChat((n) => (n.placeholder[key] = value))}
+              />
+            </div>
+          </section>
+
+          <section className="editor__group">
+            <h2>{t(CHAT_ADMIN.prompts)}</h2>
+            <p className="editor__hint">{t(CHAT_ADMIN.promptsHint)}</p>
+            <div className="editor__prompt-grid">
+              {chatSettings.quickPrompts.map((prompt, index) => (
+                <div key={index} className="editor__prompt-card">
+                  <p className="editor__field-title">
+                    {t(CHAT_ADMIN.prompt)} {index + 1}
+                  </p>
+                  <label>
+                    <span>{t(CHAT_ADMIN.english)}</span>
+                    <input
+                      value={prompt.en}
+                      onChange={(e) =>
+                        editChat((n) => {
+                          n.quickPrompts[index].en = e.target.value;
+                        })
+                      }
+                    />
+                  </label>
+                  <label>
+                    <span>{t(CHAT_ADMIN.spanish)}</span>
+                    <input
+                      value={prompt.es}
+                      onChange={(e) =>
+                        editChat((n) => {
+                          n.quickPrompts[index].es = e.target.value;
+                        })
+                      }
+                    />
+                  </label>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="editor__group">
+            <h2>{t(CHAT_ADMIN.behavior)}</h2>
+            <p className="editor__hint">{t(CHAT_ADMIN.behaviorHint)}</p>
+            <textarea
+              className="editor__textarea"
+              value={chatSettings.systemInstructions}
+              onChange={(e) => editChat((n) => (n.systemInstructions = e.target.value))}
+              rows={6}
+            />
+          </section>
+        </>
+      ) : (
+        <>
 
       {/* Global settings */}
       <section className="editor__group">
@@ -194,6 +388,8 @@ export default function PricingEditor({ initialPricing, persistent, authReady })
           </div>
         ))}
       </section>
+        </>
+      )}
       </div>
     </>
   );

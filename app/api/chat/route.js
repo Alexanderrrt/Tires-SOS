@@ -1,4 +1,5 @@
 import { SERVICES, SITE } from "../../site.config";
+import { getChatSettings } from "../../../lib/chat-settings-store";
 
 const GROQ_API_BASE = "https://api.groq.com/openai/v1/chat/completions";
 const DEFAULT_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
@@ -46,6 +47,23 @@ Tone:
 - Light humor is okay if it feels natural.
 `.trim();
 
+const QUOTE_PROMPT = `
+This conversation is happening on the quote page.
+Your job is to start a useful quote lead for the shop team.
+
+For quote requests, collect only the next useful missing detail:
+- vehicle year, make, and model
+- tire size if they know it
+- service needed
+- quantity, especially for tires
+- when they want to come in
+- name and phone number for follow-up
+
+Do not ask for all details at once.
+When the customer gives enough information, summarize it clearly and invite them to send it through WhatsApp or call the shop.
+If they ask for price, give a careful ballpark only when the service is simple. Otherwise say the shop will confirm after checking the vehicle.
+`.trim();
+
 export async function POST(request) {
   const apiKey = process.env.GROQ_API_KEY;
 
@@ -65,6 +83,8 @@ export async function POST(request) {
 
   const messages = Array.isArray(payload?.messages) ? payload.messages : [];
   const lang = payload?.lang === "es" ? "es" : "en";
+  const context = payload?.context === "quote" ? "quote" : "shop";
+  const chatSettings = context === "quote" ? await getChatSettings() : null;
   const sanitizedMessages = messages
     .filter((message) => message && typeof message.content === "string")
     .slice(-12)
@@ -88,7 +108,9 @@ export async function POST(request) {
       messages: [
         {
           role: "system",
-          content: `${SYSTEM_PROMPT}\n\nBusiness facts:\n${BUSINESS_FACTS}\n\nRespond in ${
+          content: `${SYSTEM_PROMPT}${context === "quote" ? `\n\n${QUOTE_PROMPT}` : ""}${
+            chatSettings?.systemInstructions ? `\n\nAdmin chat guidance:\n${chatSettings.systemInstructions}` : ""
+          }\n\nBusiness facts:\n${BUSINESS_FACTS}\n\nRespond in ${
             lang === "es" ? "Spanish" : "English"
           } unless the user clearly switches languages.`,
         },
