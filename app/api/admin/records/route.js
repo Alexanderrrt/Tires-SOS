@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { verifySession, SESSION_COOKIE } from "../../../../lib/auth";
 import {
+  deleteRecord,
   getChatRecords,
   recordsStoreConfigured,
   updateRecordStatus,
@@ -44,5 +45,36 @@ export async function PATCH(request) {
     return Response.json({ ok: true, persisted: res.persisted, storeConfigured: recordsStoreConfigured() });
   } catch (error) {
     return Response.json({ error: error.message || "Update failed." }, { status: 422 });
+  }
+}
+
+export async function DELETE(request) {
+  if (!(await requireAuth())) {
+    return Response.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  let payload;
+  try {
+    payload = await request.json();
+  } catch {
+    return Response.json({ error: "Bad JSON." }, { status: 400 });
+  }
+
+  const type = payload?.type === "appointment" ? "appointment" : "lead";
+  const id = typeof payload?.id === "string" ? payload.id : "";
+  if (!id) {
+    return Response.json({ error: "Missing record id." }, { status: 400 });
+  }
+
+  try {
+    const res = await deleteRecord(type, id);
+    return Response.json({
+      ok: true,
+      persisted: res.persisted,
+      deleted: res.deleted,
+      storeConfigured: recordsStoreConfigured(),
+    });
+  } catch (error) {
+    return Response.json({ error: error.message || "Delete failed." }, { status: 422 });
   }
 }

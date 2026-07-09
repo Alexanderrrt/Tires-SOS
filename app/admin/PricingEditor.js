@@ -54,6 +54,8 @@ const CHAT_ADMIN = {
   refresh: { en: "Refresh", es: "Actualizar" },
   refreshed: { en: "Records refreshed.", es: "Registros actualizados." },
   updateFailed: { en: "Status update failed.", es: "No se pudo actualizar el estado." },
+  deleted: { en: "Record deleted.", es: "Registro eliminado." },
+  deleteFailed: { en: "Delete failed.", es: "No se pudo eliminar." },
   english: { en: "English", es: "Ingles" },
   spanish: { en: "Spanish", es: "Espanol" },
 };
@@ -82,6 +84,15 @@ const RECORD_COPY = {
   created: { en: "Created", es: "Creado" },
   updated: { en: "Updated", es: "Actualizado" },
   requested: { en: "Appointment requested", es: "Cita solicitada" },
+  delete: { en: "Delete", es: "Eliminar" },
+  deleteLeadConfirm: {
+    en: "Delete this lead? Any appointment created from it will also be removed.",
+    es: "Eliminar este cliente? Tambien se eliminara cualquier cita creada desde este registro.",
+  },
+  deleteAppointmentConfirm: {
+    en: "Delete this appointment request?",
+    es: "Eliminar esta solicitud de cita?",
+  },
 };
 
 const LEAD_STATUSES = [
@@ -174,7 +185,7 @@ function EmptyRecords({ children }) {
   return <div className="record-empty">{children}</div>;
 }
 
-function LeadCard({ lead, t, disabled, onStatus }) {
+function LeadCard({ lead, t, disabled, onStatus, onDelete }) {
   const fallback = t(RECORD_COPY.missing);
   return (
     <article className="record-card">
@@ -190,6 +201,17 @@ function LeadCard({ lead, t, disabled, onStatus }) {
           onChange={(status) => onStatus("lead", lead.id, status)}
           disabled={disabled}
         />
+      </div>
+
+      <div className="record-card__actions">
+        <button
+          type="button"
+          className="record-card__delete"
+          onClick={() => onDelete("lead", lead.id, lead)}
+          disabled={disabled}
+        >
+          {t(RECORD_COPY.delete)}
+        </button>
       </div>
 
       <div className="record-card__meta">
@@ -217,7 +239,7 @@ function LeadCard({ lead, t, disabled, onStatus }) {
   );
 }
 
-function AppointmentCard({ appointment, t, disabled, onStatus }) {
+function AppointmentCard({ appointment, t, disabled, onStatus, onDelete }) {
   const fallback = t(RECORD_COPY.missing);
   return (
     <article className="record-card record-card--appointment">
@@ -233,6 +255,17 @@ function AppointmentCard({ appointment, t, disabled, onStatus }) {
           onChange={(status) => onStatus("appointment", appointment.id, status)}
           disabled={disabled}
         />
+      </div>
+
+      <div className="record-card__actions">
+        <button
+          type="button"
+          className="record-card__delete"
+          onClick={() => onDelete("appointment", appointment.id, appointment)}
+          disabled={disabled}
+        >
+          {t(RECORD_COPY.delete)}
+        </button>
       </div>
 
       <div className="record-card__meta">
@@ -394,6 +427,55 @@ export default function PricingEditor({
     }
   }
 
+  async function deleteRecord(type, id, record) {
+    const confirmMessage =
+      type === "appointment" ? t(RECORD_COPY.deleteAppointmentConfirm) : t(RECORD_COPY.deleteLeadConfirm);
+    if (!window.confirm(confirmMessage)) return;
+
+    setUpdatingId(id);
+    setStatus(null);
+    const res = await fetch("/api/admin/records", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, id }),
+    });
+    setUpdatingId("");
+    const body = await res.json().catch(() => ({}));
+
+    if (res.ok) {
+      setRecords((current) => {
+        const deletedAppointmentIds = new Set(body.deleted?.appointmentIds || []);
+        const deletedLeadIds = new Set(body.deleted?.leadIds || []);
+        const nextLeads = current.leads.filter((lead) => !deletedLeadIds.has(lead.id));
+        const nextAppointments = current.appointments.filter(
+          (appointment) => !deletedAppointmentIds.has(appointment.id),
+        );
+
+        if (type === "appointment") {
+          return {
+            ...current,
+            appointments: nextAppointments,
+          };
+        }
+
+        return {
+          leads: nextLeads,
+          appointments: nextAppointments.filter(
+            (appointment) => appointment.leadId !== id && appointment.sessionId !== record?.sessionId,
+          ),
+        };
+      });
+      setStatus({ ok: true, msg: CHAT_ADMIN.deleted });
+      router.refresh();
+    } else {
+      const detail = body.error ? ` (${body.error})` : "";
+      setStatus({
+        ok: false,
+        msg: { en: CHAT_ADMIN.deleteFailed.en + detail, es: CHAT_ADMIN.deleteFailed.es + detail },
+      });
+    }
+  }
+
   async function logout() {
     setLoggingOut(true);
     await fetch("/api/admin/logout", { method: "POST" });
@@ -487,6 +569,7 @@ export default function PricingEditor({
                   t={t}
                   disabled={updatingId === lead.id}
                   onStatus={updateRecordStatus}
+                  onDelete={deleteRecord}
                 />
               ))
             ) : (
@@ -503,6 +586,7 @@ export default function PricingEditor({
                   t={t}
                   disabled={updatingId === appointment.id}
                   onStatus={updateRecordStatus}
+                  onDelete={deleteRecord}
                 />
               ))
             ) : (
