@@ -46,6 +46,11 @@ const CHAT_ADMIN = {
     en: "Private guidance for the chat responses. Customers do not see this text.",
     es: "Guia privada para las respuestas del chat. Los clientes no ven este texto.",
   },
+  disableEstimates: { en: "Disable price estimates", es: "Desactivar estimados de precio" },
+  disableEstimatesHint: {
+    en: "When on, the chatbot will never give a price or price range. It still collects the service, vehicle, name, phone, and appointment as usual.",
+    es: "Si esta activado, el chatbot nunca dara un precio ni un rango. Sigue recolectando el servicio, vehiculo, nombre, telefono y cita como siempre.",
+  },
   saved: { en: "Chat saved.", es: "Chat guardado." },
   savedSession: {
     en: "Chat saved for this session - connect Supabase to make it permanent.",
@@ -777,6 +782,15 @@ export default function PricingEditor({
                 onChange={(e) => editChat((n) => (n.systemInstructions = e.target.value))}
                 rows={6}
               />
+              <label className="editor__checkbox">
+                <input
+                  type="checkbox"
+                  checked={chatSettings.disableEstimates === true}
+                  onChange={(e) => editChat((n) => (n.disableEstimates = e.target.checked))}
+                />
+                <span>{t(CHAT_ADMIN.disableEstimates)}</span>
+              </label>
+              <p className="editor__hint">{t(CHAT_ADMIN.disableEstimatesHint)}</p>
             </section>
           </>
         ) : (

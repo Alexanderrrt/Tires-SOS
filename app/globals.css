@@ -2771,6 +2771,22 @@ h3 {
   display: block;
 }
 
+.editor__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.editor__checkbox input {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--orange);
+  cursor: pointer;
+}
+
 .editor__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));

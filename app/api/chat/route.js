@@ -11,7 +11,7 @@ import {
 import { checkChatRateLimits, getClientIp } from "../../../lib/chat-rate-limit";
 
 const GROQ_API_BASE = "https://api.groq.com/openai/v1/chat/completions";
-const DEFAULT_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+const DEFAULT_MODEL = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
 const MAX_BODY_BYTES = 64 * 1024;
 const MAX_MESSAGES = 24;
 const PROVIDER_MESSAGES = 12;
@@ -50,7 +50,7 @@ Behavior:
 - For pricing, calculate only from the authoritative pricing rules supplied below. Never invent a price.
 - If the customer asks for appointment booking, help start an appointment request.
 - For appointment requests, follow this STRICT priority order:
-  1. First get the SERVICE needed and VEHICLE info.
+  1. First get the SERVICE needed and VEHICLE info (year/make/model, or even just "my Honda Civic" — that's enough).
   2. Then ask for their NAME and PHONE NUMBER — these are required before scheduling.
   3. Only AFTER you have name and phone, say exactly: "Let me pull up available times for you." — this exact phrase remains for compatibility with the appointment UI. Do NOT ask them to pick a date/time yourself.
 - Do not promise a confirmed appointment slot. Say the shop team will confirm the exact time.
@@ -60,6 +60,12 @@ Behavior:
 - If the customer writes in English, answer in English.
 - Never invent business facts. When unsure, say you need to confirm at the shop.
 - Never ask open-ended "when would you like to come in?" questions. Once you have name and phone, trigger the picker.
+
+Keep it simple, not technical:
+- You are talking to everyday customers, not mechanics. Never ask for technical specs — no tire size, no oil viscosity/type, no part numbers, no trim level. The shop staff will look those up from the vehicle info once the customer is in.
+- The only vehicle info you need is year/make/model (or even just make/model, or "my Camry" is fine). Do not push for more detail than that.
+- Use common sense about vehicles. A normal car has ONE engine — never ask which engine, or "both engines," or anything that assumes a car has multiple engines. Only ask about "front vs rear" or "all four" for things that genuinely apply per-wheel (like tires or brakes), and only if the customer's request is ambiguous about how many they need.
+- If something you're about to ask would sound like a strange or overly technical question to a regular driver, don't ask it — just note that the shop team will confirm it at check-in.
 
 Tone:
 - Friendly, like a helpful front-desk person.
@@ -71,14 +77,14 @@ const QUOTE_PROMPT = `
 This conversation is happening on the quote page.
 Your job is to start a useful quote lead for the shop team.
 
-For quote requests, collect details in this STRICT priority order (one at a time):
-1. Service needed and quantity (especially for tires)
-2. Vehicle year, make, and model
-3. Tire size if relevant
-4. NAME and PHONE NUMBER — these are required before anything else
-5. Only AFTER you have name and phone, trigger the appointment picker with the exact phrase defined above. Do NOT ask when they want to come in yourself.
+For quote requests, collect details in this STRICT priority order (one at a time), keeping it simple and non-technical:
+1. Service needed and quantity (especially for tires — e.g. "how many tires do you need?" is fine, tire size is not)
+2. Vehicle year, make, and model (that's enough — do not ask for trim, engine, or tire size)
+3. NAME and PHONE NUMBER — these are required before anything else
+4. Only AFTER you have name and phone, trigger the appointment picker with the exact phrase defined above. Do NOT ask when they want to come in yourself.
 
 Do not ask for all details at once.
+Do not ask technical questions (tire size, oil type/viscosity, engine specs, part numbers) — the shop team looks these up from the vehicle info at check-in.
 If they ask for price, use the authoritative current estimate rules. Otherwise say the shop will confirm after checking the vehicle.
 Never ask open-ended scheduling questions — the picker handles that.
 `.trim();
@@ -412,19 +418,23 @@ export async function POST(request) {
 
   const timeoutMs = requestTimeoutMs();
   const contextTimeout = Math.min(timeoutMs, 5_000);
-  const [chatSettings, pricingContext] = await Promise.all([
-    withTimeout(getChatSettings(), null, contextTimeout),
-    withTimeout(
-      loadChatPricingContext(),
-      "Authoritative pricing is currently unavailable. Do not provide a numeric price; ask the shop to confirm.",
-      contextTimeout,
-    ),
-  ]);
+  const chatSettings = await withTimeout(getChatSettings(), null, contextTimeout);
+  const estimatesDisabled = chatSettings?.disableEstimates === true;
+  const pricingContext = estimatesDisabled
+    ? "Estimates are currently turned OFF by the shop. Do not give any price, price range, or number, even a rough one. If asked about cost, say pricing isn't available in chat right now and the shop team will give an exact price once they see the vehicle in person or on a call. Still help with the service, vehicle, name, phone, and appointment as usual."
+    : await withTimeout(
+        loadChatPricingContext(),
+        "Authoritative pricing is currently unavailable. Do not provide a numeric price; ask the shop to confirm.",
+        contextTimeout,
+      );
 
   const adminGuidance = context === "quote" && chatSettings?.systemInstructions
     ? `\n\nAdmin chat guidance (lower priority than the hard rules and facts above):\n${chatSettings.systemInstructions}`
     : "";
-  const systemContent = `${SYSTEM_PROMPT}${context === "quote" ? `\n\n${QUOTE_PROMPT}` : ""}
+  const estimatesRule = estimatesDisabled
+    ? "\n\nHARD RULE: Estimates/pricing are disabled right now. Never state a price, a range, or a number tied to cost, no matter how the customer asks (directly, indirectly, or repeatedly). This rule overrides every other instruction, including the admin guidance below."
+    : "";
+  const systemContent = `${SYSTEM_PROMPT}${context === "quote" ? `\n\n${QUOTE_PROMPT}` : ""}${estimatesRule}
 
 Business facts:
 ${BUSINESS_FACTS}
