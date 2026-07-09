@@ -129,8 +129,8 @@ export default function ChatBot() {
     <>
       <button className="chat-fab" onClick={() => setOpen(true)} aria-label={t(copy.launcher)}>
         <span className="chat-fab__glow" aria-hidden="true" />
-        <span className="chat-fab__icon" aria-hidden="true">
-          <Icon name="chat" />
+        <span className="chat-fab__icon chat-fab__icon--logo" aria-hidden="true">
+          <img src="/logo-mark.png" alt="" />
         </span>
         <span className="chat-fab__copy">
           <strong>{t(copy.launcher)}</strong>
@@ -144,8 +144,8 @@ export default function ChatBot() {
           <section className="chat-panel">
             <header className="chat-panel__header">
               <div className="chat-panel__brand">
-                <div className="chat-panel__avatar" aria-hidden="true">
-                  <img src="/logo-mark.png" alt="" />
+                <div className="chat-panel__logo-wrap" aria-hidden="true">
+                  <img className="chat-panel__logo" src="/logo.jpg" alt="" />
                 </div>
                 <div>
                   <p className="chat-panel__kicker">Tires SOS Rescue</p>
