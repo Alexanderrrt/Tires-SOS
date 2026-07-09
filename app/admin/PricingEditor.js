@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useLanguage, useT } from "../i18n/LanguageContext";
 import { COPY } from "../site.config";
 import AdminLoader from "./AdminLoader";
+import AppointmentCalendar from "./AppointmentCalendar";
 
 const E = COPY.admin.editor;
 
@@ -476,6 +477,65 @@ export default function PricingEditor({
     }
   }
 
+  async function scheduleAppointment(appointmentId, scheduledDate, scheduledTime) {
+    setUpdatingId(appointmentId);
+    setStatus(null);
+    const res = await fetch("/api/admin/records", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "schedule", id: appointmentId, scheduledDate, scheduledTime }),
+    });
+    setUpdatingId("");
+    const body = await res.json().catch(() => ({}));
+    if (res.ok) {
+      setRecords((current) => ({
+        ...current,
+        appointments: current.appointments.map((a) =>
+          a.id === appointmentId ? { ...a, ...body.appointment, scheduledDate, scheduledTime, status: "confirmed", updatedAt: new Date().toISOString() } : a,
+        ),
+      }));
+      setStatus({ ok: true, msg: { en: "Appointment scheduled.", es: "Cita agendada." } });
+    } else {
+      setStatus({ ok: false, msg: { en: body.error || "Schedule failed.", es: body.error || "No se pudo agendar." } });
+    }
+  }
+
+  async function unscheduleAppointment(appointmentId) {
+    setUpdatingId(appointmentId);
+    setStatus(null);
+    const res = await fetch("/api/admin/records", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "unschedule", id: appointmentId }),
+    });
+    setUpdatingId("");
+    const body = await res.json().catch(() => ({}));
+    if (res.ok) {
+      setRecords((current) => ({
+        ...current,
+        appointments: current.appointments.map((a) =>
+          a.id === appointmentId ? { ...a, scheduledDate: "", scheduledTime: "", status: "requested", updatedAt: new Date().toISOString() } : a,
+        ),
+      }));
+      setStatus({ ok: true, msg: { en: "Appointment unscheduled.", es: "Cita desagendada." } });
+    } else {
+      setStatus({ ok: false, msg: { en: body.error || "Unschedule failed.", es: body.error || "No se pudo desagendar." } });
+    }
+  }
+
+  async function testSms() {
+    setSaving(true);
+    setStatus(null);
+    const res = await fetch("/api/admin/test-notify", { method: "POST" });
+    setSaving(false);
+    const body = await res.json().catch(() => ({}));
+    if (res.ok) {
+      setStatus({ ok: true, msg: { en: "Test SMS sent! Check your phone.", es: "SMS de prueba enviado! Revisa tu telefono." } });
+    } else {
+      setStatus({ ok: false, msg: { en: body.error || "SMS test failed.", es: body.error || "Prueba de SMS fallo." } });
+    }
+  }
+
   async function logout() {
     setLoggingOut(true);
     await fetch("/api/admin/logout", { method: "POST" });
@@ -514,9 +574,14 @@ export default function PricingEditor({
               {loggingOut ? t(E.loggingOut) : t(E.logOut)}
             </button>
             {recordsTab && (
-              <button className="btn btn--ghost btn--small" onClick={refreshRecords} disabled={saving}>
-                {saving ? t(E.saving) : t(CHAT_ADMIN.refresh)}
-              </button>
+              <>
+                <button className="btn btn--ghost btn--small" onClick={refreshRecords} disabled={saving}>
+                  {saving ? t(E.saving) : t(CHAT_ADMIN.refresh)}
+                </button>
+                <button className="btn btn--ghost btn--small editor__test-sms" onClick={testSms} disabled={saving}>
+                  {t({ en: "Test SMS", es: "Probar SMS" })}
+                </button>
+              </>
             )}
             {showSave && (
               <button className="btn btn--primary btn--small" onClick={save} disabled={saving}>
@@ -577,22 +642,16 @@ export default function PricingEditor({
             )}
           </section>
         ) : activeTab === "appointments" ? (
-          <section className="record-list" aria-label={t(CHAT_ADMIN.appointmentsTitle)}>
-            {records.appointments.length ? (
-              records.appointments.map((appointment) => (
-                <AppointmentCard
-                  key={appointment.id}
-                  appointment={appointment}
-                  t={t}
-                  disabled={updatingId === appointment.id}
-                  onStatus={updateRecordStatus}
-                  onDelete={deleteRecord}
-                />
-              ))
-            ) : (
-              <EmptyRecords>{t(RECORD_COPY.noAppointments)}</EmptyRecords>
-            )}
-          </section>
+          <AppointmentCalendar
+            appointments={records.appointments}
+            t={t}
+            onSchedule={scheduleAppointment}
+            onUnschedule={unscheduleAppointment}
+            onStatus={updateRecordStatus}
+            onDelete={deleteRecord}
+            disabled={saving}
+            updatingId={updatingId}
+          />
         ) : activeTab === "chat" ? (
           <>
             <section className="editor__group">

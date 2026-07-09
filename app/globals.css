@@ -3049,6 +3049,378 @@ h3 {
   }
 }
 
+.editor__test-sms {
+  color: #4caf50 !important;
+  border-color: rgba(76, 175, 80, 0.35) !important;
+}
+
+.editor__test-sms:hover:not(:disabled) {
+  background: rgba(76, 175, 80, 0.12) !important;
+}
+
+/* ---------- Appointment calendar ---------- */
+
+.cal {
+  margin-top: 1.25rem;
+}
+
+.cal__nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.cal__nav .btn {
+  font-size: 0.9rem;
+  min-width: 2rem;
+}
+
+.cal__week-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--paper);
+  opacity: 0.85;
+}
+
+.cal__banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  margin-bottom: 0.75rem;
+  background: var(--orange);
+  color: var(--ink);
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.cal__scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid rgba(243, 237, 227, 0.1);
+  border-radius: 0.5rem;
+}
+
+.cal__grid {
+  display: grid;
+  min-width: 560px;
+  gap: 1px;
+  background: rgba(243, 237, 227, 0.06);
+}
+
+.cal__corner {
+  background: var(--ink);
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+
+.cal__day-header {
+  padding: 0.5rem 0.35rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--paper);
+  opacity: 0.7;
+  background: var(--ink);
+}
+
+.cal__day-header--today {
+  opacity: 1;
+  color: var(--orange);
+}
+
+.cal__day-name {
+  display: block;
+}
+
+.cal__day-num {
+  display: block;
+  font-size: 1.1rem;
+  line-height: 1;
+  margin-top: 0.15rem;
+}
+
+.cal__day-header--today .cal__day-num {
+  background: var(--orange);
+  color: var(--ink);
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cal__time {
+  padding: 0.4rem 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--paper);
+  opacity: 0.5;
+  text-align: right;
+  white-space: nowrap;
+  background: var(--ink);
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.cal__slot {
+  min-height: 3.2rem;
+  padding: 0.3rem;
+  background: rgba(243, 237, 227, 0.025);
+  transition: background 0.15s, opacity 0.15s;
+  cursor: default;
+  border-bottom: 1px solid rgba(243, 237, 227, 0.06);
+}
+
+.cal__slot--today {
+  background: rgba(248, 96, 0, 0.04);
+}
+
+.cal__slot--closed {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(0, 0, 0, 0.2),
+    rgba(0, 0, 0, 0.2) 4px,
+    rgba(0, 0, 0, 0.28) 4px,
+    rgba(0, 0, 0, 0.28) 8px
+  );
+  cursor: not-allowed;
+}
+
+.cal__slot--past:not(.cal__slot--booked) {
+  opacity: 0.35;
+}
+
+.cal__slot--available {
+  background: rgba(248, 96, 0, 0.08);
+  cursor: pointer;
+  outline: 1px dashed rgba(248, 96, 0, 0.4);
+  outline-offset: -1px;
+}
+
+.cal__slot--available:hover {
+  background: rgba(248, 96, 0, 0.18);
+}
+
+.cal__slot--booked {
+  background: rgba(248, 96, 0, 0.12);
+  cursor: pointer;
+  border-left: 3px solid var(--orange);
+}
+
+.cal__slot--booked:hover {
+  background: rgba(248, 96, 0, 0.2);
+}
+
+.cal__slot--selected {
+  background: rgba(248, 96, 0, 0.25);
+  outline: 2px solid var(--orange);
+  outline-offset: -2px;
+}
+
+.cal__appt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  overflow: hidden;
+}
+
+.cal__appt strong {
+  color: var(--orange);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cal__appt span {
+  color: var(--paper);
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Detail panel */
+
+.cal__detail {
+  margin-top: 0.75rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(248, 96, 0, 0.3);
+  border-radius: 0.5rem;
+  background: rgba(248, 96, 0, 0.05);
+}
+
+.cal__detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.cal__detail-head h4 {
+  font-size: 1.1rem;
+  color: var(--orange);
+  margin: 0;
+}
+
+.cal__detail-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+  font-size: 0.85rem;
+  color: var(--paper);
+  margin-bottom: 0.6rem;
+}
+
+.cal__detail-notes {
+  font-size: 0.8rem;
+  color: var(--paper);
+  opacity: 0.7;
+  margin: 0.4rem 0 0.6rem;
+}
+
+.cal__detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.cal__detail-actions select {
+  background: rgba(243, 237, 227, 0.08);
+  color: var(--paper);
+  border: 1px solid rgba(243, 237, 227, 0.15);
+  border-radius: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+/* Pending / Unscheduled cards */
+
+.cal__section {
+  margin-top: 1.5rem;
+}
+
+.cal__section h3 {
+  font-size: 1rem;
+  color: var(--paper);
+  margin: 0 0 0.75rem;
+}
+
+.cal__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.3rem;
+  height: 1.3rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--orange);
+  color: var(--ink);
+  font-size: 0.7rem;
+  font-weight: 700;
+  vertical-align: middle;
+  margin-left: 0.25rem;
+}
+
+.cal__empty {
+  font-size: 0.85rem;
+  color: var(--paper);
+  opacity: 0.5;
+}
+
+.cal__card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(243, 237, 227, 0.1);
+  border-radius: 0.5rem;
+  background: rgba(243, 237, 227, 0.03);
+  margin-bottom: 0.5rem;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.cal__card--active {
+  border-color: var(--orange);
+  background: rgba(248, 96, 0, 0.06);
+}
+
+.cal__card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.82rem;
+  color: var(--paper);
+  min-width: 0;
+}
+
+.cal__card-info strong {
+  color: var(--orange);
+  font-size: 0.9rem;
+}
+
+.cal__card-info span {
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cal__card-pref {
+  font-style: italic;
+  opacity: 0.6 !important;
+}
+
+.cal__card-actions {
+  display: flex;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.cal__delete-btn {
+  color: #e84040 !important;
+  border-color: rgba(232, 64, 64, 0.3) !important;
+}
+
+.cal__delete-btn:hover:not(:disabled) {
+  background: rgba(232, 64, 64, 0.12) !important;
+}
+
+@media (max-width: 720px) {
+  .cal__card {
+    flex-direction: column;
+  }
+
+  .cal__card-actions {
+    width: 100%;
+  }
+
+  .cal__card-actions .btn {
+    flex: 1;
+  }
+
+  .cal__detail-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 /* ---------- Brand popup ---------- */
 
 .brand-popup {
@@ -3783,6 +4155,26 @@ h3 {
   color: #ff7a5c;
   font-size: 0.85rem;
   min-height: 1.2em;
+}
+
+.chat-panel__completed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 0.75rem;
+  text-align: center;
+}
+
+.chat-panel__completed-text {
+  color: var(--paper);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  opacity: 0.85;
+}
+
+.chat-panel__new-chat {
+  width: 100%;
 }
 
 @media (max-width: 760px) {

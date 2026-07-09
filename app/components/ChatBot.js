@@ -101,6 +101,30 @@ function TypingDots() {
   );
 }
 
+const COMPLETED_SIGNALS = [
+  /appointment.*(?:set|booked|confirmed|scheduled|received|noted)/i,
+  /cita.*(?:agendada|confirmada|recibida|anotada|registrada)/i,
+  /(?:we'll|we will|the team will|shop will|shop team will).*(?:confirm|reach out|contact|follow up|get back)/i,
+  /(?:el equipo|el taller|nos comunicaremos|te contactaremos|te llamaremos)/i,
+  /(?:thank you|thanks).*(?:all the info|everything we need|all set|got it)/i,
+  /(?:gracias).*(?:toda la info|todo lo que necesitamos|listo|anotado)/i,
+];
+
+function detectChatCompleted(messages) {
+  if (messages.length < 4) return false;
+  const userTexts = messages.filter((m) => m.role === "user").map((m) => (typeof m.content === "string" ? m.content : ""));
+  const allUserText = userTexts.join(" ");
+  const hasPhone = /\d{3}[-.\s]?\d{3}[-.\s]?\d{4}/.test(allUserText);
+  const hasName = /\b(?:my name is|me llamo|soy|i'm|i am|name is)\b/i.test(allUserText) ||
+    /[A-Z][a-z]+\s+[A-Z][a-z]+/.test(allUserText);
+  if (!hasPhone && !hasName) return false;
+
+  const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+  if (!lastAssistant) return false;
+  const text = typeof lastAssistant.content === "string" ? lastAssistant.content : "";
+  return COMPLETED_SIGNALS.some((re) => re.test(text));
+}
+
 export default function ChatBot({ embedded = false, className = "", showComposer = true, mode = "shop" }) {
   const t = useT();
   const { lang } = useLanguage();
@@ -111,12 +135,13 @@ export default function ChatBot({ embedded = false, className = "", showComposer
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [messages, setMessages] = useState(() => initialMessages(copy.intro));
-  const [sessionId] = useState(() => makeSessionId());
+  const [sessionId, setSessionId] = useState(() => makeSessionId());
+  const [chatCompleted, setChatCompleted] = useState(false);
   const listRef = useRef(null);
   const textareaRef = useRef(null);
 
   const visible = embedded || open;
-  const canSend = input.trim().length > 0 && !loading;
+  const canSend = input.trim().length > 0 && !loading && !chatCompleted;
 
   const quickPrompts = useMemo(
     () =>
@@ -177,6 +202,16 @@ export default function ChatBot({ embedded = false, className = "", showComposer
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [embedded]);
 
+  const startNewChat = () => {
+    setMessages(initialMessages(copy.intro));
+    setSessionId(makeSessionId());
+    setChatCompleted(false);
+    setInput("");
+    setError("");
+    scrollToBottom();
+    textareaRef.current?.focus();
+  };
+
   const send = async (text) => {
     const content = text.trim();
     if (!content || loading) return;
@@ -203,16 +238,20 @@ export default function ChatBot({ embedded = false, className = "", showComposer
 
       if (!res.ok) throw new Error(data?.error || "Chat request failed.");
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            data.message ||
-            (lang === "es" ? "Estoy aqui si necesitas mas detalles." : "I'm here if you need more details."),
-          createdAt: Date.now(),
-        },
-      ]);
+      const assistantMsg = {
+        role: "assistant",
+        content:
+          data.message ||
+          (lang === "es" ? "Estoy aqui si necesitas mas detalles." : "I'm here if you need more details."),
+        createdAt: Date.now(),
+      };
+      setMessages((prev) => {
+        const updated = [...prev, assistantMsg];
+        if (detectChatCompleted(updated)) {
+          setTimeout(() => setChatCompleted(true), 800);
+        }
+        return updated;
+      });
       scrollToBottom();
     } catch (err) {
       setError(err.message || "Something went wrong.");
@@ -306,7 +345,19 @@ export default function ChatBot({ embedded = false, className = "", showComposer
               )}
             </div>
 
-            {showComposer && (
+            {showComposer && chatCompleted ? (
+              <div className="chat-panel__completed">
+                <p className="chat-panel__completed-text">
+                  {t({
+                    en: "Your info has been sent to the shop team. They'll reach out to confirm.",
+                    es: "Tu informacion fue enviada al equipo del taller. Te contactaran para confirmar.",
+                  })}
+                </p>
+                <button type="button" className="btn btn--primary chat-panel__new-chat" onClick={startNewChat}>
+                  {t({ en: "Start a new chat", es: "Iniciar un nuevo chat" })}
+                </button>
+              </div>
+            ) : showComposer ? (
               <form
                 className="chat-panel__composer"
                 onSubmit={(event) => {
@@ -334,7 +385,7 @@ export default function ChatBot({ embedded = false, className = "", showComposer
                   </button>
                 </div>
               </form>
-            )}
+            ) : null}
           </section>
         </div>
       )}
