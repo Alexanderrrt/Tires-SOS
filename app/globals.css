@@ -4177,6 +4177,84 @@ h3 {
   width: 100%;
 }
 
+.chat-picker {
+  margin: 0.5rem 0;
+  padding: 0.75rem;
+  background: var(--ink);
+  border: 1px solid var(--orange);
+  border-radius: 14px;
+  animation: chatPickerIn 0.3s ease;
+}
+
+@keyframes chatPickerIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-picker__title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--orange);
+  margin-bottom: 0.5rem;
+}
+
+.chat-picker__days {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+  overflow-x: auto;
+}
+
+.chat-picker__day {
+  flex: 0 0 auto;
+  padding: 0.3rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--paper);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.chat-picker__day:hover {
+  border-color: var(--orange);
+}
+
+.chat-picker__day--active {
+  background: var(--orange);
+  color: var(--ink);
+  border-color: var(--orange);
+}
+
+.chat-picker__slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.3rem;
+}
+
+.chat-picker__slot {
+  padding: 0.4rem 0.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--paper);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.chat-picker__slot:hover {
+  background: var(--orange);
+  color: var(--ink);
+  border-color: var(--orange);
+}
+
 @media (max-width: 760px) {
   .chat-panel {
     width: 100%;

@@ -101,6 +101,21 @@ function TypingDots() {
   );
 }
 
+const PICKER_TRIGGERS = [
+  /let me pull up available times/i,
+  /d[ée]jame mostrarte los horarios disponibles/i,
+  /here are the available/i,
+  /available times for you/i,
+  /horarios disponibles/i,
+];
+
+function shouldShowPicker(messages) {
+  const last = [...messages].reverse().find((m) => m.role === "assistant");
+  if (!last) return false;
+  const text = typeof last.content === "string" ? last.content : "";
+  return PICKER_TRIGGERS.some((re) => re.test(text));
+}
+
 const COMPLETED_SIGNALS = [
   /appointment.*(?:set|booked|confirmed|scheduled|received|noted)/i,
   /cita.*(?:agendada|confirmada|recibida|anotada|registrada)/i,
@@ -125,6 +140,95 @@ function detectChatCompleted(messages) {
   return COMPLETED_SIGNALS.some((re) => re.test(text));
 }
 
+function pad(n) {
+  return String(n).padStart(2, "0");
+}
+
+function buildPickerDays() {
+  const days = [];
+  const now = new Date();
+  for (let i = 0; i < 7 && days.length < 4; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+    const cfg = SITE.hours.find((h) => h.day === d.getDay());
+    if (!cfg || !cfg.open) continue;
+    const slots = [];
+    const [oh] = cfg.open.split(":").map(Number);
+    const [ch] = cfg.close.split(":").map(Number);
+    for (let h = oh; h < ch; h++) {
+      if (i === 0 && h <= now.getHours()) continue;
+      slots.push(`${pad(h)}:00`);
+    }
+    if (slots.length === 0) continue;
+    days.push({
+      date: d,
+      key: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+      label: cfg.label,
+      slots,
+    });
+  }
+  return days;
+}
+
+function formatTime12(t24) {
+  const [h, m] = t24.split(":").map(Number);
+  const suffix = h >= 12 ? "PM" : "AM";
+  return `${h % 12 || 12}:${pad(m)} ${suffix}`;
+}
+
+function AppointmentPicker({ t, onSelect }) {
+  const days = useMemo(() => buildPickerDays(), []);
+  const [selectedDay, setSelectedDay] = useState(0);
+
+  if (days.length === 0) return null;
+
+  const day = days[selectedDay];
+  const isToday = day.key === `${new Date().getFullYear()}-${pad(new Date().getMonth() + 1)}-${pad(new Date().getDate())}`;
+  const dayLabel = isToday
+    ? t({ en: "Today", es: "Hoy" })
+    : `${t(day.label)} ${day.date.getDate()}`;
+
+  return (
+    <div className="chat-picker">
+      <p className="chat-picker__title">
+        {t({ en: "Pick a time", es: "Elige un horario" })}
+      </p>
+      <div className="chat-picker__days">
+        {days.map((d, i) => {
+          const dIsToday = d.key === `${new Date().getFullYear()}-${pad(new Date().getMonth() + 1)}-${pad(new Date().getDate())}`;
+          return (
+            <button
+              key={d.key}
+              type="button"
+              className={`chat-picker__day ${i === selectedDay ? "chat-picker__day--active" : ""}`}
+              onClick={() => setSelectedDay(i)}
+            >
+              {dIsToday ? t({ en: "Today", es: "Hoy" }) : `${t(d.label).slice(0, 3)} ${d.date.getDate()}`}
+            </button>
+          );
+        })}
+      </div>
+      <div className="chat-picker__slots">
+        {day.slots.map((slot) => (
+          <button
+            key={slot}
+            type="button"
+            className="chat-picker__slot"
+            onClick={() => {
+              const msg = t({
+                en: `I'd like to come in on ${dayLabel} at ${formatTime12(slot)}`,
+                es: `Me gustaría ir el ${dayLabel} a las ${formatTime12(slot)}`,
+              });
+              onSelect(msg);
+            }}
+          >
+            {formatTime12(slot)}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function ChatBot({ embedded = false, className = "", showComposer = true, mode = "shop" }) {
   const t = useT();
   const { lang } = useLanguage();
@@ -137,11 +241,13 @@ export default function ChatBot({ embedded = false, className = "", showComposer
   const [messages, setMessages] = useState(() => initialMessages(copy.intro));
   const [sessionId, setSessionId] = useState(() => makeSessionId());
   const [chatCompleted, setChatCompleted] = useState(false);
+  const [pickerUsed, setPickerUsed] = useState(false);
   const listRef = useRef(null);
   const textareaRef = useRef(null);
 
   const visible = embedded || open;
   const canSend = input.trim().length > 0 && !loading && !chatCompleted;
+  const showPicker = !pickerUsed && !chatCompleted && !loading && shouldShowPicker(messages);
 
   const quickPrompts = useMemo(
     () =>
@@ -191,7 +297,7 @@ export default function ChatBot({ embedded = false, className = "", showComposer
 
   useEffect(() => {
     if (visible) scrollToBottom();
-  }, [messages, loading, visible]);
+  }, [messages, loading, visible, showPicker]);
 
   useEffect(() => {
     if (embedded) return;
@@ -206,6 +312,7 @@ export default function ChatBot({ embedded = false, className = "", showComposer
     setMessages(initialMessages(copy.intro));
     setSessionId(makeSessionId());
     setChatCompleted(false);
+    setPickerUsed(false);
     setInput("");
     setError("");
     scrollToBottom();
@@ -263,6 +370,11 @@ export default function ChatBot({ embedded = false, className = "", showComposer
       setLoading(false);
       scrollToBottom();
     }
+  };
+
+  const handlePickerSelect = (msg) => {
+    setPickerUsed(true);
+    send(msg);
   };
 
   return (
@@ -342,6 +454,9 @@ export default function ChatBot({ embedded = false, className = "", showComposer
                     <span>{t(copy.typing)}</span>
                   </p>
                 </article>
+              )}
+              {showPicker && (
+                <AppointmentPicker t={t} onSelect={handlePickerSelect} />
               )}
             </div>
 
