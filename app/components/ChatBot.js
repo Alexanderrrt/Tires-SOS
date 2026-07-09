@@ -145,7 +145,7 @@ export default function ChatBot() {
             <header className="chat-panel__header">
               <div className="chat-panel__brand">
                 <div className="chat-panel__logo-wrap" aria-hidden="true">
-                  <img className="chat-panel__logo" src="/logo.jpg" alt="" />
+                  <img className="chat-panel__logo" src="/logo-mark.png" alt="" />
                 </div>
                 <div>
                   <p className="chat-panel__kicker">Tires SOS Rescue</p>
