@@ -1,39 +1,22 @@
 import { cookies } from "next/headers";
 import { verifySession, SESSION_COOKIE } from "../../../../lib/auth";
 import {
+  blockSlot,
   deleteRecord,
   getChatRecords,
   recordsStoreConfigured,
   scheduleAppointment,
+  unblockSlot,
   unscheduleAppointment,
   updateRecordStatus,
 } from "../../../../lib/chat-records-store";
-import { SITE } from "../../../site.config";
+import { deliverLeadNotification } from "../../../../lib/lead-notification-service";
+import { validateShopSlot } from "../../../../lib/appointment-slots";
+import { isValidDateKey, isValidTimeKey } from "../../../../lib/shop-time";
 
 async function requireAuth() {
   const token = cookies().get(SESSION_COOKIE)?.value;
   return verifySession(token);
-}
-
-function validateBusinessHours(scheduledDate, scheduledTime) {
-  const date = new Date(scheduledDate + "T12:00:00");
-  if (Number.isNaN(date.getTime())) return "Invalid date.";
-
-  const dayOfWeek = date.getDay();
-  const hours = SITE.hours.find((h) => h.day === dayOfWeek);
-  if (!hours || !hours.open) return "Shop is closed on this day.";
-
-  const [openH, openM] = hours.open.split(":").map(Number);
-  const [closeH, closeM] = hours.close.split(":").map(Number);
-  const [slotH, slotM] = scheduledTime.split(":").map(Number);
-  if (Number.isNaN(slotH) || Number.isNaN(slotM)) return "Invalid time.";
-
-  const slot = slotH * 60 + slotM;
-  const open = openH * 60 + openM;
-  const close = closeH * 60 + closeM;
-  if (slot < open || slot >= close) return "Time is outside business hours.";
-
-  return null;
 }
 
 export async function GET() {
@@ -58,9 +41,33 @@ export async function PATCH(request) {
   }
 
   const action = payload?.action;
+
+  if (action === "block" || action === "unblock") {
+    const date = typeof payload?.date === "string" ? payload.date : "";
+    const time = typeof payload?.time === "string" ? payload.time : "";
+    if (!isValidDateKey(date) || (time !== "all" && !isValidTimeKey(time))) {
+      return Response.json({ error: "Invalid date or time." }, { status: 400 });
+    }
+    try {
+      const res = action === "block" ? await blockSlot(date, time) : await unblockSlot(date, time);
+      return Response.json({ ok: true, ...res, storeConfigured: recordsStoreConfigured() });
+    } catch (error) {
+      return Response.json({ error: error.message || "Block/unblock failed." }, { status: 422 });
+    }
+  }
+
   const id = typeof payload?.id === "string" ? payload.id : "";
   if (!id) {
     return Response.json({ error: "Missing record id." }, { status: 400 });
+  }
+
+  if (action === "retry-notification") {
+    try {
+      const notification = await deliverLeadNotification({ id });
+      return Response.json({ ok: true, notification, storeConfigured: recordsStoreConfigured() });
+    } catch {
+      return Response.json({ error: "Notification retry failed." }, { status: 503 });
+    }
   }
 
   if (action === "schedule") {
@@ -70,16 +77,20 @@ export async function PATCH(request) {
       return Response.json({ error: "Missing date or time." }, { status: 400 });
     }
 
-    const hoursError = validateBusinessHours(scheduledDate, scheduledTime);
-    if (hoursError) {
-      return Response.json({ error: hoursError }, { status: 400 });
+    const validation = validateShopSlot(scheduledDate, scheduledTime, { maxDays: 365 });
+    if (!validation.ok) {
+      return Response.json({ error: validation.message, code: validation.code }, { status: 400 });
     }
 
     try {
       const res = await scheduleAppointment(id, scheduledDate, scheduledTime);
       return Response.json({ ok: true, persisted: res.persisted, appointment: res.appointment, storeConfigured: recordsStoreConfigured() });
     } catch (error) {
-      return Response.json({ error: error.message || "Schedule failed." }, { status: 422 });
+      const conflict = /booked|blocked|unavailable|conflict|unique/i.test(error?.message || "");
+      return Response.json(
+        { error: conflict ? "That time is unavailable." : "Schedule failed." },
+        { status: conflict ? 409 : 422 },
+      );
     }
   }
 

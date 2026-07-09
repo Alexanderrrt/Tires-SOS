@@ -3,7 +3,7 @@
 import ChatBot from "../components/ChatBot";
 import { useLanguage } from "../i18n/LanguageContext";
 
-export default function QuoteLeadStarter() {
+export default function QuoteLeadStarter({ turnstileSiteKey = "" }) {
   const { lang } = useLanguage();
   const copy =
     lang === "es"
@@ -26,7 +26,13 @@ export default function QuoteLeadStarter() {
         <p className="quote__assistant-kicker">{copy.kicker}</p>
         <h2 className="quote__assistant-title">{copy.title}</h2>
         <p className="quote__assistant-copy">{copy.body}</p>
-        <ChatBot embedded showComposer mode="quote" className="quote__assistant-chat" />
+        <ChatBot
+          embedded
+          showComposer
+          mode="quote"
+          className="quote__assistant-chat"
+          turnstileSiteKey={turnstileSiteKey}
+        />
       </aside>
     </section>
   );

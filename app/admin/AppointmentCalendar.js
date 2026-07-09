@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { SITE } from "../site.config";
+import { addDaysToDateKey, dayOfWeekForDateKey, getShopDateTime } from "../../lib/shop-time";
 
 const HOURS = SITE.hours;
 
@@ -15,28 +16,24 @@ function formatTime12(t24) {
   return `${h % 12 || 12}:${pad(m)} ${suffix}`;
 }
 
-function toDateStr(d) {
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-
-function getMonday(offset) {
-  const now = new Date();
-  const day = now.getDay();
+function getMondayKey(offset) {
+  const shopNow = getShopDateTime();
+  const day = shopNow.dayOfWeek;
   const diff = day === 0 ? -6 : 1 - day;
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate() + diff + offset * 7);
+  return addDaysToDateKey(shopNow.dateKey, diff + offset * 7);
 }
 
 function buildWeek(offset) {
-  const mon = getMonday(offset);
+  const mondayKey = getMondayKey(offset);
   const days = [];
   for (let i = 0; i < 7; i++) {
-    const d = new Date(mon);
-    d.setDate(mon.getDate() + i);
-    const cfg = HOURS.find((h) => h.day === d.getDay());
+    const key = addDaysToDateKey(mondayKey, i);
+    const dayOfWeek = dayOfWeekForDateKey(key);
+    const cfg = HOURS.find((h) => h.day === dayOfWeek);
     if (!cfg || !cfg.open) continue;
     days.push({
-      date: d,
-      key: toDateStr(d),
+      date: new Date(`${key}T12:00:00Z`),
+      key,
       label: cfg.label,
       open: cfg.open,
       close: cfg.close,
@@ -86,6 +83,12 @@ const COPY = {
   noShow: { en: "No-show", es: "No llego" },
   canceled: { en: "Canceled", es: "Cancelada" },
   preferred: { en: "Preferred", es: "Preferido" },
+  blockDay: { en: "Block day", es: "Bloquear dia" },
+  unblockDay: { en: "Unblock day", es: "Desbloquear dia" },
+  block: { en: "Block", es: "Bloquear" },
+  unblock: { en: "Unblock", es: "Desbloquear" },
+  blocked: { en: "Blocked", es: "Bloqueado" },
+  blockMode: { en: "Block/Unblock mode", es: "Modo bloquear" },
 };
 
 const APPT_STATUSES = [
@@ -96,13 +99,24 @@ const APPT_STATUSES = [
   { value: "canceled", label: COPY.canceled },
 ];
 
-export default function AppointmentCalendar({ appointments, t, onSchedule, onUnschedule, onStatus, onDelete, disabled, updatingId }) {
+export default function AppointmentCalendar({ appointments, blockedSlots = [], t, onSchedule, onUnschedule, onStatus, onDelete, onBlock, onUnblock, disabled, updatingId }) {
   const [weekOffset, setWeekOffset] = useState(0);
   const [scheduling, setScheduling] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
+  const [blockMode, setBlockMode] = useState(false);
 
   const days = useMemo(() => buildWeek(weekOffset), [weekOffset]);
-  const todayStr = toDateStr(new Date());
+  const todayStr = getShopDateTime().dateKey;
+
+  const blockedMap = useMemo(() => {
+    const set = new Set();
+    const daySet = new Set();
+    blockedSlots.forEach((s) => {
+      if (s.time === "all") daySet.add(s.date);
+      else set.add(`${s.date}_${s.time}`);
+    });
+    return { set, daySet };
+  }, [blockedSlots]);
 
   const bookedMap = useMemo(() => {
     const map = {};
@@ -119,52 +133,82 @@ export default function AppointmentCalendar({ appointments, t, onSchedule, onUns
     [appointments],
   );
 
-  const weekScheduled = useMemo(() => {
-    const dayKeys = new Set(days.map((d) => d.key));
-    return appointments.filter((a) => a.scheduledDate && dayKeys.has(a.scheduledDate) && (a.status === "confirmed" || a.status === "requested"));
-  }, [appointments, days]);
-
   const selectedAppt = useMemo(() => (selectedId ? appointments.find((a) => a.id === selectedId) : null), [selectedId, appointments]);
 
   const handleSlotClick = useCallback(
     (dayKey, time, day) => {
       const slots = slotsForDay(day.open, day.close);
       if (!slots.includes(time)) return;
+
+      if (blockMode) {
+        const cellKey = `${dayKey}_${time}`;
+        if (blockedMap.set.has(cellKey) || blockedMap.daySet.has(dayKey)) {
+          onUnblock(dayKey, time);
+        } else if (!bookedMap[cellKey]) {
+          onBlock(dayKey, time);
+        }
+        return;
+      }
+
       if (bookedMap[`${dayKey}_${time}`]) {
         const appt = bookedMap[`${dayKey}_${time}`];
         setSelectedId((prev) => (prev === appt.id ? null : appt.id));
         return;
       }
       if (dayKey < todayStr) return;
+      if (blockedMap.set.has(`${dayKey}_${time}`) || blockedMap.daySet.has(dayKey)) return;
       if (scheduling) {
         onSchedule(scheduling, dayKey, time);
         setScheduling(null);
       }
     },
-    [scheduling, bookedMap, todayStr, onSchedule],
+    [scheduling, bookedMap, blockedMap, todayStr, onSchedule, onBlock, onUnblock, blockMode],
+  );
+
+  const handleDayBlock = useCallback(
+    (dayKey) => {
+      if (blockedMap.daySet.has(dayKey)) {
+        onUnblock(dayKey, "all");
+      } else {
+        onBlock(dayKey, "all");
+      }
+    },
+    [blockedMap, onBlock, onUnblock],
   );
 
   const handleScheduleClick = useCallback((id) => {
     setScheduling((prev) => (prev === id ? null : id));
     setSelectedId(null);
+    setBlockMode(false);
   }, []);
 
   const weekLabel = useMemo(() => {
     if (!days.length) return "";
     const opts = { month: "short", day: "numeric" };
-    return `${days[0].date.toLocaleDateString("en-US", opts)} - ${days[days.length - 1].date.toLocaleDateString("en-US", opts)}`;
+    return `${days[0].date.toLocaleDateString("en-US", { ...opts, timeZone: "UTC" })} - ${days[days.length - 1].date.toLocaleDateString("en-US", { ...opts, timeZone: "UTC" })}`;
   }, [days]);
 
   const cells = [];
   cells.push(<div key="corner" className="cal__corner" />);
-  days.forEach((day) =>
+  days.forEach((day) => {
+    const isDayBlocked = blockedMap.daySet.has(day.key);
     cells.push(
-      <div key={`h-${day.key}`} className={`cal__day-header ${day.key === todayStr ? "cal__day-header--today" : ""}`}>
+      <div key={`h-${day.key}`} className={`cal__day-header ${day.key === todayStr ? "cal__day-header--today" : ""} ${isDayBlocked ? "cal__day-header--blocked" : ""}`}>
         <span className="cal__day-name">{t(day.label)}</span>
-        <span className="cal__day-num">{day.date.getDate()}</span>
+        <span className="cal__day-num">{day.date.getUTCDate()}</span>
+        {blockMode && (
+          <button
+            type="button"
+            className={`cal__block-day-btn ${isDayBlocked ? "cal__block-day-btn--active" : ""}`}
+            onClick={() => handleDayBlock(day.key)}
+            disabled={disabled}
+          >
+            {isDayBlocked ? t(COPY.unblockDay) : t(COPY.blockDay)}
+          </button>
+        )}
       </div>,
-    ),
-  );
+    );
+  });
 
   ALL_SLOTS.forEach((time) => {
     cells.push(
@@ -178,7 +222,8 @@ export default function AppointmentCalendar({ appointments, t, onSchedule, onUns
       const cellKey = `${day.key}_${time}`;
       const booked = bookedMap[cellKey];
       const isPast = day.key < todayStr;
-      const canBook = isActive && !booked && !isPast && scheduling;
+      const isBlocked = blockedMap.set.has(cellKey) || blockedMap.daySet.has(day.key);
+      const canBook = isActive && !booked && !isPast && !isBlocked && scheduling;
 
       cells.push(
         <div
@@ -190,19 +235,24 @@ export default function AppointmentCalendar({ appointments, t, onSchedule, onUns
             booked && "cal__slot--booked",
             canBook && "cal__slot--available",
             isPast && "cal__slot--past",
+            isBlocked && isActive && "cal__slot--blocked",
             selectedId && booked?.id === selectedId && "cal__slot--selected",
+            blockMode && isActive && !booked && "cal__slot--blockable",
           ]
             .filter(Boolean)
             .join(" ")}
           onClick={() => isActive && handleSlotClick(day.key, time, day)}
-          role={canBook || booked ? "button" : undefined}
-          tabIndex={canBook || booked ? 0 : undefined}
+          role={canBook || booked || (blockMode && isActive) ? "button" : undefined}
+          tabIndex={canBook || booked || (blockMode && isActive) ? 0 : undefined}
         >
           {booked && (
             <div className="cal__appt">
               <strong>{booked.service || "Appt"}</strong>
               <span>{booked.customerName || booked.phone || ""}</span>
             </div>
+          )}
+          {isBlocked && isActive && !booked && (
+            <span className="cal__blocked-label">{t(COPY.blocked)}</span>
           )}
         </div>,
       );
@@ -222,6 +272,13 @@ export default function AppointmentCalendar({ appointments, t, onSchedule, onUns
         <button type="button" onClick={() => setWeekOffset((o) => o + 1)} className="btn btn--ghost btn--small" aria-label="Next week">
           &#8250;
         </button>
+        <button
+          type="button"
+          className={`btn btn--small ${blockMode ? "btn--danger" : "btn--ghost"}`}
+          onClick={() => { setBlockMode((b) => !b); setScheduling(null); setSelectedId(null); }}
+        >
+          {blockMode ? t(COPY.cancel) : t(COPY.blockMode)}
+        </button>
       </div>
 
       {scheduling && (
@@ -230,6 +287,12 @@ export default function AppointmentCalendar({ appointments, t, onSchedule, onUns
           <button type="button" className="btn btn--ghost btn--small" onClick={() => setScheduling(null)}>
             {t(COPY.cancel)}
           </button>
+        </div>
+      )}
+
+      {blockMode && (
+        <div className="cal__banner cal__banner--block">
+          <span>{t({ en: "Click slots or days to block/unblock. Blocked slots won't be offered to customers.", es: "Haz clic en horarios o dias para bloquear/desbloquear. Los horarios bloqueados no se ofreceran a los clientes." })}</span>
         </div>
       )}
 

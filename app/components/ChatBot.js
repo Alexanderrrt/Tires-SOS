@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLanguage, useT } from "../i18n/LanguageContext";
 import { CHAT, SITE } from "../site.config";
-import Icon from "./Icons";
+import { formatShopSlot, getShopDateTime } from "../../lib/shop-time";
+import TurnstileChallenge from "./TurnstileChallenge";
 
 const QUOTE_CHAT = {
   title: { en: "Quote Desk", es: "Cotizacion" },
@@ -70,23 +71,20 @@ function copyForMode(mode, settings) {
 }
 
 function initialMessages(intro) {
-  return [{ role: "assistant", content: intro, createdAt: Date.now() }];
-}
-
-function makeSessionId() {
-  if (typeof crypto?.randomUUID === "function") return crypto.randomUUID();
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  return [{ role: "assistant", content: intro, createdAt: null }];
 }
 
 function formatTime(timestamp) {
+  if (!timestamp) return "";
   return new Date(timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
 function BubbleMeta({ role, createdAt }) {
   const { lang } = useLanguage();
+  const time = formatTime(createdAt);
   return (
     <span className="chat-bubble__meta">
-      {role === "assistant" ? "Tires SOS" : lang === "es" ? "Tu" : "You"} - {formatTime(createdAt)}
+      {role === "assistant" ? "Tires SOS" : lang === "es" ? "Tu" : "You"}{time ? ` - ${time}` : ""}
     </span>
   );
 }
@@ -101,72 +99,8 @@ function TypingDots() {
   );
 }
 
-const PICKER_TRIGGERS = [
-  /let me pull up available times/i,
-  /d[ée]jame mostrarte los horarios disponibles/i,
-  /here are the available/i,
-  /available times for you/i,
-  /horarios disponibles/i,
-];
-
-function shouldShowPicker(messages) {
-  const last = [...messages].reverse().find((m) => m.role === "assistant");
-  if (!last) return false;
-  const text = typeof last.content === "string" ? last.content : "";
-  return PICKER_TRIGGERS.some((re) => re.test(text));
-}
-
-const COMPLETED_SIGNALS = [
-  /appointment.*(?:set|booked|confirmed|scheduled|received|noted)/i,
-  /cita.*(?:agendada|confirmada|recibida|anotada|registrada)/i,
-  /(?:we'll|we will|the team will|shop will|shop team will).*(?:confirm|reach out|contact|follow up|get back)/i,
-  /(?:el equipo|el taller|nos comunicaremos|te contactaremos|te llamaremos)/i,
-  /(?:thank you|thanks).*(?:all the info|everything we need|all set|got it)/i,
-  /(?:gracias).*(?:toda la info|todo lo que necesitamos|listo|anotado)/i,
-];
-
-function detectChatCompleted(messages) {
-  if (messages.length < 4) return false;
-  const userTexts = messages.filter((m) => m.role === "user").map((m) => (typeof m.content === "string" ? m.content : ""));
-  const allUserText = userTexts.join(" ");
-  const hasPhone = /\d{3}[-.\s]?\d{3}[-.\s]?\d{4}/.test(allUserText);
-  const hasName = /\b(?:my name is|me llamo|soy|i'm|i am|name is)\b/i.test(allUserText) ||
-    /[A-Z][a-z]+\s+[A-Z][a-z]+/.test(allUserText);
-  if (!hasPhone && !hasName) return false;
-
-  const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
-  if (!lastAssistant) return false;
-  const text = typeof lastAssistant.content === "string" ? lastAssistant.content : "";
-  return COMPLETED_SIGNALS.some((re) => re.test(text));
-}
-
 function pad(n) {
   return String(n).padStart(2, "0");
-}
-
-function buildPickerDays() {
-  const days = [];
-  const now = new Date();
-  for (let i = 0; i < 7 && days.length < 4; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
-    const cfg = SITE.hours.find((h) => h.day === d.getDay());
-    if (!cfg || !cfg.open) continue;
-    const slots = [];
-    const [oh] = cfg.open.split(":").map(Number);
-    const [ch] = cfg.close.split(":").map(Number);
-    for (let h = oh; h < ch; h++) {
-      if (i === 0 && h <= now.getHours()) continue;
-      slots.push(`${pad(h)}:00`);
-    }
-    if (slots.length === 0) continue;
-    days.push({
-      date: d,
-      key: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
-      label: cfg.label,
-      slots,
-    });
-  }
-  return days;
 }
 
 function formatTime12(t24) {
@@ -175,34 +109,105 @@ function formatTime12(t24) {
   return `${h % 12 || 12}:${pad(m)} ${suffix}`;
 }
 
-function AppointmentPicker({ t, onSelect }) {
-  const days = useMemo(() => buildPickerDays(), []);
-  const [selectedDay, setSelectedDay] = useState(0);
+const DAY_NAMES = {
+  0: { en: "Sunday", es: "Domingo" },
+  1: { en: "Monday", es: "Lunes" },
+  2: { en: "Tuesday", es: "Martes" },
+  3: { en: "Wednesday", es: "Miercoles" },
+  4: { en: "Thursday", es: "Jueves" },
+  5: { en: "Friday", es: "Viernes" },
+  6: { en: "Saturday", es: "Sabado" },
+};
 
-  if (days.length === 0) return null;
+function AppointmentPicker({ t, lang, onSelect, onSessionExpired, disabled = false, refreshKey = 0 }) {
+  const [days, setDays] = useState(null);
+  const [selectedDay, setSelectedDay] = useState(0);
+  const [fetchError, setFetchError] = useState("");
+  const [retryKey, setRetryKey] = useState(0);
+
+  useEffect(() => {
+    let alive = true;
+    setDays(null);
+    setFetchError("");
+    fetch("/api/availability", { cache: "no-store" })
+      .then(async (response) => {
+        if (response.status === 401) {
+          onSessionExpired?.();
+          throw new Error("session");
+        }
+        if (!response.ok) throw new Error("availability");
+        return response.json();
+      })
+      .then((data) => {
+        if (!alive) return;
+        setDays(Array.isArray(data?.days) ? data.days : []);
+      })
+      .catch(() => {
+        if (alive) setFetchError("unavailable");
+      });
+    return () => { alive = false; };
+  }, [onSessionExpired, refreshKey, retryKey]);
+
+  if (fetchError) {
+    return (
+      <div className="chat-picker chat-picker--error" role="status">
+        <p className="chat-picker__title">
+          {t({ en: "Times are temporarily unavailable.", es: "Los horarios no estan disponibles por ahora." })}
+        </p>
+        <p>{t({ en: "You can retry or call the shop for help.", es: "Puedes intentar de nuevo o llamar al taller." })}</p>
+        <button type="button" className="btn btn--ghost btn--small" onClick={() => setRetryKey((value) => value + 1)}>
+          {t({ en: "Retry", es: "Intentar de nuevo" })}
+        </button>
+      </div>
+    );
+  }
+  if (!days) {
+    return (
+      <div className="chat-picker">
+        <p className="chat-picker__title">{t({ en: "Loading times...", es: "Cargando horarios..." })}</p>
+      </div>
+    );
+  }
+  if (days.length === 0) {
+    return (
+      <div className="chat-picker chat-picker--error" role="status">
+        <p className="chat-picker__title">
+          {t({ en: "No online times are open right now.", es: "No hay horarios disponibles en linea por ahora." })}
+        </p>
+        <p>{t({ en: "Please call the shop and we will help you directly.", es: "Llama al taller y te ayudamos directamente." })}</p>
+      </div>
+    );
+  }
 
   const day = days[selectedDay];
-  const isToday = day.key === `${new Date().getFullYear()}-${pad(new Date().getMonth() + 1)}-${pad(new Date().getDate())}`;
-  const dayLabel = isToday
-    ? t({ en: "Today", es: "Hoy" })
-    : `${t(day.label)} ${day.date.getDate()}`;
+  const todayStr = getShopDateTime().dateKey;
+  const isToday = day.date === todayStr;
+  const dayName = DAY_NAMES[day.dayOfWeek] || { en: "", es: "" };
+  const dayNum = parseInt(day.date.split("-")[2], 10);
+  const dayLabel = isToday ? t({ en: "Today", es: "Hoy" }) : `${t(dayName)} ${dayNum}`;
 
   return (
     <div className="chat-picker">
       <p className="chat-picker__title">
         {t({ en: "Pick a time", es: "Elige un horario" })}
       </p>
+      <p className="chat-picker__timezone">
+        {t({ en: "All times are Pacific time.", es: "Todos los horarios son hora del Pacifico." })}
+      </p>
       <div className="chat-picker__days">
         {days.map((d, i) => {
-          const dIsToday = d.key === `${new Date().getFullYear()}-${pad(new Date().getMonth() + 1)}-${pad(new Date().getDate())}`;
+          const dIsToday = d.date === todayStr;
+          const dNum = parseInt(d.date.split("-")[2], 10);
+          const dName = DAY_NAMES[d.dayOfWeek] || { en: "", es: "" };
           return (
             <button
-              key={d.key}
+              key={d.date}
               type="button"
               className={`chat-picker__day ${i === selectedDay ? "chat-picker__day--active" : ""}`}
               onClick={() => setSelectedDay(i)}
+              disabled={disabled}
             >
-              {dIsToday ? t({ en: "Today", es: "Hoy" }) : `${t(d.label).slice(0, 3)} ${d.date.getDate()}`}
+              {dIsToday ? t({ en: "Today", es: "Hoy" }) : `${t(dName).slice(0, 3)} ${dNum}`}
             </button>
           );
         })}
@@ -213,12 +218,18 @@ function AppointmentPicker({ t, onSelect }) {
             key={slot}
             type="button"
             className="chat-picker__slot"
+            disabled={disabled}
             onClick={() => {
               const msg = t({
                 en: `I'd like to come in on ${dayLabel} at ${formatTime12(slot)}`,
-                es: `Me gustaría ir el ${dayLabel} a las ${formatTime12(slot)}`,
+                es: `Me gustaria ir el ${dayLabel} a las ${formatTime12(slot)}`,
               });
-              onSelect(msg);
+              onSelect({
+                date: day.date,
+                time: slot,
+                message: msg,
+                label: formatShopSlot(day.date, slot, lang),
+              });
             }}
           >
             {formatTime12(slot)}
@@ -229,7 +240,13 @@ function AppointmentPicker({ t, onSelect }) {
   );
 }
 
-export default function ChatBot({ embedded = false, className = "", showComposer = true, mode = "shop" }) {
+export default function ChatBot({
+  embedded = false,
+  className = "",
+  showComposer = true,
+  mode = "shop",
+  turnstileSiteKey = "",
+}) {
   const t = useT();
   const { lang } = useLanguage();
   const [adminChatSettings, setAdminChatSettings] = useState(null);
@@ -239,15 +256,29 @@ export default function ChatBot({ embedded = false, className = "", showComposer
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [messages, setMessages] = useState(() => initialMessages(copy.intro));
-  const [sessionId, setSessionId] = useState(() => makeSessionId());
+  const [session, setSession] = useState({
+    loading: true,
+    ready: false,
+    id: "",
+    turnstileRequired: false,
+    error: "",
+  });
+  const [privacyConsent, setPrivacyConsent] = useState(false);
+  const [nextAction, setNextAction] = useState("collect_details");
   const [chatCompleted, setChatCompleted] = useState(false);
+  const [completion, setCompletion] = useState(null);
   const [pickerUsed, setPickerUsed] = useState(false);
+  const [reservationLoading, setReservationLoading] = useState(false);
+  const [pickerRefreshKey, setPickerRefreshKey] = useState(0);
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const listRef = useRef(null);
   const textareaRef = useRef(null);
+  const busyRef = useRef(false);
 
   const visible = embedded || open;
-  const canSend = input.trim().length > 0 && !loading && !chatCompleted;
-  const showPicker = !pickerUsed && !chatCompleted && !loading && shouldShowPicker(messages);
+  const canInteract = session.ready && privacyConsent && !loading && !reservationLoading && !chatCompleted;
+  const canSend = input.trim().length > 0 && canInteract;
+  const showPicker = nextAction === "show_availability" && !pickerUsed && !chatCompleted && !loading;
 
   const quickPrompts = useMemo(
     () =>
@@ -267,12 +298,76 @@ export default function ChatBot({ embedded = false, className = "", showComposer
     });
   };
 
+  const bootstrapSession = useCallback(async ({ turnstileToken = "", rotate = false } = {}) => {
+    setSession((current) => ({ ...current, loading: true, error: "" }));
+    try {
+      const usePost = Boolean(turnstileToken || rotate);
+      const response = await fetch("/api/chat/session", {
+        method: usePost ? "POST" : "GET",
+        headers: usePost ? { "Content-Type": "application/json" } : undefined,
+        body: usePost ? JSON.stringify({ turnstileToken, rotate }) : undefined,
+        cache: "no-store",
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data?.error || "session_failed");
+
+      if (data.ok) {
+        setSession({
+          loading: false,
+          ready: true,
+          id: data.sessionId || "",
+          turnstileRequired: false,
+          error: "",
+        });
+        return true;
+      }
+
+      if (data.turnstileRequired) {
+        setSession({ loading: false, ready: false, id: "", turnstileRequired: true, error: "" });
+        return false;
+      }
+
+      throw new Error("session_failed");
+    } catch {
+      setSession({
+        loading: false,
+        ready: false,
+        id: "",
+        turnstileRequired: false,
+        error: "session_failed",
+      });
+      return false;
+    }
+  }, []);
+
+  const handleTurnstileToken = useCallback(
+    async (token) => {
+      if (!token) return;
+      const ok = await bootstrapSession({ turnstileToken: token });
+      if (!ok) setTurnstileResetKey((value) => value + 1);
+    },
+    [bootstrapSession],
+  );
+
+  const handleTurnstileError = useCallback(() => {
+    setSession((current) => ({ ...current, error: "challenge_failed" }));
+  }, []);
+
+  const handleSessionExpired = useCallback(() => {
+    setError(t({ en: "Your secure chat session expired. Please try again.", es: "Tu sesion segura expiro. Intenta de nuevo." }));
+    bootstrapSession();
+  }, [bootstrapSession, t]);
+
   useEffect(() => {
-    if (visible) {
+    bootstrapSession();
+  }, [bootstrapSession]);
+
+  useEffect(() => {
+    if (visible && session.ready && privacyConsent && !embedded) {
       textareaRef.current?.focus();
       scrollToBottom();
     }
-  }, [visible]);
+  }, [embedded, privacyConsent, session.ready, visible]);
 
   useEffect(() => {
     if (mode !== "quote") return;
@@ -308,23 +403,27 @@ export default function ChatBot({ embedded = false, className = "", showComposer
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [embedded]);
 
-  const startNewChat = () => {
+  const startNewChat = async () => {
     setMessages(initialMessages(copy.intro));
-    setSessionId(makeSessionId());
     setChatCompleted(false);
+    setCompletion(null);
+    setNextAction("collect_details");
     setPickerUsed(false);
+    setPickerRefreshKey((value) => value + 1);
     setInput("");
     setError("");
+    await bootstrapSession({ rotate: true });
     scrollToBottom();
     textareaRef.current?.focus();
   };
 
   const send = async (text) => {
     const content = text.trim();
-    if (!content || loading) return;
+    if (!content || busyRef.current || !canInteract) return;
+    busyRef.current = true;
 
     const nextMessages = [...messages, { role: "user", content, createdAt: Date.now() }];
-    const requestMessages = nextMessages.map((message) => ({
+    const requestMessages = nextMessages.slice(-24).map((message) => ({
       role: message.role,
       content: typeof message.content === "string" ? message.content : t(message.content),
     }));
@@ -339,11 +438,29 @@ export default function ChatBot({ embedded = false, className = "", showComposer
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lang, context: mode, sessionId, messages: requestMessages }),
+        body: JSON.stringify({ lang, context: mode, privacyConsent: true, messages: requestMessages }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
-      if (!res.ok) throw new Error(data?.error || "Chat request failed.");
+      if (!res.ok) {
+        if (res.status === 401) handleSessionExpired();
+        const saved = data?.status?.leadCaptured;
+        setError(data?.error || t({ en: "Chat is temporarily unavailable.", es: "El chat no esta disponible por ahora." }));
+        setMessages((previous) => [
+          ...previous,
+          {
+            role: "assistant",
+            content: saved
+              ? t({
+                  en: "I saved the details you sent, but I could not answer just now. You can retry or call the shop.",
+                  es: "Guarde los datos que enviaste, pero no pude responder ahora. Intenta de nuevo o llama al taller.",
+                })
+              : copy.fallback,
+            createdAt: Date.now(),
+          },
+        ]);
+        return;
+      }
 
       const assistantMsg = {
         role: "assistant",
@@ -352,13 +469,8 @@ export default function ChatBot({ embedded = false, className = "", showComposer
           (lang === "es" ? "Estoy aqui si necesitas mas detalles." : "I'm here if you need more details."),
         createdAt: Date.now(),
       };
-      setMessages((prev) => {
-        const updated = [...prev, assistantMsg];
-        if (detectChatCompleted(updated)) {
-          setTimeout(() => setChatCompleted(true), 800);
-        }
-        return updated;
-      });
+      setMessages((prev) => [...prev, assistantMsg]);
+      setNextAction(data?.action?.type || "collect_details");
       scrollToBottom();
     } catch (err) {
       setError(err.message || "Something went wrong.");
@@ -367,14 +479,93 @@ export default function ChatBot({ embedded = false, className = "", showComposer
         { role: "assistant", content: copy.fallback, createdAt: Date.now() },
       ]);
     } finally {
+      busyRef.current = false;
       setLoading(false);
       scrollToBottom();
     }
   };
 
-  const handlePickerSelect = (msg) => {
+  const handlePickerSelect = async (selection) => {
+    if (busyRef.current || reservationLoading || !session.ready || !privacyConsent) return;
+    busyRef.current = true;
+    setReservationLoading(true);
     setPickerUsed(true);
-    send(msg);
+    setError("");
+    setMessages((previous) => [
+      ...previous,
+      { role: "user", content: selection.message, createdAt: Date.now() },
+    ]);
+
+    try {
+      const response = await fetch("/api/appointments/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scheduledDate: selection.date,
+          scheduledTime: selection.time,
+          privacyConsent: true,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (response.status === 401) {
+        handleSessionExpired();
+        throw new Error("session");
+      }
+
+      if (response.status === 409) {
+        setPickerUsed(false);
+        setPickerRefreshKey((value) => value + 1);
+        setMessages((previous) => [
+          ...previous,
+          {
+            role: "assistant",
+            content: t({
+              en: "That time was just taken. I refreshed the available times—please choose another one.",
+              es: "Ese horario acaba de ocuparse. Actualice los horarios; elige otro, por favor.",
+            }),
+            createdAt: Date.now(),
+          },
+        ]);
+        return;
+      }
+
+      if (!response.ok || !data.ok) throw new Error(data?.error || "reservation_failed");
+
+      const notificationStatus = data?.notification?.status || "pending";
+      const persisted = data?.persisted === true;
+      const confirmation = persisted
+        ? notificationStatus === "provider_accepted" || notificationStatus === "sent"
+          ? t({
+              en: `Your request for ${selection.label} is reserved, and the shop notification was accepted. The team will confirm it with you.`,
+              es: `Tu solicitud para ${selection.label} quedo reservada y la notificacion fue aceptada. El equipo te la confirmara.`,
+            })
+          : t({
+              en: `Your request for ${selection.label} is safely saved. The shop can see it in the admin desk; notification delivery is pending.`,
+              es: `Tu solicitud para ${selection.label} quedo guardada. El taller puede verla; la notificacion esta pendiente.`,
+            })
+        : t({
+            en: "The request is only stored temporarily. Please call the shop to make sure the time is held.",
+            es: "La solicitud solo esta guardada temporalmente. Llama al taller para asegurar el horario.",
+          });
+
+      setMessages((previous) => [
+        ...previous,
+        { role: "assistant", content: confirmation, createdAt: Date.now() },
+      ]);
+      setCompletion({ persisted, notificationStatus, slotLabel: selection.label });
+      setChatCompleted(true);
+      setNextAction("completed");
+    } catch (reservationError) {
+      if (reservationError.message !== "session") {
+        setPickerUsed(false);
+        setError(t({ en: "We could not reserve that time. Please retry or call the shop.", es: "No pudimos reservar ese horario. Intenta de nuevo o llama al taller." }));
+      }
+    } finally {
+      busyRef.current = false;
+      setReservationLoading(false);
+      scrollToBottom();
+    }
   };
 
   return (
@@ -417,7 +608,7 @@ export default function ChatBot({ embedded = false, className = "", showComposer
             <div className="chat-panel__stats">
               <div>
                 <span>{t(copy.fastAnswers)}</span>
-                <strong>{t(copy.liveChat)}</strong>
+                <strong>{t({ en: "AI assistant", es: "Asistente con IA" })}</strong>
               </div>
               <div>
                 <span>{t(copy.callUs)}</span>
@@ -431,9 +622,62 @@ export default function ChatBot({ embedded = false, className = "", showComposer
               </div>
             </div>
 
+            <div className="chat-panel__security" aria-live="polite">
+              {session.loading ? (
+                <p>{t({ en: "Starting a secure chat...", es: "Iniciando un chat seguro..." })}</p>
+              ) : session.turnstileRequired ? (
+                <div>
+                  <p>{t({ en: "Please complete the security check to continue.", es: "Completa la verificacion para continuar." })}</p>
+                  {turnstileSiteKey ? (
+                    <TurnstileChallenge
+                      siteKey={turnstileSiteKey}
+                      language={lang}
+                      resetKey={turnstileResetKey}
+                      onToken={handleTurnstileToken}
+                      onError={handleTurnstileError}
+                    />
+                  ) : (
+                    <p className="chat-panel__error">
+                      {t({
+                        en: "The security check is not configured. Please call the shop.",
+                        es: "La verificacion no esta configurada. Llama al taller.",
+                      })}
+                    </p>
+                  )}
+                </div>
+              ) : session.error ? (
+                <div>
+                  <p className="chat-panel__error">
+                    {t({ en: "Secure chat could not start.", es: "No se pudo iniciar el chat seguro." })}
+                  </p>
+                  <button type="button" className="btn btn--ghost btn--small" onClick={() => bootstrapSession()}>
+                    {t({ en: "Retry", es: "Intentar de nuevo" })}
+                  </button>
+                </div>
+              ) : null}
+            </div>
+
+            <label className="chat-consent">
+              <input
+                type="checkbox"
+                checked={privacyConsent}
+                onChange={(event) => setPrivacyConsent(event.target.checked)}
+                disabled={!session.ready || loading || reservationLoading || chatCompleted}
+              />
+              <span>
+                {t({
+                  en: "I agree to send these details to the shop and its service providers under the",
+                  es: "Acepto enviar estos datos al taller y sus proveedores segun la",
+                })}{" "}
+                <a href="/privacy" target="_blank" rel="noreferrer">
+                  {t({ en: "Privacy Policy", es: "Politica de Privacidad" })}
+                </a>.
+              </span>
+            </label>
+
             <div className="chat-panel__prompts">
               {quickPrompts.map((prompt, index) => (
-                <button key={`${prompt}-${index}`} className="chat-chip" onClick={() => send(prompt)} disabled={loading}>
+                <button key={`${prompt}-${index}`} className="chat-chip" onClick={() => send(prompt)} disabled={!canInteract}>
                   {prompt}
                 </button>
               ))}
@@ -455,18 +699,44 @@ export default function ChatBot({ embedded = false, className = "", showComposer
                   </p>
                 </article>
               )}
+              {reservationLoading && (
+                <article className="chat-bubble chat-bubble--assistant">
+                  <BubbleMeta role="assistant" createdAt={Date.now()} />
+                  <p className="chat-bubble__typing-row">
+                    <TypingDots />
+                    <span>{t({ en: "Reserving your request...", es: "Reservando tu solicitud..." })}</span>
+                  </p>
+                </article>
+              )}
               {showPicker && (
-                <AppointmentPicker t={t} onSelect={handlePickerSelect} />
+                <AppointmentPicker
+                  t={t}
+                  lang={lang}
+                  onSelect={handlePickerSelect}
+                  onSessionExpired={handleSessionExpired}
+                  disabled={reservationLoading}
+                  refreshKey={pickerRefreshKey}
+                />
               )}
             </div>
 
             {showComposer && chatCompleted ? (
               <div className="chat-panel__completed">
                 <p className="chat-panel__completed-text">
-                  {t({
-                    en: "Your info has been sent to the shop team. They'll reach out to confirm.",
-                    es: "Tu informacion fue enviada al equipo del taller. Te contactaran para confirmar.",
-                  })}
+                  {completion?.persisted
+                    ? completion.notificationStatus === "provider_accepted" || completion.notificationStatus === "sent"
+                      ? t({
+                          en: "Your appointment request is saved. The shop alert was accepted, but the team still needs to confirm the time.",
+                          es: "Tu solicitud esta guardada. La alerta fue aceptada, pero el equipo todavia debe confirmar el horario.",
+                        })
+                      : t({
+                          en: "Your appointment request is saved in the shop dashboard. Notification delivery is pending.",
+                          es: "Tu solicitud esta guardada en el panel del taller. La notificacion esta pendiente.",
+                        })
+                    : t({
+                        en: "This request is only stored temporarily. Please call the shop to confirm.",
+                        es: "Esta solicitud solo esta guardada temporalmente. Llama al taller para confirmar.",
+                      })}
                 </p>
                 <button type="button" className="btn btn--primary chat-panel__new-chat" onClick={startNewChat}>
                   {t({ en: "Start a new chat", es: "Iniciar un nuevo chat" })}
@@ -482,16 +752,22 @@ export default function ChatBot({ embedded = false, className = "", showComposer
               >
                 <textarea
                   ref={textareaRef}
-                value={input}
-                onChange={(event) => setInput(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" && !event.shiftKey) {
-                    event.preventDefault();
-                    send(input);
+                  value={input}
+                  onChange={(event) => setInput(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault();
+                      send(input);
+                    }
+                  }}
+                  placeholder={
+                    privacyConsent
+                      ? t(copy.placeholder)
+                      : t({ en: "Accept the privacy notice to begin...", es: "Acepta el aviso de privacidad para comenzar..." })
                   }
-                }}
-                placeholder={t(copy.placeholder)}
-                rows={2}
+                  rows={2}
+                  maxLength={2000}
+                  disabled={!session.ready || !privacyConsent || loading || reservationLoading}
                 />
                 <div className="chat-panel__composer-bar">
                   <span className="chat-panel__error">{error}</span>

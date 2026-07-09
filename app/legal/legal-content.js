@@ -42,12 +42,14 @@ export const LEGAL_PAGES = {
           en: [
             "We do not sell personal information.",
             "We may use service providers for hosting, messaging, embeds, maps, and AI chat.",
-            "Instagram, Google Maps, WhatsApp, and Groq may collect data when you use their embedded or linked services.",
+            "Chat and quote details may be processed by Groq to generate responses and by EmailJS, an email service, and the mobile carrier's email-to-SMS gateway to alert the shop team.",
+            "Instagram, Google Maps, WhatsApp, Groq, EmailJS, email providers, and mobile carriers may process information under their own privacy policies.",
           ],
           es: [
             "No vendemos informacion personal.",
             "Podemos usar proveedores para alojamiento, mensajeria, incrustaciones, mapas y chat con IA.",
-            "Instagram, Google Maps, WhatsApp y Groq pueden recopilar datos cuando usas sus servicios incrustados o enlazados.",
+            "Los datos del chat y de cotizaciones pueden ser procesados por Groq para generar respuestas y por EmailJS, un servicio de correo y la pasarela de correo a SMS del operador movil para avisar al equipo del taller.",
+            "Instagram, Google Maps, WhatsApp, Groq, EmailJS, proveedores de correo y operadores moviles pueden procesar informacion segun sus propias politicas de privacidad.",
           ],
         },
       },
@@ -61,6 +63,21 @@ export const LEGAL_PAGES = {
           es: [
             "Podemos usar almacenamiento del navegador para recordar el idioma y la sesion de administrador.",
             "Los servicios de terceros pueden usar sus propias cookies y tecnologias de seguimiento.",
+          ],
+        },
+      },
+      {
+        heading: { en: "Retention and deletion", es: "Retencion y eliminacion" },
+        items: {
+          en: [
+            "We keep chat, lead, and appointment information only as long as reasonably needed to respond, maintain business records, resolve disputes, and meet legal obligations.",
+            "Service providers may retain copies according to their own retention policies.",
+            "To request access, correction, or deletion of your information, call (408) 332-8962. We will address applicable requests subject to legal and business record obligations.",
+          ],
+          es: [
+            "Conservamos la informacion de chats, clientes potenciales y citas solo durante el tiempo razonablemente necesario para responder, mantener registros comerciales, resolver disputas y cumplir obligaciones legales.",
+            "Los proveedores de servicios pueden conservar copias de acuerdo con sus propias politicas de retencion.",
+            "Para solicitar acceso, correccion o eliminacion de tu informacion, llama al (408) 332-8962. Atenderemos las solicitudes aplicables sujetas a obligaciones legales y de registros comerciales.",
           ],
         },
       },
@@ -114,11 +131,11 @@ export const LEGAL_PAGES = {
         heading: { en: "Third-party services", es: "Servicios de terceros" },
         items: {
           en: [
-            "Instagram, Google Maps, WhatsApp, and Groq are separate services with their own policies and terms.",
+            "Instagram, Google Maps, WhatsApp, Groq, EmailJS, email providers, and mobile carriers are separate services with their own policies and terms.",
             "We are not responsible for outages, policy changes, or content on third-party services.",
           ],
           es: [
-            "Instagram, Google Maps, WhatsApp y Groq son servicios separados con sus propias politicas y terminos.",
+            "Instagram, Google Maps, WhatsApp, Groq, EmailJS, proveedores de correo y operadores moviles son servicios separados con sus propias politicas y terminos.",
             "No somos responsables de caidas, cambios de politica o contenido en servicios de terceros.",
           ],
         },

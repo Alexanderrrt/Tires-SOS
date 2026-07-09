@@ -308,6 +308,7 @@ export default function PricingEditor({
   const [records, setRecords] = useState({
     leads: initialRecords?.leads || [],
     appointments: initialRecords?.appointments || [],
+    blockedSlots: initialRecords?.blockedSlots || [],
   });
   const [status, setStatus] = useState(null); // {ok, msg: {en, es}}
   const [saving, setSaving] = useState(false);
@@ -386,7 +387,11 @@ export default function PricingEditor({
     setSaving(false);
     const body = await res.json().catch(() => ({}));
     if (res.ok) {
-      setRecords({ leads: body.leads || [], appointments: body.appointments || [] });
+      setRecords({
+        leads: body.leads || [],
+        appointments: body.appointments || [],
+        blockedSlots: body.blockedSlots || [],
+      });
       setStatus({ ok: true, msg: CHAT_ADMIN.refreshed });
       router.refresh();
     } else {
@@ -460,6 +465,7 @@ export default function PricingEditor({
         }
 
         return {
+          ...current,
           leads: nextLeads,
           appointments: nextAppointments.filter(
             (appointment) => appointment.leadId !== id && appointment.sessionId !== record?.sessionId,
@@ -520,6 +526,42 @@ export default function PricingEditor({
       setStatus({ ok: true, msg: { en: "Appointment unscheduled.", es: "Cita desagendada." } });
     } else {
       setStatus({ ok: false, msg: { en: body.error || "Unschedule failed.", es: body.error || "No se pudo desagendar." } });
+    }
+  }
+
+  async function handleBlock(date, time) {
+    setStatus(null);
+    const res = await fetch("/api/admin/records", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "block", date, time }),
+    });
+    if (res.ok) {
+      setRecords((current) => ({
+        ...current,
+        blockedSlots: [...(current.blockedSlots || []), { date, time, createdAt: new Date().toISOString() }],
+      }));
+    } else {
+      const body = await res.json().catch(() => ({}));
+      setStatus({ ok: false, msg: { en: body.error || "Block failed.", es: body.error || "No se pudo bloquear." } });
+    }
+  }
+
+  async function handleUnblock(date, time) {
+    setStatus(null);
+    const res = await fetch("/api/admin/records", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "unblock", date, time }),
+    });
+    if (res.ok) {
+      setRecords((current) => ({
+        ...current,
+        blockedSlots: (current.blockedSlots || []).filter((s) => !(s.date === date && s.time === time)),
+      }));
+    } else {
+      const body = await res.json().catch(() => ({}));
+      setStatus({ ok: false, msg: { en: body.error || "Unblock failed.", es: body.error || "No se pudo desbloquear." } });
     }
   }
 
@@ -644,11 +686,14 @@ export default function PricingEditor({
         ) : activeTab === "appointments" ? (
           <AppointmentCalendar
             appointments={records.appointments}
+            blockedSlots={records.blockedSlots || []}
             t={t}
             onSchedule={scheduleAppointment}
             onUnschedule={unscheduleAppointment}
             onStatus={updateRecordStatus}
             onDelete={deleteRecord}
+            onBlock={handleBlock}
+            onUnblock={handleUnblock}
             disabled={saving}
             updatingId={updatingId}
           />

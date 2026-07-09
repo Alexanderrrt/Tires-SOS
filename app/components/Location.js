@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useT } from "../i18n/LanguageContext";
 import { COPY, SITE } from "../site.config";
+import { getShopDateTime } from "../../lib/shop-time";
 import Icon from "./Icons";
 import Reveal from "./Reveal";
 
@@ -36,7 +38,14 @@ function LocationCard({ loc, t }) {
 
 export default function Location() {
   const t = useT();
-  const today = new Date().getDay();
+  const [today, setToday] = useState(null);
+
+  useEffect(() => {
+    const update = () => setToday(getShopDateTime().dayOfWeek);
+    update();
+    const timer = setInterval(update, 60 * 60 * 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <section id="location" className="section section--tread">

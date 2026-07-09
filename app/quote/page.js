@@ -19,7 +19,7 @@ export default function QuotePage() {
       <main className="section">
         <div className="section__inner">
           <QuoteIntro />
-          <QuoteLeadStarter />
+          <QuoteLeadStarter turnstileSiteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""} />
         </div>
       </main>
       <Footer />

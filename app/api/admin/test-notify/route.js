@@ -1,18 +1,29 @@
 import { cookies } from "next/headers";
-import { verifySession, SESSION_COOKIE } from "../../../../lib/auth";
+import { authConfigured, verifySession, SESSION_COOKIE } from "../../../../lib/auth";
 import { notifyLead, notifyConfigured } from "../../../../lib/lead-notify";
 
+const NO_STORE = { "Cache-Control": "no-store" };
+
+function json(body, status = 200) {
+  return Response.json(body, { status, headers: NO_STORE });
+}
+
 export async function POST() {
+  if (!authConfigured()) {
+    return json({ ok: false, status: "auth_not_configured", error: "Admin authentication is not configured." }, 503);
+  }
+
   const token = cookies().get(SESSION_COOKIE)?.value;
   if (!(await verifySession(token))) {
-    return Response.json({ error: "Unauthorized." }, { status: 401 });
+    return json({ ok: false, status: "unauthorized", error: "Unauthorized." }, 401);
   }
 
   if (!notifyConfigured()) {
-    return Response.json({
+    return json({
       ok: false,
-      error: "EMAILJS env vars not configured. Set EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY, and EMAILJS_PRIVATE_KEY.",
-    }, { status: 400 });
+      status: "notification_not_configured",
+      error: "The notification service is not configured.",
+    }, 503);
   }
 
   try {
@@ -20,10 +31,25 @@ export async function POST() {
       type: "TEST",
       name: "Tires SOS Admin",
       phone: "N/A",
-      message: "This is a test notification from your Tires SOS admin panel. If you received this SMS, notifications are working.",
+      message: "This is a test notification from the Tires SOS admin panel.",
     });
-    return Response.json({ ok: true, ...result });
-  } catch (error) {
-    return Response.json({ ok: false, error: error.message }, { status: 500 });
+
+    if (!result.accepted) {
+      return json({
+        ok: false,
+        accepted: false,
+        status: result.status,
+        error: "The notification provider did not accept the test message.",
+      }, 503);
+    }
+
+    return json({ ok: true, accepted: true, status: result.status });
+  } catch {
+    return json({
+      ok: false,
+      accepted: false,
+      status: "notification_failed",
+      error: "The notification provider did not accept the test message.",
+    }, 502);
   }
 }

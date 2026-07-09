@@ -1,8 +1,9 @@
--- Tires SOS Rescue - admin settings store.
--- Run once in the Supabase SQL editor. Stores the whole pricing document plus
--- chat admin settings as a single JSONB row (id = 1). The site reads/writes it
--- with the service-role key from the server only, so Row Level Security can
--- stay on with no public policy.
+-- Tires SOS Rescue database schema.
+-- Run this file in the Supabase SQL editor. Every statement is safe to rerun.
+-- The pricing document remains a singleton, while mutable chat data lives in
+-- normalized rows so unrelated customer sessions cannot overwrite one another.
+
+create extension if not exists pgcrypto;
 
 create table if not exists public.pricing (
   id         int primary key default 1,
@@ -11,11 +12,616 @@ create table if not exists public.pricing (
   constraint pricing_singleton check (id = 1)
 );
 
-alter table public.pricing enable row level security;
-
--- Seed the singleton row if it does not exist yet. The app also self-heals by
--- falling back to its bundled defaults, but seeding here means the admin panel
--- shows real values immediately.
 insert into public.pricing (id, data)
 values (1, '{}'::jsonb)
 on conflict (id) do nothing;
+
+create table if not exists public.chat_settings (
+  id         smallint primary key default 1,
+  settings   jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now(),
+  constraint chat_settings_singleton check (id = 1),
+  constraint chat_settings_object check (jsonb_typeof(settings) = 'object')
+);
+
+create table if not exists public.chat_leads (
+  id                             text primary key,
+  session_id                     text not null unique,
+  source                         text not null default 'Quote chat',
+  lang                           text not null default 'en' check (lang in ('en', 'es')),
+  status                         text not null default 'new'
+                                 check (status in ('new', 'contacted', 'booked', 'done', 'lost')),
+  created_at                     timestamptz not null default now(),
+  updated_at                     timestamptz not null default now(),
+  appointment_requested          boolean not null default false,
+  summary                        text not null default '',
+  customer_name                  text not null default '',
+  phone                          text not null default '',
+  vehicle                        text not null default '',
+  tire_size                      text not null default '',
+  service                        text not null default '',
+  preferred_date                 date,
+  preferred_time                 time(0) without time zone,
+  preferred_time_text            text not null default '',
+  last_message                   text not null default '',
+  assistant_message              text not null default '',
+  transcript                     jsonb not null default '[]'::jsonb,
+  notification_status            text not null default 'not_ready'
+                                 check (notification_status in
+                                   ('not_ready', 'pending', 'sent', 'failed', 'skipped', 'unknown')),
+  notification_attempts          integer not null default 0 check (notification_attempts >= 0),
+  notification_last_attempt_at   timestamptz,
+  notification_sent_at           timestamptz,
+  notification_last_error_code   text,
+  constraint chat_leads_transcript_array check (jsonb_typeof(transcript) = 'array')
+);
+
+comment on column public.chat_leads.notification_status is
+  'not_ready=no complete contact; pending=claimed; sent=delivered to provider; failed=retryable; skipped=not configured; unknown=legacy delivery state';
+comment on column public.chat_leads.notification_last_error_code is
+  'Bounded provider-neutral code only. Raw provider errors must never be stored.';
+
+create table if not exists public.chat_appointments (
+  id                   text primary key,
+  lead_id              text references public.chat_leads(id) on delete cascade,
+  session_id           text not null unique,
+  status               text not null default 'requested'
+                       check (status in ('requested', 'confirmed', 'completed', 'no-show', 'canceled')),
+  created_at           timestamptz not null default now(),
+  updated_at           timestamptz not null default now(),
+  customer_name        text not null default '',
+  phone                text not null default '',
+  service              text not null default '',
+  vehicle              text not null default '',
+  preferred_date       date,
+  preferred_time       time(0) without time zone,
+  preferred_time_text  text not null default '',
+  notes                text not null default '',
+  scheduled_date       date,
+  scheduled_time       time(0) without time zone,
+  constraint chat_appointments_schedule_pair check (
+    (scheduled_date is null and scheduled_time is null) or
+    (scheduled_date is not null and scheduled_time is not null)
+  )
+);
+
+create table if not exists public.chat_blocked_slots (
+  id          bigint generated by default as identity primary key,
+  slot_date   date not null,
+  slot_time   time(0) without time zone,
+  is_all_day  boolean not null default false,
+  created_at  timestamptz not null default now(),
+  constraint chat_blocked_slots_shape check (
+    (is_all_day and slot_time is null) or
+    (not is_all_day and slot_time is not null)
+  )
+);
+
+create table if not exists public.chat_rate_limits (
+  rate_key           text primary key,
+  window_started_at  timestamptz not null,
+  request_count      integer not null default 0 check (request_count >= 0),
+  expires_at         timestamptz not null,
+  updated_at         timestamptz not null default now()
+);
+
+create index if not exists chat_leads_updated_idx
+  on public.chat_leads (updated_at desc);
+create index if not exists chat_appointments_updated_idx
+  on public.chat_appointments (updated_at desc);
+create index if not exists chat_appointments_lead_idx
+  on public.chat_appointments (lead_id);
+create index if not exists chat_rate_limits_expires_idx
+  on public.chat_rate_limits (expires_at);
+
+create unique index if not exists chat_blocked_slots_day_unique
+  on public.chat_blocked_slots (slot_date)
+  where is_all_day;
+create unique index if not exists chat_blocked_slots_time_unique
+  on public.chat_blocked_slots (slot_date, slot_time)
+  where not is_all_day;
+
+-- Migrate chat settings out of pricing.data before removing the legacy key.
+insert into public.chat_settings (id, settings, updated_at)
+select 1, p.data -> 'chatSettings', p.updated_at
+from public.pricing p
+where p.id = 1
+  and jsonb_typeof(p.data -> 'chatSettings') = 'object'
+on conflict (id) do nothing;
+
+-- Migrate existing lead objects. Invalid/missing optional values are normalized;
+-- a missing session id is the only reason a legacy item is skipped.
+with legacy_leads as (
+  select item
+  from public.pricing p
+  cross join lateral jsonb_array_elements(
+    case when jsonb_typeof(p.data -> 'chatLeads') = 'array'
+      then p.data -> 'chatLeads'
+      else '[]'::jsonb
+    end
+  ) item
+  where p.id = 1
+)
+insert into public.chat_leads (
+  id, session_id, source, lang, status, created_at, updated_at,
+  appointment_requested, summary, customer_name, phone, vehicle, tire_size,
+  service, preferred_date, preferred_time, preferred_time_text, last_message,
+  assistant_message, transcript, notification_status, notification_attempts,
+  notification_last_attempt_at, notification_sent_at, notification_last_error_code
+)
+select
+  coalesce(nullif(item ->> 'id', ''), 'lead_' || replace(gen_random_uuid()::text, '-', '')),
+  item ->> 'sessionId',
+  coalesce(nullif(item ->> 'source', ''), 'Quote chat'),
+  case when item ->> 'lang' = 'es' then 'es' else 'en' end,
+  case when item ->> 'status' in ('new', 'contacted', 'booked', 'done', 'lost')
+    then item ->> 'status' else 'new' end,
+  case when item ->> 'createdAt' ~ '^20[0-9]{2}-[0-9]{2}-[0-9]{2}T'
+    then (item ->> 'createdAt')::timestamptz else now() end,
+  case when item ->> 'updatedAt' ~ '^20[0-9]{2}-[0-9]{2}-[0-9]{2}T'
+    then (item ->> 'updatedAt')::timestamptz else now() end,
+  coalesce((item ->> 'appointmentRequested')::boolean, false),
+  coalesce(item ->> 'summary', ''),
+  coalesce(item ->> 'customerName', ''),
+  coalesce(item ->> 'phone', ''),
+  coalesce(item ->> 'vehicle', ''),
+  coalesce(item ->> 'tireSize', ''),
+  coalesce(item ->> 'service', ''),
+  case when item ->> 'preferredDate' ~ '^20[0-9]{2}-[0-9]{2}-[0-9]{2}$'
+    then (item ->> 'preferredDate')::date else null end,
+  case when item ->> 'preferredTime' ~ '^([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$'
+    then (item ->> 'preferredTime')::time else null end,
+  coalesce(nullif(item ->> 'preferredTimeText', ''), item ->> 'preferredTime', ''),
+  coalesce(item ->> 'lastMessage', ''),
+  coalesce(item ->> 'assistantMessage', ''),
+  case when jsonb_typeof(item -> 'transcript') = 'array' then item -> 'transcript' else '[]'::jsonb end,
+  case when item ->> 'notificationStatus' in ('not_ready', 'pending', 'sent', 'failed', 'skipped', 'unknown')
+    then item ->> 'notificationStatus' else 'unknown' end,
+  case when item ->> 'notificationAttempts' ~ '^[0-9]+$'
+    then (item ->> 'notificationAttempts')::integer else 0 end,
+  case when item ->> 'notificationLastAttemptAt' ~ '^20[0-9]{2}-[0-9]{2}-[0-9]{2}T'
+    then (item ->> 'notificationLastAttemptAt')::timestamptz else null end,
+  case when item ->> 'notificationSentAt' ~ '^20[0-9]{2}-[0-9]{2}-[0-9]{2}T'
+    then (item ->> 'notificationSentAt')::timestamptz else null end,
+  case when item ? 'notificationLastErrorCode'
+    then left(regexp_replace(lower(item ->> 'notificationLastErrorCode'), '[^a-z0-9_.-]', '_', 'g'), 80)
+    else null end
+from legacy_leads
+where coalesce(item ->> 'sessionId', '') <> ''
+on conflict (session_id) do nothing;
+
+with legacy_appointments as (
+  select item
+  from public.pricing p
+  cross join lateral jsonb_array_elements(
+    case when jsonb_typeof(p.data -> 'appointments') = 'array'
+      then p.data -> 'appointments'
+      else '[]'::jsonb
+    end
+  ) item
+  where p.id = 1
+)
+insert into public.chat_appointments (
+  id, lead_id, session_id, status, created_at, updated_at, customer_name, phone,
+  service, vehicle, preferred_date, preferred_time, preferred_time_text, notes,
+  scheduled_date, scheduled_time
+)
+select
+  coalesce(nullif(a.item ->> 'id', ''), 'appt_' || replace(gen_random_uuid()::text, '-', '')),
+  l.id,
+  a.item ->> 'sessionId',
+  case when a.item ->> 'status' in ('requested', 'confirmed', 'completed', 'no-show', 'canceled')
+    then a.item ->> 'status' else 'requested' end,
+  case when a.item ->> 'createdAt' ~ '^20[0-9]{2}-[0-9]{2}-[0-9]{2}T'
+    then (a.item ->> 'createdAt')::timestamptz else now() end,
+  case when a.item ->> 'updatedAt' ~ '^20[0-9]{2}-[0-9]{2}-[0-9]{2}T'
+    then (a.item ->> 'updatedAt')::timestamptz else now() end,
+  coalesce(a.item ->> 'customerName', ''),
+  coalesce(a.item ->> 'phone', ''),
+  coalesce(a.item ->> 'service', ''),
+  coalesce(a.item ->> 'vehicle', ''),
+  case when a.item ->> 'preferredDate' ~ '^20[0-9]{2}-[0-9]{2}-[0-9]{2}$'
+    then (a.item ->> 'preferredDate')::date else null end,
+  case when a.item ->> 'preferredTime' ~ '^([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$'
+    then (a.item ->> 'preferredTime')::time else null end,
+  coalesce(nullif(a.item ->> 'preferredTimeText', ''), a.item ->> 'preferredTime', ''),
+  coalesce(a.item ->> 'notes', ''),
+  case when a.item ->> 'scheduledDate' ~ '^20[0-9]{2}-[0-9]{2}-[0-9]{2}$'
+         and a.item ->> 'scheduledTime' ~ '^([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$'
+    then (a.item ->> 'scheduledDate')::date else null end,
+  case when a.item ->> 'scheduledDate' ~ '^20[0-9]{2}-[0-9]{2}-[0-9]{2}$'
+         and a.item ->> 'scheduledTime' ~ '^([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$'
+    then (a.item ->> 'scheduledTime')::time else null end
+from legacy_appointments a
+left join public.chat_leads l
+  on l.id = a.item ->> 'leadId' or l.session_id = a.item ->> 'sessionId'
+where coalesce(a.item ->> 'sessionId', '') <> ''
+on conflict (session_id) do nothing;
+
+with legacy_blocks as (
+  select item
+  from public.pricing p
+  cross join lateral jsonb_array_elements(
+    case when jsonb_typeof(p.data -> 'blockedSlots') = 'array'
+      then p.data -> 'blockedSlots'
+      else '[]'::jsonb
+    end
+  ) item
+  where p.id = 1
+)
+insert into public.chat_blocked_slots (slot_date, slot_time, is_all_day, created_at)
+select
+  (item ->> 'date')::date,
+  case when item ->> 'time' = 'all' then null else (item ->> 'time')::time end,
+  item ->> 'time' = 'all',
+  case when item ->> 'createdAt' ~ '^20[0-9]{2}-[0-9]{2}-[0-9]{2}T'
+    then (item ->> 'createdAt')::timestamptz else now() end
+from legacy_blocks
+where item ->> 'date' ~ '^20[0-9]{2}-[0-9]{2}-[0-9]{2}$'
+  and (item ->> 'time' = 'all' or item ->> 'time' ~ '^([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$')
+on conflict do nothing;
+
+-- Resolve any legacy double bookings deterministically before adding the active
+-- slot invariant. The newest item remains scheduled; older duplicates return to
+-- the pending queue and are never discarded.
+with ranked as (
+  select id,
+         row_number() over (
+           partition by scheduled_date, scheduled_time
+           order by updated_at desc, id
+         ) as position
+  from public.chat_appointments
+  where scheduled_date is not null
+    and scheduled_time is not null
+    and status in ('requested', 'confirmed')
+)
+update public.chat_appointments a
+set scheduled_date = null,
+    scheduled_time = null,
+    status = 'requested',
+    updated_at = now()
+from ranked r
+where a.id = r.id and r.position > 1;
+
+create unique index if not exists chat_appointments_active_slot_unique
+  on public.chat_appointments (scheduled_date, scheduled_time)
+  where scheduled_date is not null
+    and scheduled_time is not null
+    and status in ('requested', 'confirmed');
+
+-- The migration is complete. Removing legacy chat keys prevents stale JSON copies
+-- from being exposed by the pricing endpoint or restored by a later pricing save.
+update public.pricing
+set data = data - 'chatSettings' - 'chatLeads' - 'appointments' - 'blockedSlots',
+    updated_at = now()
+where id = 1
+  and (data ? 'chatSettings' or data ? 'chatLeads' or data ? 'appointments' or data ? 'blockedSlots');
+
+create or replace function public.reserve_chat_appointment(
+  p_identifier text,
+  p_scheduled_date date,
+  p_scheduled_time time without time zone
+)
+returns setof public.chat_appointments
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_lead public.chat_leads%rowtype;
+  v_appointment public.chat_appointments%rowtype;
+  v_local_now timestamp without time zone := timezone('America/Los_Angeles', now());
+  v_day integer;
+begin
+  if coalesce(btrim(p_identifier), '') = '' then
+    raise exception 'CHAT_RESERVATION_IDENTIFIER_REQUIRED' using errcode = 'P0001';
+  end if;
+  if p_scheduled_date is null or p_scheduled_time is null then
+    raise exception 'CHAT_RESERVATION_DATE_TIME_REQUIRED' using errcode = 'P0001';
+  end if;
+  if extract(minute from p_scheduled_time) <> 0 or extract(second from p_scheduled_time) <> 0 then
+    raise exception 'CHAT_RESERVATION_INVALID_INTERVAL' using errcode = 'P0001';
+  end if;
+  if p_scheduled_date < v_local_now::date or
+     (p_scheduled_date = v_local_now::date and p_scheduled_time <= v_local_now::time) then
+    raise exception 'CHAT_RESERVATION_PAST' using errcode = 'P0001';
+  end if;
+
+  v_day := extract(dow from p_scheduled_date);
+  if v_day = 0 or
+     (v_day between 1 and 5 and (p_scheduled_time < time '09:00' or p_scheduled_time >= time '18:00')) or
+     (v_day = 6 and (p_scheduled_time < time '09:00' or p_scheduled_time >= time '17:00')) then
+    raise exception 'CHAT_RESERVATION_OUTSIDE_BUSINESS_HOURS' using errcode = 'P0001';
+  end if;
+
+  select l.* into v_lead
+  from public.chat_leads l
+  where l.id = p_identifier or l.session_id = p_identifier
+  order by case when l.id = p_identifier then 0 else 1 end
+  limit 1;
+
+  if not found then
+    select l.* into v_lead
+    from public.chat_appointments a
+    join public.chat_leads l on l.id = a.lead_id or l.session_id = a.session_id
+    where a.id = p_identifier or a.session_id = p_identifier
+    order by case when a.id = p_identifier then 0 else 1 end
+    limit 1;
+  end if;
+
+  if v_lead.id is null then
+    raise exception 'CHAT_RESERVATION_LEAD_NOT_FOUND' using errcode = 'P0001';
+  end if;
+  if btrim(v_lead.customer_name) = '' or btrim(v_lead.phone) = '' then
+    raise exception 'CHAT_RESERVATION_CONTACT_REQUIRED' using errcode = 'P0001';
+  end if;
+
+  -- Every reservation/block operation on a date uses this lock, closing the race
+  -- between the block check and the unique active-slot insert/update.
+  perform pg_advisory_xact_lock(hashtextextended('chat-date:' || p_scheduled_date::text, 0));
+
+  if exists (
+    select 1 from public.chat_blocked_slots b
+    where b.slot_date = p_scheduled_date
+      and (b.is_all_day or b.slot_time = p_scheduled_time)
+  ) then
+    raise exception 'CHAT_RESERVATION_BLOCKED' using errcode = 'P0001';
+  end if;
+
+  select a.* into v_appointment
+  from public.chat_appointments a
+  where a.id = p_identifier
+     or a.session_id = p_identifier
+     or a.session_id = v_lead.session_id
+  order by case when a.id = p_identifier then 0 else 1 end
+  limit 1
+  for update;
+
+  if v_appointment.id is null then
+    insert into public.chat_appointments (
+      id, lead_id, session_id, status, customer_name, phone, service, vehicle,
+      preferred_date, preferred_time, preferred_time_text, notes
+    ) values (
+      'appt_' || replace(gen_random_uuid()::text, '-', ''),
+      v_lead.id,
+      v_lead.session_id,
+      'requested',
+      v_lead.customer_name,
+      v_lead.phone,
+      v_lead.service,
+      v_lead.vehicle,
+      v_lead.preferred_date,
+      v_lead.preferred_time,
+      v_lead.preferred_time_text,
+      v_lead.summary
+    )
+    returning * into v_appointment;
+  end if;
+
+  if exists (
+    select 1 from public.chat_appointments a
+    where a.id <> v_appointment.id
+      and a.scheduled_date = p_scheduled_date
+      and a.scheduled_time = p_scheduled_time
+      and a.status in ('requested', 'confirmed')
+  ) then
+    raise exception 'CHAT_RESERVATION_CONFLICT' using errcode = 'P0001';
+  end if;
+
+  begin
+    update public.chat_appointments
+    set scheduled_date = p_scheduled_date,
+        scheduled_time = p_scheduled_time,
+        status = 'confirmed',
+        customer_name = v_lead.customer_name,
+        phone = v_lead.phone,
+        service = v_lead.service,
+        vehicle = v_lead.vehicle,
+        preferred_date = coalesce(v_lead.preferred_date, p_scheduled_date),
+        preferred_time = coalesce(v_lead.preferred_time, p_scheduled_time),
+        preferred_time_text = v_lead.preferred_time_text,
+        notes = v_lead.summary,
+        updated_at = now()
+    where id = v_appointment.id
+    returning * into v_appointment;
+  exception when unique_violation then
+    raise exception 'CHAT_RESERVATION_CONFLICT' using errcode = 'P0001';
+  end;
+
+  return next v_appointment;
+end;
+$$;
+
+create or replace function public.block_chat_slot(
+  p_slot_date date,
+  p_slot_time time without time zone,
+  p_all_day boolean default false
+)
+returns table(action text)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_slot_date is null or
+     (coalesce(p_all_day, false) and p_slot_time is not null) or
+     (not coalesce(p_all_day, false) and p_slot_time is null) then
+    raise exception 'CHAT_BLOCK_INVALID' using errcode = 'P0001';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtextextended('chat-date:' || p_slot_date::text, 0));
+
+  if exists (
+    select 1 from public.chat_appointments a
+    where a.scheduled_date = p_slot_date
+      and (p_all_day or a.scheduled_time = p_slot_time)
+      and a.status in ('requested', 'confirmed')
+  ) then
+    raise exception 'CHAT_BLOCK_RESERVED_SLOT' using errcode = 'P0001';
+  end if;
+
+  if exists (
+    select 1 from public.chat_blocked_slots b
+    where b.slot_date = p_slot_date
+      and (b.is_all_day or (not p_all_day and b.slot_time = p_slot_time))
+  ) then
+    action := 'already_blocked';
+    return next;
+    return;
+  end if;
+
+  if p_all_day then
+    delete from public.chat_blocked_slots
+    where slot_date = p_slot_date and not is_all_day;
+  end if;
+
+  insert into public.chat_blocked_slots (slot_date, slot_time, is_all_day)
+  values (p_slot_date, case when p_all_day then null else p_slot_time end, p_all_day)
+  on conflict do nothing;
+
+  action := 'blocked';
+  return next;
+end;
+$$;
+
+create or replace function public.claim_chat_lead_notification(
+  p_lead_id text default null,
+  p_session_id text default null
+)
+returns setof public.chat_leads
+language sql
+security definer
+set search_path = public
+as $$
+  with target as (
+    select l.id
+    from public.chat_leads l
+    where (p_lead_id is not null and l.id = p_lead_id)
+       or (p_session_id is not null and l.session_id = p_session_id)
+    order by case when p_lead_id is not null and l.id = p_lead_id then 0 else 1 end
+    limit 1
+  )
+  update public.chat_leads l
+  set notification_status = 'pending',
+      notification_last_attempt_at = now(),
+      notification_last_error_code = null,
+      updated_at = now()
+  from target t
+  where l.id = t.id
+    and btrim(l.customer_name) <> ''
+    and btrim(l.phone) <> ''
+    and l.notification_status in ('not_ready', 'failed', 'skipped')
+    and l.notification_attempts < 3
+  returning l.*;
+$$;
+
+create or replace function public.record_chat_notification_result(
+  p_lead_id text default null,
+  p_session_id text default null,
+  p_status text default 'failed',
+  p_error_code text default null
+)
+returns setof public.chat_leads
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_status not in ('sent', 'failed', 'skipped') then
+    raise exception 'CHAT_NOTIFICATION_INVALID_STATUS' using errcode = 'P0001';
+  end if;
+
+  return query
+  with target as (
+    select l.id
+    from public.chat_leads l
+    where (p_lead_id is not null and l.id = p_lead_id)
+       or (p_session_id is not null and l.session_id = p_session_id)
+    order by case when p_lead_id is not null and l.id = p_lead_id then 0 else 1 end
+    limit 1
+  )
+  update public.chat_leads l
+  set notification_status = p_status,
+      notification_attempts = l.notification_attempts + 1,
+      notification_last_attempt_at = now(),
+      notification_sent_at = case when p_status = 'sent' then now() else l.notification_sent_at end,
+      notification_last_error_code = case when p_status = 'sent' then null
+        else nullif(left(regexp_replace(lower(coalesce(p_error_code, 'delivery_failed')), '[^a-z0-9_.-]', '_', 'g'), 80), '') end,
+      updated_at = now()
+  from target t
+  where l.id = t.id
+  returning l.*;
+end;
+$$;
+
+create or replace function public.consume_chat_rate_limit(
+  p_key text,
+  p_limit integer,
+  p_window_seconds integer
+)
+returns table(allowed boolean, remaining integer, reset_at timestamptz)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_now timestamptz := clock_timestamp();
+  v_limit integer := greatest(1, least(coalesce(p_limit, 1), 100000));
+  v_window integer := greatest(1, least(coalesce(p_window_seconds, 60), 86400));
+  v_count integer;
+  v_expires timestamptz;
+begin
+  if coalesce(btrim(p_key), '') = '' then
+    raise exception 'CHAT_RATE_LIMIT_KEY_REQUIRED' using errcode = 'P0001';
+  end if;
+
+  insert into public.chat_rate_limits (
+    rate_key, window_started_at, request_count, expires_at, updated_at
+  ) values (
+    left(p_key, 200), v_now, 1, v_now + make_interval(secs => v_window), v_now
+  )
+  on conflict (rate_key) do update
+  set window_started_at = case
+        when public.chat_rate_limits.expires_at <= v_now then v_now
+        else public.chat_rate_limits.window_started_at end,
+      request_count = case
+        when public.chat_rate_limits.expires_at <= v_now then 1
+        else public.chat_rate_limits.request_count + 1 end,
+      expires_at = case
+        when public.chat_rate_limits.expires_at <= v_now then v_now + make_interval(secs => v_window)
+        else public.chat_rate_limits.expires_at end,
+      updated_at = v_now
+  returning request_count, expires_at into v_count, v_expires;
+
+  allowed := v_count <= v_limit;
+  remaining := greatest(0, v_limit - v_count);
+  reset_at := v_expires;
+  return next;
+end;
+$$;
+
+alter table public.pricing enable row level security;
+alter table public.chat_settings enable row level security;
+alter table public.chat_leads enable row level security;
+alter table public.chat_appointments enable row level security;
+alter table public.chat_blocked_slots enable row level security;
+alter table public.chat_rate_limits enable row level security;
+
+-- No anon/authenticated policies are created. Server code uses the service role.
+revoke all on public.chat_settings from anon, authenticated;
+revoke all on public.chat_leads from anon, authenticated;
+revoke all on public.chat_appointments from anon, authenticated;
+revoke all on public.chat_blocked_slots from anon, authenticated;
+revoke all on public.chat_rate_limits from anon, authenticated;
+
+revoke execute on function public.reserve_chat_appointment(text, date, time without time zone) from public, anon, authenticated;
+revoke execute on function public.block_chat_slot(date, time without time zone, boolean) from public, anon, authenticated;
+revoke execute on function public.claim_chat_lead_notification(text, text) from public, anon, authenticated;
+revoke execute on function public.record_chat_notification_result(text, text, text, text) from public, anon, authenticated;
+revoke execute on function public.consume_chat_rate_limit(text, integer, integer) from public, anon, authenticated;
+
+grant execute on function public.reserve_chat_appointment(text, date, time without time zone) to service_role;
+grant execute on function public.block_chat_slot(date, time without time zone, boolean) to service_role;
+grant execute on function public.claim_chat_lead_notification(text, text) to service_role;
+grant execute on function public.record_chat_notification_result(text, text, text, text) to service_role;
+grant execute on function public.consume_chat_rate_limit(text, integer, integer) to service_role;

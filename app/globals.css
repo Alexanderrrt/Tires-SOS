@@ -3229,6 +3229,70 @@ h3 {
   outline-offset: -2px;
 }
 
+.cal__slot--blocked {
+  background: rgba(220, 38, 38, 0.12);
+  border-left: 3px solid rgba(220, 38, 38, 0.5);
+  cursor: default;
+}
+
+.cal__slot--blockable {
+  cursor: pointer;
+}
+
+.cal__slot--blockable:hover {
+  outline: 1px dashed rgba(220, 38, 38, 0.5);
+  outline-offset: -1px;
+}
+
+.cal__blocked-label {
+  font-size: 0.65rem;
+  color: rgba(220, 38, 38, 0.8);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.cal__day-header--blocked {
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.cal__block-day-btn {
+  font-size: 0.6rem;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  background: transparent;
+  color: rgba(220, 38, 38, 0.9);
+  cursor: pointer;
+  margin-top: 0.2rem;
+  transition: all 0.15s;
+}
+
+.cal__block-day-btn:hover {
+  background: rgba(220, 38, 38, 0.15);
+}
+
+.cal__block-day-btn--active {
+  background: rgba(220, 38, 38, 0.2);
+  border-color: rgba(220, 38, 38, 0.6);
+}
+
+.cal__banner--block {
+  background: rgba(220, 38, 38, 0.12);
+  border-color: rgba(220, 38, 38, 0.4);
+  color: rgba(220, 38, 38, 0.9);
+}
+
+.btn--danger {
+  background: rgba(220, 38, 38, 0.8);
+  color: #fff;
+  border: none;
+}
+
+.btn--danger:hover {
+  background: rgba(220, 38, 38, 0.95);
+}
+
 .cal__appt {
   display: flex;
   flex-direction: column;
@@ -4023,6 +4087,45 @@ h3 {
   text-decoration: none;
 }
 
+.chat-panel__security {
+  min-height: 0;
+  color: var(--paper-dim);
+  font-size: 0.86rem;
+}
+
+.chat-panel__security p {
+  margin: 0 0 0.55rem;
+}
+
+.chat-turnstile {
+  min-height: 65px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.chat-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--paper-dim);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.chat-consent input {
+  flex: 0 0 auto;
+  margin-top: 0.2rem;
+  accent-color: var(--orange);
+}
+
+.chat-consent a {
+  color: var(--orange);
+}
+
 .chat-panel__prompts {
   display: flex;
   flex-wrap: wrap;
@@ -4037,6 +4140,13 @@ h3 {
   border-radius: 999px;
   cursor: pointer;
   font-family: var(--body);
+}
+
+.chat-chip:disabled,
+.chat-picker__day:disabled,
+.chat-picker__slot:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .chat-panel__messages {
@@ -4144,6 +4254,11 @@ h3 {
   outline-offset: 1px;
 }
 
+.chat-panel__composer textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .chat-panel__composer-bar {
   display: flex;
   justify-content: space-between;
@@ -4198,6 +4313,22 @@ h3 {
   letter-spacing: 0.04em;
   color: var(--orange);
   margin-bottom: 0.5rem;
+}
+
+.chat-picker__timezone {
+  margin: -0.2rem 0 0.6rem;
+  color: var(--paper-dim);
+  font-size: 0.75rem;
+}
+
+.chat-picker--error {
+  border-color: var(--line);
+}
+
+.chat-picker--error p:not(.chat-picker__title) {
+  margin: 0 0 0.7rem;
+  color: var(--paper-dim);
+  font-size: 0.82rem;
 }
 
 .chat-picker__days {
