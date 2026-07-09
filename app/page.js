@@ -9,6 +9,7 @@ import Location from "./components/Location";
 import Reviews from "./components/Reviews";
 import Footer from "./components/Footer";
 import BrandPopups from "./components/BrandPopups";
+import ChatBot from "./components/ChatBot";
 import { SITE } from "./site.config";
 
 export default function HomePage() {
@@ -27,6 +28,7 @@ export default function HomePage() {
       </main>
       <Footer />
       <BrandPopups phoneHref={SITE.phoneHref} />
+      <ChatBot />
     </>
   );
 }
