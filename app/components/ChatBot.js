@@ -5,22 +5,19 @@ import { useLanguage, useT } from "../i18n/LanguageContext";
 import { CHAT, SITE } from "../site.config";
 import Icon from "./Icons";
 
-const starterMessages = [
-  {
-    role: "assistant",
-    content: {
-      en: "Hey, I’m here at the shop desk with you. Ask me anything about tires, brakes, alignment, oil changes, batteries, rims, hours, location, or walk-in help.",
-      es: "Hola, estoy aquí en el mostrador contigo. Pregúntame sobre llantas, frenos, alineación, cambio de aceite, baterías, rines, horario, ubicación o atención sin cita.",
-    },
-  },
-];
+function initialMessages() {
+  return [{ role: "assistant", content: CHAT.intro, createdAt: Date.now() }];
+}
 
-function BubbleMeta({ role }) {
+function formatTime(timestamp) {
+  return new Date(timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+function BubbleMeta({ role, createdAt }) {
   const { lang } = useLanguage();
-  const time = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   return (
     <span className="chat-bubble__meta">
-      {role === "assistant" ? "Tires SOS" : lang === "es" ? "Tú" : "You"} · {time}
+      {role === "assistant" ? "Tires SOS" : lang === "es" ? "Tu" : "You"} - {formatTime(createdAt)}
     </span>
   );
 }
@@ -42,7 +39,7 @@ export default function ChatBot() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [messages, setMessages] = useState(starterMessages);
+  const [messages, setMessages] = useState(initialMessages);
   const listRef = useRef(null);
   const textareaRef = useRef(null);
 
@@ -50,14 +47,13 @@ export default function ChatBot() {
   const canSend = input.trim().length > 0 && !loading;
 
   const quickPrompts = useMemo(
-    () => [
-      t(copy.promptServices),
-      t(copy.promptPrice),
-      t(copy.promptHours),
-      t(copy.promptSpanish),
-    ],
-    [t, copy, lang]
+    () => [t(copy.promptServices), t(copy.promptPrice), t(copy.promptHours), t(copy.promptSpanish)],
+    [t, copy]
   );
+
+  const renderMessage = (message) => {
+    return typeof message.content === "string" ? message.content : t(message.content);
+  };
 
   const scrollToBottom = () => {
     requestAnimationFrame(() => {
@@ -84,7 +80,12 @@ export default function ChatBot() {
     const content = text.trim();
     if (!content || loading) return;
 
-    const nextMessages = [...messages, { role: "user", content }];
+    const nextMessages = [...messages, { role: "user", content, createdAt: Date.now() }];
+    const requestMessages = nextMessages.map((message) => ({
+      role: message.role,
+      content: typeof message.content === "string" ? message.content : t(message.content),
+    }));
+
     setMessages(nextMessages);
     setInput("");
     setLoading(true);
@@ -95,7 +96,7 @@ export default function ChatBot() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lang, messages: nextMessages }),
+        body: JSON.stringify({ lang, messages: requestMessages }),
       });
       const data = await res.json();
 
@@ -105,7 +106,10 @@ export default function ChatBot() {
         ...prev,
         {
           role: "assistant",
-          content: { en: data.message || "I’m here if you need more details.", es: data.message || "Estoy aquí si necesitas más detalles." },
+          content:
+            data.message ||
+            (lang === "es" ? "Estoy aqui si necesitas mas detalles." : "I'm here if you need more details."),
+          createdAt: Date.now(),
         },
       ]);
       scrollToBottom();
@@ -113,20 +117,12 @@ export default function ChatBot() {
       setError(err.message || "Something went wrong.");
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: copy.fallback,
-        },
+        { role: "assistant", content: copy.fallback, createdAt: Date.now() },
       ]);
     } finally {
       setLoading(false);
       scrollToBottom();
     }
-  };
-
-  const renderMessage = (message) => {
-    const content = typeof message.content === "string" ? message.content : t(message.content);
-    return content;
   };
 
   return (
@@ -158,7 +154,7 @@ export default function ChatBot() {
                 </div>
               </div>
               <button className="chat-panel__close" onClick={() => setOpen(false)} aria-label={t(copy.close)}>
-                ×
+                x
               </button>
             </header>
 
@@ -190,13 +186,13 @@ export default function ChatBot() {
             <div className="chat-panel__messages" ref={listRef}>
               {messages.map((message, index) => (
                 <article key={`${message.role}-${index}`} className={`chat-bubble chat-bubble--${message.role}`}>
-                  <BubbleMeta role={message.role} />
+                  <BubbleMeta role={message.role} createdAt={message.createdAt} />
                   <p>{renderMessage(message)}</p>
                 </article>
               ))}
               {loading && (
                 <article className="chat-bubble chat-bubble--assistant">
-                  <BubbleMeta role="assistant" />
+                  <BubbleMeta role="assistant" createdAt={Date.now()} />
                   <p className="chat-bubble__typing-row">
                     <TypingDots />
                     <span>{t(copy.typing)}</span>
@@ -207,15 +203,15 @@ export default function ChatBot() {
 
             <form
               className="chat-panel__composer"
-              onSubmit={(e) => {
-                e.preventDefault();
+              onSubmit={(event) => {
+                event.preventDefault();
                 send(input);
               }}
             >
               <textarea
                 ref={textareaRef}
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(event) => setInput(event.target.value)}
                 placeholder={t(copy.placeholder)}
                 rows={2}
               />

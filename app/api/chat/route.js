@@ -1,10 +1,23 @@
+import { SERVICES, SITE } from "../../site.config";
+
 const GROQ_API_BASE = "https://api.groq.com/openai/v1/chat/completions";
 const DEFAULT_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+
+const BUSINESS_FACTS = [
+  `Phone: ${SITE.phone}`,
+  `WhatsApp: ${SITE.whatsapp}`,
+  `Locations: ${SITE.locations.map((location) => location.full).join("; ")}`,
+  `Hours: ${SITE.hours
+    .map((hour) => `${hour.label.en}: ${hour.open && hour.close ? `${hour.open}-${hour.close}` : "Closed"}`)
+    .join("; ")}`,
+  `Services: ${SERVICES.map((service) => `${service.title.en} / ${service.title.es}`).join(", ")}`,
+].join("\n");
 
 const SYSTEM_PROMPT = `
 You are Tires SOS Rescue's friendly shop assistant.
 You sound like a real person at the counter: warm, calm, practical, and easy to talk to.
 You help customers in a concise, bilingual way and you can show a little personality.
+
 Focus on:
 - tires
 - flat repair
@@ -18,7 +31,7 @@ Focus on:
 Behavior:
 - Use contractions and natural conversation.
 - Start with a quick human acknowledgment when appropriate.
-- Ask one clarifying question if the customer’s request is vague.
+- Ask one clarifying question if the customer's request is vague.
 - If the customer asks for pricing, give a helpful range and encourage the quote page or a shop visit.
 - If the customer asks for appointment booking, clarify this shop welcomes walk-ins and phone/WhatsApp contact.
 - If the customer asks for hours or address, answer clearly and directly.
@@ -26,6 +39,7 @@ Behavior:
 - If the customer writes in Spanish, answer in Spanish.
 - If the customer writes in English, answer in English.
 - Never invent business facts. When unsure, say you need to confirm at the shop.
+
 Tone:
 - Friendly, like a helpful front-desk person.
 - Never robotic, never overly formal.
@@ -74,8 +88,9 @@ export async function POST(request) {
       messages: [
         {
           role: "system",
-          content:
-            `${SYSTEM_PROMPT}\n\nRespond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly switches languages.`,
+          content: `${SYSTEM_PROMPT}\n\nBusiness facts:\n${BUSINESS_FACTS}\n\nRespond in ${
+            lang === "es" ? "Spanish" : "English"
+          } unless the user clearly switches languages.`,
         },
         ...sanitizedMessages,
       ],
