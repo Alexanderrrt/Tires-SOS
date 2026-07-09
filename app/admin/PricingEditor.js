@@ -7,11 +7,20 @@ import { COPY } from "../site.config";
 import AdminLoader from "./AdminLoader";
 
 const E = COPY.admin.editor;
+
 const CHAT_ADMIN = {
   adminTitle: { en: "Admin", es: "Admin" },
+  leadsTab: { en: "Leads", es: "Clientes" },
+  appointmentsTab: { en: "Appointments", es: "Citas" },
   chatTab: { en: "Chat", es: "Chat" },
   pricingTab: { en: "Pricing", es: "Precios" },
+  leadsTitle: { en: "Chat Leads", es: "Clientes del chat" },
+  appointmentsTitle: { en: "Appointments", es: "Citas" },
   chatTitle: { en: "Chat Settings", es: "Configuracion del chat" },
+  recordsStorageWarn: {
+    en: "Lead storage is not connected - records only apply for this session.",
+    es: "El almacenamiento de clientes no esta conectado - los registros solo aplican en esta sesion.",
+  },
   chatStorageWarn: {
     en: "Chat storage is not connected - changes apply for this session only.",
     es: "El almacenamiento del chat no esta conectado - los cambios solo aplican en esta sesion.",
@@ -42,9 +51,54 @@ const CHAT_ADMIN = {
     es: "Chat guardado para esta sesion - conecta Supabase para hacerlo permanente.",
   },
   saveFailed: { en: "Chat save failed.", es: "No se pudo guardar el chat." },
+  refresh: { en: "Refresh", es: "Actualizar" },
+  refreshed: { en: "Records refreshed.", es: "Registros actualizados." },
+  updateFailed: { en: "Status update failed.", es: "No se pudo actualizar el estado." },
   english: { en: "English", es: "Ingles" },
   spanish: { en: "Spanish", es: "Espanol" },
 };
+
+const RECORD_COPY = {
+  noLeads: {
+    en: "No chat leads yet. New quote or service conversations will appear here.",
+    es: "Todavia no hay clientes del chat. Las conversaciones de cotizacion o servicio apareceran aqui.",
+  },
+  noAppointments: {
+    en: "No appointment requests yet. When someone asks to schedule, it will show here.",
+    es: "Todavia no hay solicitudes de cita. Cuando alguien pida agendar, aparecera aqui.",
+  },
+  status: { en: "Status", es: "Estado" },
+  source: { en: "Source", es: "Origen" },
+  name: { en: "Name", es: "Nombre" },
+  phone: { en: "Phone", es: "Telefono" },
+  vehicle: { en: "Vehicle", es: "Vehiculo" },
+  tireSize: { en: "Tire size", es: "Medida" },
+  service: { en: "Service", es: "Servicio" },
+  timing: { en: "Preferred time", es: "Horario preferido" },
+  summary: { en: "Summary", es: "Resumen" },
+  notes: { en: "Notes", es: "Notas" },
+  conversation: { en: "Conversation", es: "Conversacion" },
+  missing: { en: "Not captured yet", es: "No capturado todavia" },
+  created: { en: "Created", es: "Creado" },
+  updated: { en: "Updated", es: "Actualizado" },
+  requested: { en: "Appointment requested", es: "Cita solicitada" },
+};
+
+const LEAD_STATUSES = [
+  { value: "new", label: { en: "New", es: "Nuevo" } },
+  { value: "contacted", label: { en: "Contacted", es: "Contactado" } },
+  { value: "booked", label: { en: "Booked", es: "Agendado" } },
+  { value: "done", label: { en: "Done", es: "Listo" } },
+  { value: "lost", label: { en: "Lost", es: "Perdido" } },
+];
+
+const APPOINTMENT_STATUSES = [
+  { value: "requested", label: { en: "Requested", es: "Solicitada" } },
+  { value: "confirmed", label: { en: "Confirmed", es: "Confirmada" } },
+  { value: "completed", label: { en: "Completed", es: "Completada" } },
+  { value: "no-show", label: { en: "No-show", es: "No llego" } },
+  { value: "canceled", label: { en: "Canceled", es: "Cancelada" } },
+];
 
 function BilingualField({ label, value, onChange, multiline = false, languageLabels }) {
   const Control = multiline ? "textarea" : "input";
@@ -63,18 +117,169 @@ function BilingualField({ label, value, onChange, multiline = false, languageLab
   );
 }
 
-export default function PricingEditor({ initialPricing, initialChatSettings, persistent, chatPersistent, authReady }) {
+function formatDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function RecordField({ label, value, fallback }) {
+  return (
+    <div className="record-card__field">
+      <span>{label}</span>
+      <strong>{value || fallback}</strong>
+    </div>
+  );
+}
+
+function StatusSelect({ value, options, onChange, disabled, label }) {
+  return (
+    <label className="record-card__status">
+      <span>{label}</span>
+      <select value={value} onChange={(event) => onChange(event.target.value)} disabled={disabled}>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label.en} / {option.label.es}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function Transcript({ record, t }) {
+  const transcript = Array.isArray(record.transcript) ? record.transcript.slice(-8) : [];
+  if (!transcript.length) return null;
+  return (
+    <details className="record-card__transcript">
+      <summary>{t(RECORD_COPY.conversation)}</summary>
+      <div>
+        {transcript.map((message, index) => (
+          <p key={`${message.role}-${index}`}>
+            <span>{message.role === "assistant" ? "Tires SOS" : "Customer"}:</span> {message.content}
+          </p>
+        ))}
+      </div>
+    </details>
+  );
+}
+
+function EmptyRecords({ children }) {
+  return <div className="record-empty">{children}</div>;
+}
+
+function LeadCard({ lead, t, disabled, onStatus }) {
+  const fallback = t(RECORD_COPY.missing);
+  return (
+    <article className="record-card">
+      <div className="record-card__head">
+        <div>
+          <p className="record-card__eyebrow">{lead.source || t(RECORD_COPY.source)}</p>
+          <h2>{lead.service || t(CHAT_ADMIN.leadsTitle)}</h2>
+        </div>
+        <StatusSelect
+          label={t(RECORD_COPY.status)}
+          value={lead.status || "new"}
+          options={LEAD_STATUSES}
+          onChange={(status) => onStatus("lead", lead.id, status)}
+          disabled={disabled}
+        />
+      </div>
+
+      <div className="record-card__meta">
+        <span>{t(RECORD_COPY.created)}: {formatDate(lead.createdAt) || fallback}</span>
+        <span>{t(RECORD_COPY.updated)}: {formatDate(lead.updatedAt) || fallback}</span>
+        {lead.appointmentRequested && <span className="record-card__flag">{t(RECORD_COPY.requested)}</span>}
+      </div>
+
+      <div className="record-card__grid">
+        <RecordField label={t(RECORD_COPY.name)} value={lead.customerName} fallback={fallback} />
+        <RecordField label={t(RECORD_COPY.phone)} value={lead.phone} fallback={fallback} />
+        <RecordField label={t(RECORD_COPY.vehicle)} value={lead.vehicle} fallback={fallback} />
+        <RecordField label={t(RECORD_COPY.tireSize)} value={lead.tireSize} fallback={fallback} />
+        <RecordField label={t(RECORD_COPY.timing)} value={lead.preferredTime} fallback={fallback} />
+        <RecordField label={t(RECORD_COPY.source)} value={lead.source} fallback={fallback} />
+      </div>
+
+      <div className="record-card__summary">
+        <span>{t(RECORD_COPY.summary)}</span>
+        <p>{lead.summary || lead.lastMessage || fallback}</p>
+      </div>
+
+      <Transcript record={lead} t={t} />
+    </article>
+  );
+}
+
+function AppointmentCard({ appointment, t, disabled, onStatus }) {
+  const fallback = t(RECORD_COPY.missing);
+  return (
+    <article className="record-card record-card--appointment">
+      <div className="record-card__head">
+        <div>
+          <p className="record-card__eyebrow">{t(CHAT_ADMIN.appointmentsTitle)}</p>
+          <h2>{appointment.service || t(RECORD_COPY.requested)}</h2>
+        </div>
+        <StatusSelect
+          label={t(RECORD_COPY.status)}
+          value={appointment.status || "requested"}
+          options={APPOINTMENT_STATUSES}
+          onChange={(status) => onStatus("appointment", appointment.id, status)}
+          disabled={disabled}
+        />
+      </div>
+
+      <div className="record-card__meta">
+        <span>{t(RECORD_COPY.created)}: {formatDate(appointment.createdAt) || fallback}</span>
+        <span>{t(RECORD_COPY.updated)}: {formatDate(appointment.updatedAt) || fallback}</span>
+      </div>
+
+      <div className="record-card__grid">
+        <RecordField label={t(RECORD_COPY.name)} value={appointment.customerName} fallback={fallback} />
+        <RecordField label={t(RECORD_COPY.phone)} value={appointment.phone} fallback={fallback} />
+        <RecordField label={t(RECORD_COPY.vehicle)} value={appointment.vehicle} fallback={fallback} />
+        <RecordField label={t(RECORD_COPY.service)} value={appointment.service} fallback={fallback} />
+        <RecordField label={t(RECORD_COPY.timing)} value={appointment.preferredTime} fallback={fallback} />
+      </div>
+
+      <div className="record-card__summary">
+        <span>{t(RECORD_COPY.notes)}</span>
+        <p>{appointment.notes || fallback}</p>
+      </div>
+    </article>
+  );
+}
+
+export default function PricingEditor({
+  initialPricing,
+  initialChatSettings,
+  initialRecords,
+  persistent,
+  chatPersistent,
+  recordsPersistent,
+  authReady,
+}) {
   const router = useRouter();
   const { lang, toggleLang } = useLanguage();
   const t = useT();
-  const [activeTab, setActiveTab] = useState("chat");
+  const [activeTab, setActiveTab] = useState("leads");
   const [pricing, setPricing] = useState(initialPricing);
   const [chatSettings, setChatSettings] = useState(initialChatSettings);
+  const [records, setRecords] = useState({
+    leads: initialRecords?.leads || [],
+    appointments: initialRecords?.appointments || [],
+  });
   const [status, setStatus] = useState(null); // {ok, msg: {en, es}}
   const [saving, setSaving] = useState(false);
+  const [updatingId, setUpdatingId] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
 
-  // immutable-ish update helper
   const edit = (mutator) =>
     setPricing((p) => {
       const next = structuredClone(p);
@@ -108,8 +313,6 @@ export default function PricingEditor({ initialPricing, initialChatSettings, per
       setStatus({ ok: true, msg: body.persisted ? E.saved : E.savedSession });
       router.refresh();
     } else {
-      // Server detail (validation etc.) is English-only; show it after the
-      // bilingual headline rather than dropping it.
       const detail = body.error ? ` (${body.error})` : "";
       setStatus({ ok: false, msg: { en: E.saveFailed.en + detail, es: E.saveFailed.es + detail } });
     }
@@ -139,7 +342,56 @@ export default function PricingEditor({ initialPricing, initialChatSettings, per
 
   async function save() {
     if (activeTab === "chat") return saveChat();
-    return savePricing();
+    if (activeTab === "pricing") return savePricing();
+  }
+
+  async function refreshRecords() {
+    setSaving(true);
+    setStatus(null);
+    const res = await fetch("/api/admin/records");
+    setSaving(false);
+    const body = await res.json().catch(() => ({}));
+    if (res.ok) {
+      setRecords({ leads: body.leads || [], appointments: body.appointments || [] });
+      setStatus({ ok: true, msg: CHAT_ADMIN.refreshed });
+      router.refresh();
+    } else {
+      const detail = body.error ? ` (${body.error})` : "";
+      setStatus({
+        ok: false,
+        msg: { en: CHAT_ADMIN.updateFailed.en + detail, es: CHAT_ADMIN.updateFailed.es + detail },
+      });
+    }
+  }
+
+  async function updateRecordStatus(type, id, nextStatus) {
+    setUpdatingId(id);
+    setStatus(null);
+    const res = await fetch("/api/admin/records", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, id, status: nextStatus }),
+    });
+    setUpdatingId("");
+    const body = await res.json().catch(() => ({}));
+    if (res.ok) {
+      setRecords((current) => {
+        const key = type === "appointment" ? "appointments" : "leads";
+        return {
+          ...current,
+          [key]: current[key].map((record) =>
+            record.id === id ? { ...record, status: nextStatus, updatedAt: new Date().toISOString() } : record,
+          ),
+        };
+      });
+      setStatus({ ok: true, msg: { en: "Status updated.", es: "Estado actualizado." } });
+    } else {
+      const detail = body.error ? ` (${body.error})` : "";
+      setStatus({
+        ok: false,
+        msg: { en: CHAT_ADMIN.updateFailed.en + detail, es: CHAT_ADMIN.updateFailed.es + detail },
+      });
+    }
   }
 
   async function logout() {
@@ -149,247 +401,346 @@ export default function PricingEditor({ initialPricing, initialChatSettings, per
     router.refresh();
   }
 
+  const title =
+    activeTab === "leads"
+      ? CHAT_ADMIN.leadsTitle
+      : activeTab === "appointments"
+        ? CHAT_ADMIN.appointmentsTitle
+        : activeTab === "chat"
+          ? CHAT_ADMIN.chatTitle
+          : E.title;
+  const showSave = activeTab === "chat" || activeTab === "pricing";
+  const recordsTab = activeTab === "leads" || activeTab === "appointments";
+
   return (
     <>
       {loggingOut && <AdminLoader message={t(E.loggingOut)} />}
       <div className="editor">
-      <header className="editor__bar">
-        <div>
-          <h1>{activeTab === "chat" ? t(CHAT_ADMIN.chatTitle) : t(E.title)}</h1>
-          {activeTab === "pricing" && !persistent && <p className="editor__warn">{t(E.storageWarn)}</p>}
-          {activeTab === "chat" && !chatPersistent && <p className="editor__warn">{t(CHAT_ADMIN.chatStorageWarn)}</p>}
-        </div>
-        <div className="editor__actions">
-          {status && (
-            <span className={status.ok ? "editor__ok" : "editor__err"}>{t(status.msg)}</span>
-          )}
-          <button type="button" className="lang-toggle" onClick={toggleLang} aria-label="Toggle language">
-            {lang === "en" ? "ES" : "EN"}
+        <header className="editor__bar">
+          <div>
+            <h1>{t(title)}</h1>
+            {activeTab === "pricing" && !persistent && <p className="editor__warn">{t(E.storageWarn)}</p>}
+            {activeTab === "chat" && !chatPersistent && <p className="editor__warn">{t(CHAT_ADMIN.chatStorageWarn)}</p>}
+            {recordsTab && !recordsPersistent && <p className="editor__warn">{t(CHAT_ADMIN.recordsStorageWarn)}</p>}
+          </div>
+          <div className="editor__actions">
+            {status && <span className={status.ok ? "editor__ok" : "editor__err"}>{t(status.msg)}</span>}
+            <button type="button" className="lang-toggle" onClick={toggleLang} aria-label="Toggle language">
+              {lang === "en" ? "ES" : "EN"}
+            </button>
+            <button className="btn btn--ghost btn--small" onClick={logout} disabled={loggingOut || saving}>
+              {loggingOut ? t(E.loggingOut) : t(E.logOut)}
+            </button>
+            {recordsTab && (
+              <button className="btn btn--ghost btn--small" onClick={refreshRecords} disabled={saving}>
+                {saving ? t(E.saving) : t(CHAT_ADMIN.refresh)}
+              </button>
+            )}
+            {showSave && (
+              <button className="btn btn--primary btn--small" onClick={save} disabled={saving}>
+                {saving ? t(E.saving) : t(E.save)}
+              </button>
+            )}
+          </div>
+        </header>
+
+        <nav className="editor__tabs" aria-label={t(CHAT_ADMIN.adminTitle)}>
+          <button
+            type="button"
+            className={`editor__tab ${activeTab === "leads" ? "editor__tab--on" : ""}`}
+            onClick={() => setActiveTab("leads")}
+          >
+            {t(CHAT_ADMIN.leadsTab)}
+            <span>{records.leads.length}</span>
           </button>
-          <button className="btn btn--ghost btn--small" onClick={logout} disabled={loggingOut || saving}>
-            {loggingOut ? t(E.loggingOut) : t(E.logOut)}
+          <button
+            type="button"
+            className={`editor__tab ${activeTab === "appointments" ? "editor__tab--on" : ""}`}
+            onClick={() => setActiveTab("appointments")}
+          >
+            {t(CHAT_ADMIN.appointmentsTab)}
+            <span>{records.appointments.length}</span>
           </button>
-          <button className="btn btn--primary btn--small" onClick={save} disabled={saving}>
-            {saving ? t(E.saving) : t(E.save)}
+          <button
+            type="button"
+            className={`editor__tab ${activeTab === "chat" ? "editor__tab--on" : ""}`}
+            onClick={() => setActiveTab("chat")}
+          >
+            {t(CHAT_ADMIN.chatTab)}
           </button>
-        </div>
-      </header>
+          <button
+            type="button"
+            className={`editor__tab ${activeTab === "pricing" ? "editor__tab--on" : ""}`}
+            onClick={() => setActiveTab("pricing")}
+          >
+            {t(CHAT_ADMIN.pricingTab)}
+          </button>
+        </nav>
 
-      <nav className="editor__tabs" aria-label={t(CHAT_ADMIN.adminTitle)}>
-        <button
-          type="button"
-          className={`editor__tab ${activeTab === "chat" ? "editor__tab--on" : ""}`}
-          onClick={() => setActiveTab("chat")}
-        >
-          {t(CHAT_ADMIN.chatTab)}
-        </button>
-        <button
-          type="button"
-          className={`editor__tab ${activeTab === "pricing" ? "editor__tab--on" : ""}`}
-          onClick={() => setActiveTab("pricing")}
-        >
-          {t(CHAT_ADMIN.pricingTab)}
-        </button>
-      </nav>
-
-      {activeTab === "chat" ? (
-        <>
-          <section className="editor__group">
-            <h2>{t(CHAT_ADMIN.publicText)}</h2>
-            <p className="editor__hint">{t(CHAT_ADMIN.publicHint)}</p>
-            <div className="editor__bi-grid">
-              <BilingualField
-                label={t(CHAT_ADMIN.title)}
-                value={chatSettings.title}
-                languageLabels={{ en: t(CHAT_ADMIN.english), es: t(CHAT_ADMIN.spanish) }}
-                onChange={(key, value) => editChat((n) => (n.title[key] = value))}
-              />
-              <BilingualField
-                label={t(CHAT_ADMIN.subtitle)}
-                value={chatSettings.subtitle}
-                languageLabels={{ en: t(CHAT_ADMIN.english), es: t(CHAT_ADMIN.spanish) }}
-                onChange={(key, value) => editChat((n) => (n.subtitle[key] = value))}
-                multiline
-              />
-              <BilingualField
-                label={t(CHAT_ADMIN.intro)}
-                value={chatSettings.intro}
-                languageLabels={{ en: t(CHAT_ADMIN.english), es: t(CHAT_ADMIN.spanish) }}
-                onChange={(key, value) => editChat((n) => (n.intro[key] = value))}
-                multiline
-              />
-              <BilingualField
-                label={t(CHAT_ADMIN.placeholder)}
-                value={chatSettings.placeholder}
-                languageLabels={{ en: t(CHAT_ADMIN.english), es: t(CHAT_ADMIN.spanish) }}
-                onChange={(key, value) => editChat((n) => (n.placeholder[key] = value))}
-              />
-            </div>
-          </section>
-
-          <section className="editor__group">
-            <h2>{t(CHAT_ADMIN.prompts)}</h2>
-            <p className="editor__hint">{t(CHAT_ADMIN.promptsHint)}</p>
-            <div className="editor__prompt-grid">
-              {chatSettings.quickPrompts.map((prompt, index) => (
-                <div key={index} className="editor__prompt-card">
-                  <p className="editor__field-title">
-                    {t(CHAT_ADMIN.prompt)} {index + 1}
-                  </p>
-                  <label>
-                    <span>{t(CHAT_ADMIN.english)}</span>
-                    <input
-                      value={prompt.en}
-                      onChange={(e) =>
-                        editChat((n) => {
-                          n.quickPrompts[index].en = e.target.value;
-                        })
-                      }
-                    />
-                  </label>
-                  <label>
-                    <span>{t(CHAT_ADMIN.spanish)}</span>
-                    <input
-                      value={prompt.es}
-                      onChange={(e) =>
-                        editChat((n) => {
-                          n.quickPrompts[index].es = e.target.value;
-                        })
-                      }
-                    />
-                  </label>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="editor__group">
-            <h2>{t(CHAT_ADMIN.behavior)}</h2>
-            <p className="editor__hint">{t(CHAT_ADMIN.behaviorHint)}</p>
-            <textarea
-              className="editor__textarea"
-              value={chatSettings.systemInstructions}
-              onChange={(e) => editChat((n) => (n.systemInstructions = e.target.value))}
-              rows={6}
-            />
-          </section>
-        </>
-      ) : (
-        <>
-
-      {/* Global settings */}
-      <section className="editor__group">
-        <h2>{t(E.globalHeading)}</h2>
-        <div className="editor__row">
-          <label>
-            <span>{t(E.laborRate)}</span>
-            <input type="number" min="0" value={pricing.laborRate} onChange={numHandler((n, v) => (n.laborRate = v))} />
-          </label>
-          <label>
-            <span>{t(E.spread)}</span>
-            <input
-              type="number"
-              min="0"
-              max="90"
-              value={Math.round(pricing.rangePct * 100)}
-              onChange={numHandler((n, v) => (n.rangePct = Math.min(0.9, v / 100)))}
-            />
-          </label>
-          <label>
-            <span>{t(E.currency)}</span>
-            <input value={pricing.currency} onChange={(e) => edit((n) => (n.currency = e.target.value))} />
-          </label>
-        </div>
-      </section>
-
-      {/* Vehicle multipliers */}
-      <section className="editor__group">
-        <h2>{t(E.vehicleHeading)}</h2>
-        <p className="editor__hint">{t(E.vehicleHint)}</p>
-        <div className="editor__grid">
-          {pricing.vehicleClasses.map((vc, i) => (
-            <label key={vc.id} className="editor__cell">
-              <span>{t(vc.label)}</span>
-              <input
-                type="number"
-                step="0.05"
-                min="0"
-                value={vc.factor}
-                onChange={numHandler((n, v) => (n.vehicleClasses[i].factor = v))}
-              />
-            </label>
-          ))}
-        </div>
-      </section>
-
-      {/* Services */}
-      <section className="editor__group">
-        <h2>{t(E.servicesHeading)}</h2>
-        {pricing.services.map((svc, i) => (
-          <div key={svc.id} className="editor__svc">
-            <div className="editor__svc-head">
-              <strong>{t(svc.label)}</strong>
-              <span className="editor__tag">{svc.model}</span>
-              <label className="editor__inline-check">
-                <input
-                  type="checkbox"
-                  checked={svc.appliesVehicleFactor}
-                  onChange={(e) => edit((n) => (n.services[i].appliesVehicleFactor = e.target.checked))}
+        {activeTab === "leads" ? (
+          <section className="record-list" aria-label={t(CHAT_ADMIN.leadsTitle)}>
+            {records.leads.length ? (
+              records.leads.map((lead) => (
+                <LeadCard
+                  key={lead.id}
+                  lead={lead}
+                  t={t}
+                  disabled={updatingId === lead.id}
+                  onStatus={updateRecordStatus}
                 />
-                {t(E.appliesFactor)}
-              </label>
-            </div>
-            <p className="editor__hint">{t(E.modelHelp[svc.model])}</p>
+              ))
+            ) : (
+              <EmptyRecords>{t(RECORD_COPY.noLeads)}</EmptyRecords>
+            )}
+          </section>
+        ) : activeTab === "appointments" ? (
+          <section className="record-list" aria-label={t(CHAT_ADMIN.appointmentsTitle)}>
+            {records.appointments.length ? (
+              records.appointments.map((appointment) => (
+                <AppointmentCard
+                  key={appointment.id}
+                  appointment={appointment}
+                  t={t}
+                  disabled={updatingId === appointment.id}
+                  onStatus={updateRecordStatus}
+                />
+              ))
+            ) : (
+              <EmptyRecords>{t(RECORD_COPY.noAppointments)}</EmptyRecords>
+            )}
+          </section>
+        ) : activeTab === "chat" ? (
+          <>
+            <section className="editor__group">
+              <h2>{t(CHAT_ADMIN.publicText)}</h2>
+              <p className="editor__hint">{t(CHAT_ADMIN.publicHint)}</p>
+              <div className="editor__bi-grid">
+                <BilingualField
+                  label={t(CHAT_ADMIN.title)}
+                  value={chatSettings.title}
+                  languageLabels={{ en: t(CHAT_ADMIN.english), es: t(CHAT_ADMIN.spanish) }}
+                  onChange={(key, value) => editChat((n) => (n.title[key] = value))}
+                />
+                <BilingualField
+                  label={t(CHAT_ADMIN.subtitle)}
+                  value={chatSettings.subtitle}
+                  languageLabels={{ en: t(CHAT_ADMIN.english), es: t(CHAT_ADMIN.spanish) }}
+                  onChange={(key, value) => editChat((n) => (n.subtitle[key] = value))}
+                  multiline
+                />
+                <BilingualField
+                  label={t(CHAT_ADMIN.intro)}
+                  value={chatSettings.intro}
+                  languageLabels={{ en: t(CHAT_ADMIN.english), es: t(CHAT_ADMIN.spanish) }}
+                  onChange={(key, value) => editChat((n) => (n.intro[key] = value))}
+                  multiline
+                />
+                <BilingualField
+                  label={t(CHAT_ADMIN.placeholder)}
+                  value={chatSettings.placeholder}
+                  languageLabels={{ en: t(CHAT_ADMIN.english), es: t(CHAT_ADMIN.spanish) }}
+                  onChange={(key, value) => editChat((n) => (n.placeholder[key] = value))}
+                />
+              </div>
+            </section>
 
-            <div className="editor__row">
-              {svc.model === "perUnit" && (
-                <>
-                  <label>
-                    <span>{t(E.basePrice)}</span>
-                    <input type="number" min="0" value={svc.basePrice} onChange={numHandler((n, v) => (n.services[i].basePrice = v))} />
-                  </label>
-                  {svc.fees?.map((f, fi) => (
-                    <label key={fi}>
-                      <span>{t(f.label)} ({t(f.per === "unit" ? E.perUnit : E.perJob)})</span>
-                      <input type="number" min="0" value={f.amount} onChange={numHandler((n, v) => (n.services[i].fees[fi].amount = v))} />
+            <section className="editor__group">
+              <h2>{t(CHAT_ADMIN.prompts)}</h2>
+              <p className="editor__hint">{t(CHAT_ADMIN.promptsHint)}</p>
+              <div className="editor__prompt-grid">
+                {chatSettings.quickPrompts.map((prompt, index) => (
+                  <div key={index} className="editor__prompt-card">
+                    <p className="editor__field-title">
+                      {t(CHAT_ADMIN.prompt)} {index + 1}
+                    </p>
+                    <label>
+                      <span>{t(CHAT_ADMIN.english)}</span>
+                      <input
+                        value={prompt.en}
+                        onChange={(e) =>
+                          editChat((n) => {
+                            n.quickPrompts[index].en = e.target.value;
+                          })
+                        }
+                      />
                     </label>
-                  ))}
-                </>
-              )}
+                    <label>
+                      <span>{t(CHAT_ADMIN.spanish)}</span>
+                      <input
+                        value={prompt.es}
+                        onChange={(e) =>
+                          editChat((n) => {
+                            n.quickPrompts[index].es = e.target.value;
+                          })
+                        }
+                      />
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </section>
 
-              {svc.model === "labor" && (
-                <>
-                  <label>
-                    <span>{t(E.partsBase)}</span>
-                    <input type="number" min="0" value={svc.partsBase} onChange={numHandler((n, v) => (n.services[i].partsBase = v))} />
-                  </label>
-                  <label>
-                    <span>{t(E.laborHours)}</span>
-                    <input type="number" min="0" step="0.25" value={svc.laborHours} onChange={numHandler((n, v) => (n.services[i].laborHours = v))} />
-                  </label>
-                </>
-              )}
+            <section className="editor__group">
+              <h2>{t(CHAT_ADMIN.behavior)}</h2>
+              <p className="editor__hint">{t(CHAT_ADMIN.behaviorHint)}</p>
+              <textarea
+                className="editor__textarea"
+                value={chatSettings.systemInstructions}
+                onChange={(e) => editChat((n) => (n.systemInstructions = e.target.value))}
+                rows={6}
+              />
+            </section>
+          </>
+        ) : (
+          <>
+            <section className="editor__group">
+              <h2>{t(E.globalHeading)}</h2>
+              <div className="editor__row">
+                <label>
+                  <span>{t(E.laborRate)}</span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={pricing.laborRate}
+                    onChange={numHandler((n, v) => (n.laborRate = v))}
+                  />
+                </label>
+                <label>
+                  <span>{t(E.spread)}</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="90"
+                    value={Math.round(pricing.rangePct * 100)}
+                    onChange={numHandler((n, v) => (n.rangePct = Math.min(0.9, v / 100)))}
+                  />
+                </label>
+                <label>
+                  <span>{t(E.currency)}</span>
+                  <input value={pricing.currency} onChange={(e) => edit((n) => (n.currency = e.target.value))} />
+                </label>
+              </div>
+            </section>
 
-              {svc.model === "options" &&
-                svc.options.map((o, oi) => (
-                  <label key={o.id}>
-                    <span>{t(o.label)}</span>
-                    <input type="number" min="0" value={o.price} onChange={numHandler((n, v) => (n.services[i].options[oi].price = v))} />
+            <section className="editor__group">
+              <h2>{t(E.vehicleHeading)}</h2>
+              <p className="editor__hint">{t(E.vehicleHint)}</p>
+              <div className="editor__grid">
+                {pricing.vehicleClasses.map((vc, i) => (
+                  <label key={vc.id} className="editor__cell">
+                    <span>{t(vc.label)}</span>
+                    <input
+                      type="number"
+                      step="0.05"
+                      min="0"
+                      value={vc.factor}
+                      onChange={numHandler((n, v) => (n.vehicleClasses[i].factor = v))}
+                    />
                   </label>
                 ))}
+              </div>
+            </section>
 
-              {svc.model === "flat" && (
-                <label>
-                  <span>{t(E.flatPrice)}</span>
-                  <input type="number" min="0" value={svc.flatPrice} onChange={numHandler((n, v) => (n.services[i].flatPrice = v))} />
-                </label>
-              )}
-            </div>
-          </div>
-        ))}
-      </section>
-        </>
-      )}
+            <section className="editor__group">
+              <h2>{t(E.servicesHeading)}</h2>
+              {pricing.services.map((svc, i) => (
+                <div key={svc.id} className="editor__svc">
+                  <div className="editor__svc-head">
+                    <strong>{t(svc.label)}</strong>
+                    <span className="editor__tag">{svc.model}</span>
+                    <label className="editor__inline-check">
+                      <input
+                        type="checkbox"
+                        checked={svc.appliesVehicleFactor}
+                        onChange={(e) => edit((n) => (n.services[i].appliesVehicleFactor = e.target.checked))}
+                      />
+                      {t(E.appliesFactor)}
+                    </label>
+                  </div>
+                  <p className="editor__hint">{t(E.modelHelp[svc.model])}</p>
+
+                  <div className="editor__row">
+                    {svc.model === "perUnit" && (
+                      <>
+                        <label>
+                          <span>{t(E.basePrice)}</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={svc.basePrice}
+                            onChange={numHandler((n, v) => (n.services[i].basePrice = v))}
+                          />
+                        </label>
+                        {svc.fees?.map((f, fi) => (
+                          <label key={fi}>
+                            <span>
+                              {t(f.label)} ({t(f.per === "unit" ? E.perUnit : E.perJob)})
+                            </span>
+                            <input
+                              type="number"
+                              min="0"
+                              value={f.amount}
+                              onChange={numHandler((n, v) => (n.services[i].fees[fi].amount = v))}
+                            />
+                          </label>
+                        ))}
+                      </>
+                    )}
+
+                    {svc.model === "labor" && (
+                      <>
+                        <label>
+                          <span>{t(E.partsBase)}</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={svc.partsBase}
+                            onChange={numHandler((n, v) => (n.services[i].partsBase = v))}
+                          />
+                        </label>
+                        <label>
+                          <span>{t(E.laborHours)}</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.25"
+                            value={svc.laborHours}
+                            onChange={numHandler((n, v) => (n.services[i].laborHours = v))}
+                          />
+                        </label>
+                      </>
+                    )}
+
+                    {svc.model === "options" &&
+                      svc.options.map((o, oi) => (
+                        <label key={o.id}>
+                          <span>{t(o.label)}</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={o.price}
+                            onChange={numHandler((n, v) => (n.services[i].options[oi].price = v))}
+                          />
+                        </label>
+                      ))}
+
+                    {svc.model === "flat" && (
+                      <label>
+                        <span>{t(E.flatPrice)}</span>
+                        <input
+                          type="number"
+                          min="0"
+                          value={svc.flatPrice}
+                          onChange={numHandler((n, v) => (n.services[i].flatPrice = v))}
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </section>
+          </>
+        )}
       </div>
     </>
   );

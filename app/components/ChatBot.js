@@ -73,6 +73,11 @@ function initialMessages(intro) {
   return [{ role: "assistant", content: intro, createdAt: Date.now() }];
 }
 
+function makeSessionId() {
+  if (typeof crypto?.randomUUID === "function") return crypto.randomUUID();
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 function formatTime(timestamp) {
   return new Date(timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
@@ -106,6 +111,7 @@ export default function ChatBot({ embedded = false, className = "", showComposer
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [messages, setMessages] = useState(() => initialMessages(copy.intro));
+  const [sessionId] = useState(() => makeSessionId());
   const listRef = useRef(null);
   const textareaRef = useRef(null);
 
@@ -191,7 +197,7 @@ export default function ChatBot({ embedded = false, className = "", showComposer
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lang, context: mode, messages: requestMessages }),
+        body: JSON.stringify({ lang, context: mode, sessionId, messages: requestMessages }),
       });
       const data = await res.json();
 

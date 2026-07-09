@@ -2566,7 +2566,7 @@ h3 {
 }
 
 .admin {
-  max-width: 920px;
+  max-width: 1120px;
   margin: 0 auto;
   padding: 1.5rem 1.25rem 4rem;
 }
@@ -2606,6 +2606,9 @@ h3 {
 }
 
 .editor__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   border: 1px solid var(--line);
   border-bottom: 0;
   background: var(--ink);
@@ -2617,6 +2620,16 @@ h3 {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   cursor: pointer;
+}
+
+.editor__tab span {
+  min-width: 1.45rem;
+  border-radius: 999px;
+  background: rgba(255, 102, 0, 0.16);
+  color: var(--paper);
+  padding: 0.08rem 0.45rem;
+  font-size: 0.75rem;
+  text-align: center;
 }
 
 .editor__tab--on {
@@ -2806,6 +2819,202 @@ h3 {
 
 .editor__inline-check input {
   width: auto;
+}
+
+.record-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.record-empty {
+  border: 1px dashed var(--line);
+  border-radius: var(--r);
+  background:
+    radial-gradient(circle at top left, rgba(255, 102, 0, 0.14), transparent 42%),
+    var(--surface);
+  color: var(--paper-dim);
+  padding: 2rem;
+  text-align: center;
+}
+
+.record-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background:
+    linear-gradient(135deg, rgba(255, 102, 0, 0.08), transparent 34%),
+    var(--surface);
+  padding: 1.1rem;
+}
+
+.record-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--orange);
+}
+
+.record-card--appointment::before {
+  background: var(--good);
+}
+
+.record-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.8rem;
+}
+
+.record-card__eyebrow {
+  margin: 0 0 0.2rem;
+  color: var(--orange);
+  font-family: var(--display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.record-card h2 {
+  margin: 0;
+  font-size: clamp(1.25rem, 3vw, 1.8rem);
+}
+
+.record-card__status {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 180px;
+  color: var(--paper-dim);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.record-card__status select {
+  width: 100%;
+}
+
+.record-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 0.9rem;
+  color: var(--paper-dim);
+  font-size: 0.82rem;
+}
+
+.record-card__meta span {
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.record-card__flag {
+  color: var(--orange);
+}
+
+.record-card__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.7rem;
+  margin-bottom: 0.9rem;
+}
+
+.record-card__field {
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  background: rgba(0, 0, 0, 0.16);
+  padding: 0.7rem;
+}
+
+.record-card__field span,
+.record-card__summary span,
+.record-card__transcript summary {
+  display: block;
+  color: var(--paper-dim);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.25rem;
+}
+
+.record-card__field strong {
+  display: block;
+  color: var(--paper);
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.record-card__summary {
+  border-top: 1px solid var(--line-soft);
+  padding-top: 0.85rem;
+}
+
+.record-card__summary p {
+  margin: 0;
+  color: var(--paper);
+  line-height: 1.5;
+}
+
+.record-card__transcript {
+  margin-top: 0.85rem;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 0.85rem;
+}
+
+.record-card__transcript summary {
+  cursor: pointer;
+  margin-bottom: 0;
+}
+
+.record-card__transcript div {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.7rem;
+}
+
+.record-card__transcript p {
+  margin: 0;
+  color: var(--paper-dim);
+  line-height: 1.45;
+}
+
+.record-card__transcript p span {
+  color: var(--paper);
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .admin {
+    padding-inline: 0.85rem;
+  }
+
+  .editor__tabs {
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: none;
+  }
+
+  .editor__tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .editor__tab {
+    flex: 0 0 auto;
+  }
+
+  .record-card {
+    padding: 0.95rem;
+  }
+
+  .record-card__status {
+    width: 100%;
+  }
 }
 
 /* ---------- Brand popup ---------- */

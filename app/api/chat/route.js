@@ -1,5 +1,6 @@
 import { SERVICES, SITE } from "../../site.config";
 import { getChatSettings } from "../../../lib/chat-settings-store";
+import { captureChatRecord } from "../../../lib/chat-records-store";
 
 const GROQ_API_BASE = "https://api.groq.com/openai/v1/chat/completions";
 const DEFAULT_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
@@ -34,7 +35,9 @@ Behavior:
 - Start with a quick human acknowledgment when appropriate.
 - Ask one clarifying question if the customer's request is vague.
 - If the customer asks for pricing, give a helpful range and encourage the quote page or a shop visit.
-- If the customer asks for appointment booking, clarify this shop welcomes walk-ins and phone/WhatsApp contact.
+- If the customer asks for appointment booking, help start an appointment request.
+- For appointment requests, collect the next missing detail: service, vehicle, preferred day/time, name, and phone.
+- Do not promise a confirmed appointment slot. Say the shop team will confirm the exact time.
 - If the customer asks for hours or address, answer clearly and directly.
 - Keep answers short by default unless the user asks for detail.
 - If the customer writes in Spanish, answer in Spanish.
@@ -60,7 +63,7 @@ For quote requests, collect only the next useful missing detail:
 - name and phone number for follow-up
 
 Do not ask for all details at once.
-When the customer gives enough information, summarize it clearly and invite them to send it through WhatsApp or call the shop.
+When the customer gives enough information, summarize it clearly and say the shop team will use it to follow up.
 If they ask for price, give a careful ballpark only when the service is simple. Otherwise say the shop will confirm after checking the vehicle.
 `.trim();
 
@@ -84,6 +87,7 @@ export async function POST(request) {
   const messages = Array.isArray(payload?.messages) ? payload.messages : [];
   const lang = payload?.lang === "es" ? "es" : "en";
   const context = payload?.context === "quote" ? "quote" : "shop";
+  const sessionId = typeof payload?.sessionId === "string" ? payload.sessionId.slice(0, 120) : "";
   const chatSettings = context === "quote" ? await getChatSettings() : null;
   const sanitizedMessages = messages
     .filter((message) => message && typeof message.content === "string")
@@ -129,6 +133,18 @@ export async function POST(request) {
   }
 
   const content = data?.choices?.[0]?.message?.content?.trim() || "";
+
+  try {
+    await captureChatRecord({
+      sessionId,
+      context,
+      lang,
+      messages: sanitizedMessages,
+      assistantMessage: content,
+    });
+  } catch (error) {
+    console.error("Chat record capture failed:", error);
+  }
 
   return Response.json({
     model: DEFAULT_MODEL,
