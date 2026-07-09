@@ -273,6 +273,18 @@ function contactState(messages) {
     }
   }
 
+  if (hasPhone && !hasName) {
+    const phoneMatch = userText.match(phonePattern);
+    if (phoneMatch) {
+      const beforePhone = userText.slice(0, phoneMatch.index).replace(/[\s,;]+$/, "");
+      const lastSep = Math.max(beforePhone.lastIndexOf(","), beforePhone.lastIndexOf(";"));
+      const candidate = (lastSep !== -1 ? beforePhone.slice(lastSep + 1) : (beforePhone.split(/[\s]+/).pop() || "")).trim();
+      if (/^[a-zA-Z\u00c0-\u017f.'-]{2,}$/.test(candidate) && !/^(yes|no|si|okay|ok|thanks|gracias|please)$/i.test(candidate)) {
+        hasName = true;
+      }
+    }
+  }
+
   return { hasName, hasPhone, userText };
 }
 
