@@ -161,7 +161,7 @@ export default function ChatBot() {
             <div className="chat-panel__stats">
               <div>
                 <span>{t(copy.fastAnswers)}</span>
-                <strong>{t(copy.humanStyle)}</strong>
+                <strong>{t(copy.liveChat)}</strong>
               </div>
               <div>
                 <span>{t(copy.callUs)}</span>

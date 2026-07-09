@@ -6,6 +6,11 @@ import { COPY, SITE } from "../site.config";
 export default function Footer() {
   const t = useT();
   const year = new Date().getFullYear();
+  const legalLinks = [
+    { href: "/privacy", label: { en: "Privacy Policy", es: "Politica de Privacidad" } },
+    { href: "/terms", label: { en: "Terms of Use", es: "Terminos de Uso" } },
+    { href: "/disclaimer", label: { en: "Disclaimer", es: "Aviso Legal" } },
+  ];
 
   return (
     <footer className="footer">
@@ -45,6 +50,13 @@ export default function Footer() {
             <a href={SITE.social.facebook} target="_blank" rel="noopener noreferrer">
               Facebook
             </a>
+          </div>
+          <div className="footer__legal">
+            {legalLinks.map((link) => (
+              <a key={link.href} href={link.href}>
+                {t(link.label)}
+              </a>
+            ))}
           </div>
         </div>
       </div>
