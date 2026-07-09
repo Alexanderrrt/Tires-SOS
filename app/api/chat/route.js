@@ -50,6 +50,7 @@ export async function POST(request) {
   }
 
   const messages = Array.isArray(payload?.messages) ? payload.messages : [];
+  const lang = payload?.lang === "es" ? "es" : "en";
   const sanitizedMessages = messages
     .filter((message) => message && typeof message.content === "string")
     .slice(-12)
@@ -70,7 +71,14 @@ export async function POST(request) {
     },
     body: JSON.stringify({
       model: DEFAULT_MODEL,
-      messages: [{ role: "system", content: SYSTEM_PROMPT }, ...sanitizedMessages],
+      messages: [
+        {
+          role: "system",
+          content:
+            `${SYSTEM_PROMPT}\n\nRespond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly switches languages.`,
+        },
+        ...sanitizedMessages,
+      ],
       temperature: 0.4,
       max_tokens: 500,
     }),

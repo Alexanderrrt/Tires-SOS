@@ -164,6 +164,41 @@ export const OWNERS_RIDE = {
   },
 };
 
+export const CHAT = {
+  launcher: { en: "Chat", es: "Chat" },
+  launcherSub: { en: "Ask the shop", es: "Pregunta al taller" },
+  title: { en: "Real Shop Help", es: "Ayuda Real del Taller" },
+  subtitle: {
+    en: "Talk to me like you would at the counter. I’ll keep it friendly, direct, and human.",
+    es: "Háblame como si estuvieras en el mostrador. Te responderé de forma amable, directa y humana.",
+  },
+  fastAnswers: { en: "Fast answers", es: "Respuestas rápidas" },
+  humanStyle: { en: "Human-style chat", es: "Chat con trato humano" },
+  callUs: { en: "Call us", es: "Llámanos" },
+  whatsapp: { en: "WhatsApp", es: "WhatsApp" },
+  openChat: { en: "Open chat", es: "Abrir chat" },
+  close: { en: "Close chat", es: "Cerrar chat" },
+  promptHours: { en: "What are your hours today?", es: "¿Cuál es su horario hoy?" },
+  promptServices: { en: "What services do you offer?", es: "¿Qué servicios ofrecen?" },
+  promptPrice: { en: "How much is a flat repair?", es: "¿Cuánto cuesta una reparación de ponchadura?" },
+  promptSpanish: { en: "Hablas español?", es: "¿Hablas español?" },
+  placeholder: {
+    en: "Ask a question about your car...",
+    es: "Haz una pregunta sobre tu carro...",
+  },
+  send: { en: "Send", es: "Enviar" },
+  typing: { en: "Answering like a real person...", es: "Respondiendo como una persona real..." },
+  fallback: {
+    en: "I couldn’t reach the chat service just now. Please call the shop or try again in a moment.",
+    es: "No pude conectar con el chat por ahora. Llama al taller o intenta de nuevo en un momento.",
+  },
+  intro: {
+    en: "Hey, I’m here at the shop desk with you. Ask me anything about tires, brakes, alignment, oil changes, batteries, rims, hours, location, or walk-in help.",
+    es: "Hola, estoy aquí en el mostrador contigo. Pregúntame sobre llantas, frenos, alineación, cambio de aceite, baterías, rines, horario, ubicación o atención sin cita.",
+  },
+  modeLabel: { en: "Shop helper", es: "Ayudante del taller" },
+};
+
 export const TESTIMONIALS = [
   {
     quote: {

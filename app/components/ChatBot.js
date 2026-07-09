@@ -1,52 +1,84 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import { COPY, SITE } from "../site.config";
-import { useT } from "../i18n/LanguageContext";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useLanguage, useT } from "../i18n/LanguageContext";
+import { CHAT, SITE } from "../site.config";
 import Icon from "./Icons";
-
-const quickPrompts = [
-  "What services do you offer?",
-  "How much is a flat repair?",
-  "What are your hours today?",
-  "Hablas español?",
-];
 
 const starterMessages = [
   {
     role: "assistant",
-    content:
-      "Hey, I’m here at the shop desk with you. Ask me anything about tires, brakes, alignment, oil changes, batteries, rims, hours, location, or walk-in help.",
+    content: {
+      en: "Hey, I’m here at the shop desk with you. Ask me anything about tires, brakes, alignment, oil changes, batteries, rims, hours, location, or walk-in help.",
+      es: "Hola, estoy aquí en el mostrador contigo. Pregúntame sobre llantas, frenos, alineación, cambio de aceite, baterías, rines, horario, ubicación o atención sin cita.",
+    },
   },
 ];
 
 function BubbleMeta({ role }) {
+  const { lang } = useLanguage();
   const time = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   return (
     <span className="chat-bubble__meta">
-      {role === "assistant" ? "Tires SOS" : "You"} · {time}
+      {role === "assistant" ? "Tires SOS" : lang === "es" ? "Tú" : "You"} · {time}
+    </span>
+  );
+}
+
+function TypingDots() {
+  return (
+    <span className="chat-typing" aria-label="Tires SOS is typing">
+      <span />
+      <span />
+      <span />
     </span>
   );
 }
 
 export default function ChatBot() {
   const t = useT();
+  const { lang } = useLanguage();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [messages, setMessages] = useState(starterMessages);
   const listRef = useRef(null);
+  const textareaRef = useRef(null);
 
+  const copy = useMemo(() => CHAT, []);
   const canSend = input.trim().length > 0 && !loading;
 
-  const enrichedMessages = useMemo(() => messages, [messages]);
+  const quickPrompts = useMemo(
+    () => [
+      t(copy.promptServices),
+      t(copy.promptPrice),
+      t(copy.promptHours),
+      t(copy.promptSpanish),
+    ],
+    [t, copy, lang]
+  );
 
   const scrollToBottom = () => {
     requestAnimationFrame(() => {
       listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
     });
   };
+
+  useEffect(() => {
+    if (open) {
+      textareaRef.current?.focus();
+      scrollToBottom();
+    }
+  }, [open]);
+
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   const send = async (text) => {
     const content = text.trim();
@@ -63,15 +95,19 @@ export default function ChatBot() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages }),
+        body: JSON.stringify({ lang, messages: nextMessages }),
       });
       const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data?.error || "Chat request failed.");
-      }
+      if (!res.ok) throw new Error(data?.error || "Chat request failed.");
 
-      setMessages((prev) => [...prev, { role: "assistant", content: data.message || "I’m here if you need more details." }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: { en: data.message || "I’m here if you need more details.", es: data.message || "Estoy aquí si necesitas más detalles." },
+        },
+      ]);
       scrollToBottom();
     } catch (err) {
       setError(err.message || "Something went wrong.");
@@ -79,7 +115,7 @@ export default function ChatBot() {
         ...prev,
         {
           role: "assistant",
-          content: "I couldn’t reach the chat service just now. Please call the shop or try again in a moment.",
+          content: copy.fallback,
         },
       ]);
     } finally {
@@ -88,49 +124,57 @@ export default function ChatBot() {
     }
   };
 
+  const renderMessage = (message) => {
+    const content = typeof message.content === "string" ? message.content : t(message.content);
+    return content;
+  };
+
   return (
     <>
-      <button className="chat-fab" onClick={() => setOpen(true)} aria-label="Open chat assistant">
+      <button className="chat-fab" onClick={() => setOpen(true)} aria-label={t(copy.launcher)}>
         <span className="chat-fab__glow" aria-hidden="true" />
-        <span className="chat-fab__icon">
+        <span className="chat-fab__icon" aria-hidden="true">
           <Icon name="chat" />
         </span>
         <span className="chat-fab__copy">
-          <strong>Chat</strong>
-          <small>{t(COPY.nav.quote)}</small>
+          <strong>{t(copy.launcher)}</strong>
+          <small>{t(copy.launcherSub)}</small>
         </span>
       </button>
 
       {open && (
-        <div className="chat-shell" role="dialog" aria-modal="true" aria-label="Tires SOS chat assistant">
+        <div className="chat-shell" role="dialog" aria-modal="true" aria-label={t(copy.title)}>
           <div className="chat-shell__backdrop" onClick={() => setOpen(false)} />
           <section className="chat-panel">
             <header className="chat-panel__header">
-              <div>
-                <p className="chat-panel__kicker">Tires SOS Rescue</p>
-                <h2 className="chat-panel__title">Real Shop Help</h2>
-                <p className="chat-panel__subtitle">
-                  Talk to me like you would at the counter. I’ll keep it friendly, direct, and human.
-                </p>
+              <div className="chat-panel__brand">
+                <div className="chat-panel__avatar" aria-hidden="true">
+                  <img src="/logo-mark.png" alt="" />
+                </div>
+                <div>
+                  <p className="chat-panel__kicker">Tires SOS Rescue</p>
+                  <h2 className="chat-panel__title">{t(copy.title)}</h2>
+                  <p className="chat-panel__subtitle">{t(copy.subtitle)}</p>
+                </div>
               </div>
-              <button className="chat-panel__close" onClick={() => setOpen(false)} aria-label="Close chat">
+              <button className="chat-panel__close" onClick={() => setOpen(false)} aria-label={t(copy.close)}>
                 ×
               </button>
             </header>
 
             <div className="chat-panel__stats">
               <div>
-                <span>Fast answers</span>
-                <strong>Human-style chat</strong>
+                <span>{t(copy.fastAnswers)}</span>
+                <strong>{t(copy.humanStyle)}</strong>
               </div>
               <div>
-                <span>Call us</span>
+                <span>{t(copy.callUs)}</span>
                 <a href={SITE.phoneHref}>{SITE.phone}</a>
               </div>
               <div>
-                <span>WhatsApp</span>
+                <span>{t(copy.whatsapp)}</span>
                 <a href={`https://wa.me/${SITE.whatsapp}`} target="_blank" rel="noreferrer">
-                  Open chat
+                  {t(copy.openChat)}
                 </a>
               </div>
             </div>
@@ -144,16 +188,19 @@ export default function ChatBot() {
             </div>
 
             <div className="chat-panel__messages" ref={listRef}>
-              {enrichedMessages.map((message, index) => (
+              {messages.map((message, index) => (
                 <article key={`${message.role}-${index}`} className={`chat-bubble chat-bubble--${message.role}`}>
                   <BubbleMeta role={message.role} />
-                  <p>{message.content}</p>
+                  <p>{renderMessage(message)}</p>
                 </article>
               ))}
               {loading && (
                 <article className="chat-bubble chat-bubble--assistant">
                   <BubbleMeta role="assistant" />
-                  <p>Typing a quick answer...</p>
+                  <p className="chat-bubble__typing-row">
+                    <TypingDots />
+                    <span>{t(copy.typing)}</span>
+                  </p>
                 </article>
               )}
             </div>
@@ -166,15 +213,16 @@ export default function ChatBot() {
               }}
             >
               <textarea
+                ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask a question about your car..."
+                placeholder={t(copy.placeholder)}
                 rows={2}
               />
               <div className="chat-panel__composer-bar">
                 <span className="chat-panel__error">{error}</span>
                 <button type="submit" className="btn btn--primary" disabled={!canSend}>
-                  Send
+                  {t(copy.send)}
                 </button>
               </div>
             </form>
