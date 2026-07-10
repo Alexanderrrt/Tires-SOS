@@ -57,20 +57,6 @@ export async function PATCH(request) {
     }
   }
 
-  const id = typeof payload?.id === "string" ? payload.id : "";
-  if (!id) {
-    return Response.json({ error: "Missing record id." }, { status: 400 });
-  }
-
-  if (action === "retry-notification") {
-    try {
-      const notification = await deliverLeadNotification({ id });
-      return Response.json({ ok: true, notification, storeConfigured: recordsStoreConfigured() });
-    } catch {
-      return Response.json({ error: "Notification retry failed." }, { status: 503 });
-    }
-  }
-
   if (action === "create") {
     const customerName = typeof payload?.customerName === "string" ? payload.customerName : "";
     const phone = typeof payload?.phone === "string" ? payload.phone : "";
@@ -91,6 +77,20 @@ export async function PATCH(request) {
         { error: error.message || "Create failed." },
         { status: conflict ? 409 : 422 },
       );
+    }
+  }
+
+  const id = typeof payload?.id === "string" ? payload.id : "";
+  if (!id) {
+    return Response.json({ error: "Missing record id." }, { status: 400 });
+  }
+
+  if (action === "retry-notification") {
+    try {
+      const notification = await deliverLeadNotification({ id });
+      return Response.json({ ok: true, notification, storeConfigured: recordsStoreConfigured() });
+    } catch {
+      return Response.json({ error: "Notification retry failed." }, { status: 503 });
     }
   }
 

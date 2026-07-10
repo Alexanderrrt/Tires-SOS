@@ -96,13 +96,13 @@ const COPY = {
   serviceLabel: { en: "Service", es: "Servicio" },
   vehicleLabel: { en: "Vehicle", es: "Vehiculo" },
   notesLabel: { en: "Notes", es: "Notas" },
-  dateLabel: { en: "Date (YYYY-MM-DD)", es: "Fecha (YYYY-MM-DD)" },
+  dateLabel: { en: "Date", es: "Fecha" },
   timeLabel: { en: "Time", es: "Hora" },
   create: { en: "Create", es: "Crear" },
   creating: { en: "Creating...", es: "Creando..." },
   cancel: { en: "Cancel", es: "Cancelar" },
-  createDateHint: { en: "e.g. 2026-07-15. Must be a future business day.",
-    es: "ej. 2026-07-15. Debe ser un dia laboral futuro." },
+  createDateHint: { en: "Must be a future business day.",
+    es: "Debe ser un dia laboral futuro." },
 };
 
 const APPT_STATUSES = [
@@ -219,8 +219,8 @@ export default function AppointmentCalendar({ appointments, blockedSlots = [], t
       setCreateError(t({ en: "Date and time are required.", es: "Fecha y hora son requeridas." }));
       return;
     }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      setCreateError(t({ en: "Date must be in YYYY-MM-DD format.", es: "La fecha debe estar en formato YYYY-MM-DD." }));
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date < todayStr) {
+      setCreateError(t({ en: "Date must be a future date.", es: "La fecha debe ser una fecha futura." }));
       return;
     }
     onCreate({
@@ -411,9 +411,9 @@ export default function AppointmentCalendar({ appointments, blockedSlots = [], t
             <label className="cal__create-field cal__create-field--wide">
               <span>{t(COPY.dateLabel)}</span>
               <input
+                type="date"
                 value={createForm.date}
                 onChange={(e) => handleCreateField("date", e.target.value)}
-                placeholder="2026-07-15"
                 disabled={disabled}
               />
               <span className="cal__create-hint">{t(COPY.createDateHint)}</span>
