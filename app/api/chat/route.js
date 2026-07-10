@@ -237,12 +237,12 @@ function validatePayload(payload) {
   if (payload.context !== "quote" && payload.context !== "shop") {
     throw new ChatInputError("Unsupported chat context.", "invalid_context");
   }
-  if (!Array.isArray(payload.messages) || !payload.messages.length || payload.messages.length > MAX_MESSAGES) {
+  if (!Array.isArray(payload.messages) || !payload.messages.length) {
     throw new ChatInputError(`Messages must contain between 1 and ${MAX_MESSAGES} items.`, "invalid_messages");
   }
 
   let totalCharacters = 0;
-  const messages = payload.messages.map((message, index) => {
+  let messages = payload.messages.slice(-MAX_MESSAGES).map((message, index) => {
     if (!message || typeof message !== "object" || Array.isArray(message)) {
       throw new ChatInputError("Every message must be an object.", "invalid_messages");
     }
@@ -262,6 +262,10 @@ function validatePayload(payload) {
     totalCharacters += content.length;
     return { role: message.role, content };
   });
+
+  while (messages.length > 1 && messages[0].role !== "assistant") {
+    messages.shift();
+  }
 
   if (messages[0].role !== "assistant" || messages[messages.length - 1].role !== "user") {
     throw new ChatInputError("Conversation history must start with the assistant and end with the customer.", "invalid_messages");
@@ -353,6 +357,58 @@ function buildConversationResult(messages, captureResult) {
       appointment: { requested: requested || timeSelected, timeSelected },
     },
   };
+}
+
+function latestUserMessage(messages) {
+  return [...messages].reverse().find((message) => message.role === "user")?.content || "";
+}
+
+function fallbackReply({ lang, context, messages, pricingUnavailable = false }) {
+  const userText = folded(latestUserMessage(messages));
+  const inSpanish = lang === "es";
+  const wantsHours = /\b(hours?|open|close|horario|abiert|cerrad|hoy)\b/.test(userText);
+  const wantsLocation = /\b(address|location|where|ubicaci[oó]n|direcci[oó]n|ubicado)\b/.test(userText);
+  const wantsBooking = /\b(appointment|book|booking|schedule|cita|agendar|reservar|programar)\b/.test(userText);
+  const wantsPrice = /\b(price|quote|cost|how much|cu[aá]nto|precio|cotiz)\b/.test(userText);
+
+  if (wantsHours) {
+    return inSpanish
+      ? "Estamos abiertos de lunes a viernes de 9:00 AM a 6:00 PM, y los s\u00e1bados de 9:00 AM a 5:00 PM. \u00bfQuieres nuestra direcci\u00f3n o que te ayude con otro servicio?"
+      : "We’re open Monday through Friday from 9:00 AM to 6:00 PM, and Saturday from 9:00 AM to 5:00 PM. Would you like our address or help with something else?";
+  }
+
+  if (wantsLocation) {
+    return inSpanish
+      ? "Nos encuentras en 623 E Taylor St, San Jos\u00e9, CA 95112, y tambi\u00e9n en 1407 N 10th St, San Jos\u00e9, CA 95112."
+      : "You can find us at 623 E Taylor St, San Jose, CA 95112, and also at 1407 N 10th St, San Jose, CA 95112.";
+  }
+
+  if (wantsBooking) {
+    return inSpanish
+      ? "Claro. Dime qu\u00e9 servicio necesitas, tu nombre y tu n\u00famero de tel\u00e9fono, y te muestro los horarios disponibles."
+      : "Absolutely. Tell me what service you need, your name, and your phone number, and I’ll show you available times.";
+  }
+
+  if (wantsPrice) {
+    if (pricingUnavailable) {
+      return inSpanish
+        ? "Por ahora no puedo dar un precio exacto aqu\u00ed. Cu\u00e9ntame qu\u00e9 servicio necesitas y el taller te confirma el precio al ver el veh\u00edculo."
+        : "I can’t give an exact price in chat right now. Tell me what service you need and the shop will confirm the price once they see the vehicle.";
+    }
+    return inSpanish
+      ? "Puedo ayudarte con una cotizaci\u00f3n. Cu\u00e9ntame qu\u00e9 servicio necesitas y el veh\u00edculo para darte el mejor estimado."
+      : "I can help with a quote. Tell me what service you need and your vehicle, and I’ll get you the best estimate.";
+  }
+
+  if (context === "quote") {
+    return inSpanish
+      ? "Puedo ayudarte con una cotizaci\u00f3n o a empezar una cita. Dime el servicio que necesitas y seguimos."
+      : "I can help with a quote or get a booking started. Tell me what service you need and we’ll keep going.";
+  }
+
+  return inSpanish
+    ? "Estoy aqu\u00ed para ayudarte con llantas, frenos, alineaci\u00f3n, aceite, bater\u00edas, rines, horario o ubicaci\u00f3n."
+    : "I’m here to help with tires, brakes, alignment, oil changes, batteries, rims, hours, or location.";
 }
 
 async function captureSafely(args, label) {
@@ -526,12 +582,31 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
 
   const first = await callGroq(baseMessages, { withTools: true });
   if (first.error) {
-    const timedOut = first.error === "provider_timeout";
-    return errorResponse(
-      timedOut ? "The chat request timed out. Please try again." : "The chat service is temporarily unavailable.",
-      first.error,
-      timedOut ? 504 : 502,
-      { rate, conversation: preConversation },
+    const content = fallbackReply({
+      lang,
+      context,
+      messages,
+      pricingUnavailable: !pricing || estimatesDisabled,
+    });
+    const postCapture = await captureSafely(
+      {
+        sessionId: session.id,
+        context,
+        lang,
+        messages,
+        assistantMessage: content,
+      },
+      "fallback-provider",
+    );
+    const conversation = buildConversationResult(messages, postCapture || preCapture);
+    return json(
+      {
+        message: content,
+        action: conversation.action,
+        status: conversation.status,
+        fallback: true,
+      },
+      { rate },
     );
   }
 
@@ -568,9 +643,12 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
     } else {
       // Still no tool call — refuse to relay an unverified number rather than
       // risk a wrong price.
-      content = lang === "es"
-        ? "Quiero confirmar ese precio con nuestra tarifa actual antes de darte un numero exacto. Cuentame el servicio y el vehiculo de nuevo y te doy el estimado correcto."
-        : "I want to confirm that price against our current rates before giving you an exact number — tell me the service and vehicle again and I'll get you the real estimate.";
+      content = fallbackReply({
+        lang,
+        context,
+        messages,
+        pricingUnavailable: !pricing || estimatesDisabled,
+      });
       toolCalls = [];
     }
   }
