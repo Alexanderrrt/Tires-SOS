@@ -342,6 +342,17 @@ function detectService(messages) {
   return "";
 }
 
+function extractVehicle(messages) {
+  const text = messages
+    .map((message) => message?.content || "")
+    .join(" ");
+  const match = text.match(/\b(19|20)\d{2}\b[\s,.-]*([A-Za-z0-9&.'-]{2,})?(?:\s+([A-Za-z0-9&.'-]{2,}))?/);
+  if (!match) return "";
+  const year = match[0].match(/\b(19|20)\d{2}\b/)?.[0] || "";
+  const remainder = match[0].replace(year, "").replace(/^[\s,.-]+/, "").trim();
+  return [remainder || "", year].filter(Boolean).join(" ").trim();
+}
+
 function buildConversationResult(messages, captureResult) {
   const { hasName, hasPhone, userText } = contactState(messages);
   const serviceText = detectService(messages);
@@ -379,9 +390,11 @@ function buildConversationResult(messages, captureResult) {
 }
 
 function strictBookingReply({ lang, messages, content, isAppointmentFlow }) {
-  const serviceText = detectService(messages);
-  const simpleServiceFlow = Boolean(serviceText || isSimpleServiceRequest(latestUserMessage(messages)));
-  if (!isAppointmentFlow && !simpleServiceFlow) return content;
+  const latest = latestUserMessage(messages);
+  const bookingSeed = /(oil change|cambio de aceite|brake|brakes|frenos|alignment|alineacion|battery|bateria|tire|tires|llanta|llantas|inspection|inspect|diagnostic|repair)/i.test(
+    folded(latest),
+  );
+  if (!isAppointmentFlow && !bookingSeed) return content;
   const vehicle = extractVehicle(messages);
   const { hasName, hasPhone } = contactState(messages);
   const wantsVehicle = !vehicle;
@@ -402,12 +415,14 @@ function strictBookingReply({ lang, messages, content, isAppointmentFlow }) {
       ? "Gracias. Ahora solo necesito tu nombre y tu n\u00famero de tel\u00e9fono para seguir con la cita."
       : "Thanks. Now I just need your name and phone number to keep going with the appointment.";
   }
-  return content;
+  return lang === "es"
+    ? "Perfecto, gracias. Ya tengo todo y te muestro los horarios disponibles."
+    : "Perfect, thanks. Iâ€™ve got everything I need, and Iâ€™m pulling up available times for you.";
 }
 
 function isSimpleServiceRequest(text) {
   const foldedText = folded(text);
-  return /(oil change|cambio de aceite|brake service|brakes|frenos|alignment|alineacion|battery|bateria|rotation|inspect|inspection|diagnostic|change my oil)/.test(
+  return /(oil change|cambio de aceite|brake service|brakes|frenos|alignment|alineacion|battery|bateria|rotation|inspect|inspection|diagnostic|change my oil|tire|tires|llanta|llantas)/.test(
     foldedText,
   );
 }
@@ -801,7 +816,13 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
     lang,
     messages,
     content,
-    isAppointmentFlow: appointmentIntent || preConversation.status.appointment.requested || preConversation.status.contact.name || preConversation.status.contact.phone,
+    isAppointmentFlow:
+      appointmentIntent ||
+      isSimpleServiceRequest(latestText) ||
+      Boolean(detectService(messages)) ||
+      preConversation.status.appointment.requested ||
+      preConversation.status.contact.name ||
+      preConversation.status.contact.phone,
   });
 
   if (shouldBlockQuantityQuestion(latestUserMessage(messages), content)) {
