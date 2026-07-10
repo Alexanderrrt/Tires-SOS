@@ -40,6 +40,7 @@ const SYSTEM_PROMPT = `
 You are Tires SOS Rescue's friendly shop assistant.
 You sound warm, calm, practical, and easy to talk to.
 You help customers in a concise, bilingual way and you can show a little personality.
+Sound like a real front-desk teammate: brief, kind, and helpful, never robotic or overly formal.
 
 Focus on:
 - tires
@@ -342,6 +343,16 @@ function detectService(messages) {
   return "";
 }
 
+function hasServiceIntent(messages) {
+  const text = messages
+    .filter((message) => message.role === "user")
+    .map((message) => message?.content || "")
+    .join(" ");
+  return /(oil change|cambio de aceite|brake|brakes|frenos|alignment|alineacion|alineaci[oó]n|battery|bateria|tire|tires|llanta|llantas|inspection|inspect|diagnostic|repair|service|servicio|maintenance|mantenimiento)/i.test(
+    folded(text),
+  );
+}
+
 function extractVehicle(messages) {
   const text = messages
     .map((message) => message?.content || "")
@@ -391,7 +402,7 @@ function buildConversationResult(messages, captureResult) {
 
 function strictBookingReply({ lang, messages, content, isAppointmentFlow }) {
   const latest = latestUserMessage(messages);
-  const bookingSeed = /(oil change|cambio de aceite|brake|brakes|frenos|alignment|alineacion|battery|bateria|tire|tires|llanta|llantas|inspection|inspect|diagnostic|repair)/i.test(
+  const bookingSeed = /(oil change|cambio de aceite|brake|brakes|frenos|alignment|alineacion|battery|bateria|tire|tires|llanta|llantas|inspection|inspect|diagnostic|repair|service|servicio|maintenance|mantenimiento)/i.test(
     folded(latest),
   );
   if (!isAppointmentFlow && !bookingSeed) return content;
@@ -417,7 +428,39 @@ function strictBookingReply({ lang, messages, content, isAppointmentFlow }) {
   }
   return lang === "es"
     ? "Perfecto, gracias. Ya tengo todo y te muestro los horarios disponibles."
-    : "Perfect, thanks. Iâ€™ve got everything I need, and Iâ€™m pulling up available times for you.";
+    : "Perfect, thanks. I've got everything I need, and I'm pulling up available times for you.";
+}
+
+function enforceBookingSequence({ lang, messages, content, isAppointmentFlow }) {
+  const latest = latestUserMessage(messages);
+  const bookingSeed = hasServiceIntent(messages) || /(appointment|book|booking|schedule|cita|agendar|programar|reservar)/i.test(folded(latest));
+  if (!isAppointmentFlow && !bookingSeed) return content;
+  const vehicle = extractVehicle(messages);
+  const { hasName, hasPhone } = contactState(messages);
+  const wantsTires = /(tire|tires|llanta|llantas)/i.test(folded(latest));
+  const asksQuantity = /\b(4|two|2|3|5|one|1|pair|set|single|cuatro|dos|tres|cinco|uno|juego|par)\b/i.test(folded(latest));
+  if (!vehicle) {
+    return lang === "es"
+      ? wantsTires
+        ? "Claro. Necesito el a\u00f1o, marca y modelo del veh\u00edculo para ayudarte con las llantas."
+        : "Claro. Necesito el a\u00f1o, marca y modelo del veh\u00edculo para seguir con la cita o cotizaci\u00f3n."
+      : wantsTires
+        ? "Absolutely. I need the vehicle year, make, and model to help with the tires."
+        : "Absolutely. I need the vehicle year, make, and model to keep going with the quote or appointment.";
+  }
+  if (wantsTires && !asksQuantity && !hasName && !hasPhone) {
+    return lang === "es"
+      ? "Gracias. Tambi\u00e9n dime cu\u00e1ntas llantas necesitas y luego seguimos con tu nombre y tel\u00e9fono."
+      : "Thanks. Also tell me how many tires you need, and then we’ll move on to your name and phone number.";
+  }
+  if (!hasName || !hasPhone) {
+    return lang === "es"
+      ? "Gracias. Ahora solo necesito tu nombre y tu n\u00famero de tel\u00e9fono para seguir con la cita."
+      : "Thanks. Now I just need your name and phone number to keep going with the appointment.";
+  }
+  return lang === "es"
+    ? "Perfecto, gracias. Ya tengo todo y te muestro los horarios disponibles."
+    : "Perfect, thanks. I've got everything I need, and I'm pulling up available times for you.";
 }
 
 function isSimpleServiceRequest(text) {
@@ -438,6 +481,28 @@ function fallbackReply({ lang, context, messages, pricingUnavailable = false }) 
   const wantsLocation = /\b(address|location|where|ubicaci[oó]n|direcci[oó]n|ubicado)\b/.test(userText);
   const wantsBooking = /\b(appointment|book|booking|schedule|cita|agendar|reservar|programar)\b/.test(userText);
   const wantsPrice = /\b(price|quote|cost|how much|cu[aá]nto|precio|cotiz)\b/.test(userText);
+  const wantsService = hasServiceIntent(messages) || /(alineacion|alineaci[oó]n)/i.test(userText);
+  const hasVehicle = Boolean(extractVehicle(messages));
+  const contact = contactState(messages);
+  const readyForTimes = wantsService && hasVehicle && contact.hasName && contact.hasPhone;
+
+  if (readyForTimes) {
+    return inSpanish
+      ? "Perfecto, gracias. Ya tengo todo y te muestro los horarios disponibles."
+      : "Perfect, thanks. I’ve got everything I need, and I’m pulling up available times for you.";
+  }
+
+  if (wantsService && !hasVehicle) {
+    return inSpanish
+      ? "Claro. Necesito el año, marca y modelo del vehículo para seguir contigo."
+      : "Absolutely. I need the vehicle year, make, and model first so I can keep going with you.";
+  }
+
+  if (wantsService && hasVehicle) {
+    return inSpanish
+      ? "Gracias. Ahora solo necesito tu nombre y tu número de teléfono para seguir con la cita."
+      : "Thanks. Now I just need your name and phone number to keep going with the appointment.";
+  }
 
   if (wantsHours) {
     return inSpanish
@@ -712,20 +777,26 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
       messages,
       pricingUnavailable: !pricing || estimatesDisabled,
     });
+    const enforced = enforceBookingSequence({
+      lang,
+      messages,
+      content,
+      isAppointmentFlow: Boolean(detectService(messages)) || hasServiceIntent(messages),
+    });
     const postCapture = await captureSafely(
       {
         sessionId: session.id,
         context,
         lang,
         messages,
-        assistantMessage: content,
+        assistantMessage: enforced,
       },
       "fallback-provider",
     );
     const conversation = buildConversationResult(messages, postCapture || preCapture);
     return json(
       {
-        message: content,
+        message: enforced,
         action: conversation.action,
         status: conversation.status,
         fallback: true,
@@ -773,6 +844,12 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
         messages,
         pricingUnavailable: !pricing || estimatesDisabled,
       });
+      content = enforceBookingSequence({
+        lang,
+        messages,
+        content,
+        isAppointmentFlow: Boolean(detectService(messages)) || hasServiceIntent(messages),
+      });
       toolCalls = [];
     }
   }
@@ -812,7 +889,7 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
   const appointmentIntent = /(appointment|book|booking|schedule|come in|drop off|cita|agendar|programar|reservar|puedo ir|pasar)/i.test(
     folded(latestText),
   ) || isSimpleServiceRequest(latestText) || Boolean(detectService(messages));
-  content = strictBookingReply({
+  content = enforceBookingSequence({
     lang,
     messages,
     content,
