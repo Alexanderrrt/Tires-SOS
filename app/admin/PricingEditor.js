@@ -6,6 +6,7 @@ import { useLanguage, useT } from "../i18n/LanguageContext";
 import { COPY } from "../site.config";
 import AdminLoader from "./AdminLoader";
 import AppointmentCalendar from "./AppointmentCalendar";
+import ApiStatus from "./ApiStatus";
 
 const E = COPY.admin.editor;
 
@@ -15,6 +16,7 @@ const CHAT_ADMIN = {
   appointmentsTab: { en: "Appointments", es: "Citas" },
   chatTab: { en: "Chat", es: "Chat" },
   pricingTab: { en: "Pricing", es: "Precios" },
+  apiTab: { en: "API", es: "API" },
   leadsTitle: { en: "Chat Leads", es: "Clientes del chat" },
   appointmentsTitle: { en: "Appointments", es: "Citas" },
   chatTitle: { en: "Chat Settings", es: "Configuracion del chat" },
@@ -669,6 +671,13 @@ export default function PricingEditor({
           >
             {t(CHAT_ADMIN.pricingTab)}
           </button>
+          <button
+            type="button"
+            className={`editor__tab ${activeTab === "api" ? "editor__tab--on" : ""}`}
+            onClick={() => setActiveTab("api")}
+          >
+            {t(CHAT_ADMIN.apiTab)}
+          </button>
         </nav>
 
         {activeTab === "leads" ? (
@@ -793,7 +802,7 @@ export default function PricingEditor({
               <p className="editor__hint">{t(CHAT_ADMIN.disableEstimatesHint)}</p>
             </section>
           </>
-        ) : (
+        ) : activeTab === "pricing" ? (
           <>
             <section className="editor__group">
               <h2>{t(E.globalHeading)}</h2>
@@ -969,6 +978,8 @@ export default function PricingEditor({
               ))}
             </section>
           </>
+        ) : (
+          <ApiStatus t={t} lang={lang} />
         )}
       </div>
     </>

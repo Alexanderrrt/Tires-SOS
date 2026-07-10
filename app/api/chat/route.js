@@ -16,6 +16,7 @@ import {
   verifyChatSession,
 } from "../../../lib/chat-session";
 import { checkChatRateLimits, getClientIp } from "../../../lib/chat-rate-limit";
+import { recordGroqResponse, recordGroqError } from "../../../lib/groq-status";
 
 const GROQ_API_BASE = "https://api.groq.com/openai/v1/chat/completions";
 const DEFAULT_MODEL = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
@@ -55,6 +56,7 @@ Behavior:
 - Start with a quick human acknowledgment when appropriate.
 - Ask one clarifying question if the customer's request is vague.
 - For pricing, ALWAYS call the get_price_estimate tool to get the real number — never calculate a price yourself, never state a price the tool did not return.
+- For a service with multiple options (like oil type), do NOT ask the customer which option they want before pricing it. Call the tool with no optionId — it returns the full price range across all options automatically. Only mention the specific options if the customer already stated a preference or asks what choices exist.
 - If the customer asks for appointment booking, help start an appointment request.
 - For appointment requests, follow this STRICT priority order:
   1. First get the SERVICE needed and VEHICLE info (year/make/model, or even just "my Honda Civic" — that's enough).
@@ -462,10 +464,13 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
     ...messages.slice(-PROVIDER_MESSAGES),
   ];
 
-  async function callGroq(msgs, { withTools, maxTokens, temperature } = {}) {
+  async function callGroq(msgs, { withTools, forceTool, maxTokens, temperature } = {}) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), timeoutMs);
     try {
+      const toolChoice = forceTool
+        ? { type: "function", function: { name: "get_price_estimate" } }
+        : "auto";
       const response = await fetch(GROQ_API_BASE, {
         method: "POST",
         headers: {
@@ -477,16 +482,23 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
           messages: msgs,
           temperature: temperature ?? 0.3,
           max_tokens: maxTokens ?? 500,
-          ...(withTools && tools ? { tools, tool_choice: "auto" } : {}),
+          ...(withTools && tools ? { tools, tool_choice: toolChoice } : {}),
         }),
         cache: "no-store",
         signal: ctrl.signal,
+      });
+      recordGroqResponse(response.headers, {
+        ok: response.ok,
+        status: response.status,
+        message: response.ok ? null : `HTTP ${response.status}`,
       });
       if (!response.ok) return { error: "provider_unavailable" };
       const body = await response.json().catch(() => null);
       return { body };
     } catch (error) {
-      return { error: error?.name === "AbortError" ? "provider_timeout" : "provider_unavailable" };
+      const timedOut = error?.name === "AbortError";
+      recordGroqError(timedOut ? "Request timed out." : error?.message || "Network error.");
+      return { error: timedOut ? "provider_timeout" : "provider_unavailable" };
     } finally {
       clearTimeout(timer);
     }
@@ -503,9 +515,41 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
     );
   }
 
-  const firstMessage = first.body?.choices?.[0]?.message;
+  let firstMessage = first.body?.choices?.[0]?.message;
   let content = typeof firstMessage?.content === "string" ? firstMessage.content.trim() : "";
-  const toolCalls = Array.isArray(firstMessage?.tool_calls) ? firstMessage.tool_calls.slice(0, 1) : [];
+  let toolCalls = Array.isArray(firstMessage?.tool_calls) ? firstMessage.tool_calls.slice(0, 1) : [];
+
+  // Small models sometimes ignore the "always call the tool" instruction and
+  // either (a) just state a number themselves, or (b) ask the customer to
+  // pick between options (e.g. oil type) instead of calling the tool with no
+  // optionId to get the full range. Both cases skip the tool, so force a
+  // retry that MUST call it — never let a freehand number or a forbidden
+  // "which option?" question reach the customer.
+  const looksLikePrice = /[$]\s?\d|\b\d{2,4}\s?(usd|dollars|dolares)\b/i;
+  const optionLabels = pricing
+    ? (pricing.services || [])
+        .filter((s) => s.model === "options")
+        .flatMap((s) => (s.options || []).map((o) => o?.label?.en).filter(Boolean))
+    : [];
+  const asksToPickOption = content.includes("?") &&
+    optionLabels.filter((l) => content.toLowerCase().includes(String(l).toLowerCase())).length >= 2;
+  if (!toolCalls.length && pricing && (looksLikePrice.test(content) || asksToPickOption)) {
+    const forced = await callGroq(baseMessages, { withTools: true, forceTool: true });
+    const forcedMessage = forced.body?.choices?.[0]?.message;
+    const forcedCalls = Array.isArray(forcedMessage?.tool_calls) ? forcedMessage.tool_calls.slice(0, 1) : [];
+    if (forcedCalls.length) {
+      firstMessage = forcedMessage;
+      content = typeof forcedMessage?.content === "string" ? forcedMessage.content.trim() : "";
+      toolCalls = forcedCalls;
+    } else {
+      // Still no tool call — refuse to relay an unverified number rather than
+      // risk a wrong price.
+      content = lang === "es"
+        ? "Quiero confirmar ese precio con nuestra tarifa actual antes de darte un numero exacto. Cuentame el servicio y el vehiculo de nuevo y te doy el estimado correcto."
+        : "I want to confirm that price against our current rates before giving you an exact number — tell me the service and vehicle again and I'll get you the real estimate.";
+      toolCalls = [];
+    }
+  }
 
   if (toolCalls.length && pricing) {
     const call = toolCalls[0];
