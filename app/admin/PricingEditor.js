@@ -83,9 +83,7 @@ const RECORD_COPY = {
   name: { en: "Name", es: "Nombre" },
   phone: { en: "Phone", es: "Telefono" },
   vehicle: { en: "Vehicle", es: "Vehiculo" },
-  tireSize: { en: "Tire size", es: "Medida" },
   service: { en: "Service", es: "Servicio" },
-  timing: { en: "Preferred time", es: "Horario preferido" },
   summary: { en: "Summary", es: "Resumen" },
   notes: { en: "Notes", es: "Notas" },
   conversation: { en: "Conversation", es: "Conversacion" },
@@ -233,8 +231,6 @@ function LeadCard({ lead, t, disabled, onStatus, onDelete }) {
         <RecordField label={t(RECORD_COPY.name)} value={lead.customerName} fallback={fallback} />
         <RecordField label={t(RECORD_COPY.phone)} value={lead.phone} fallback={fallback} />
         <RecordField label={t(RECORD_COPY.vehicle)} value={lead.vehicle} fallback={fallback} />
-        <RecordField label={t(RECORD_COPY.tireSize)} value={lead.tireSize} fallback={fallback} />
-        <RecordField label={t(RECORD_COPY.timing)} value={lead.preferredTime} fallback={fallback} />
         <RecordField label={t(RECORD_COPY.source)} value={lead.source} fallback={fallback} />
       </div>
 
@@ -287,7 +283,6 @@ function AppointmentCard({ appointment, t, disabled, onStatus, onDelete }) {
         <RecordField label={t(RECORD_COPY.phone)} value={appointment.phone} fallback={fallback} />
         <RecordField label={t(RECORD_COPY.vehicle)} value={appointment.vehicle} fallback={fallback} />
         <RecordField label={t(RECORD_COPY.service)} value={appointment.service} fallback={fallback} />
-        <RecordField label={t(RECORD_COPY.timing)} value={appointment.preferredTime} fallback={fallback} />
       </div>
 
       <div className="record-card__summary">

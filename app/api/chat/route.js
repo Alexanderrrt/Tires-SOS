@@ -327,6 +327,31 @@ function contactState(messages) {
     }
   }
 
+  if (!hasName) {
+    const latestUser = [...messages].reverse().find((message) => message.role === "user")?.content || "";
+    let previousAssistant = "";
+    for (let index = messages.length - 2; index >= 0; index -= 1) {
+      const message = messages[index];
+      const nextMessage = messages[index + 1];
+      if (message?.role === "assistant" && nextMessage?.role === "user" && /\b(name|nombre|llamas)\b/.test(folded(message.content))) {
+        previousAssistant = message.content;
+        break;
+      }
+    }
+    if (/\b(name|nombre|llamas)\b/.test(folded(previousAssistant))) {
+      const candidate = latestUser.trim().replace(phonePattern, "").trim();
+      const words = candidate.split(/\s+/).filter(Boolean);
+      if (
+        words.length >= 1 &&
+        words.length <= 4 &&
+        words.every((word) => /^[a-zA-Z\u00c0-\u017f.'-]+$/.test(word)) &&
+        !/^(yes|no|si|okay|ok|thanks|gracias|please|phone|numero|number)$/i.test(candidate)
+      ) {
+        hasName = true;
+      }
+    }
+  }
+
   return { hasName, hasPhone, userText };
 }
 
@@ -437,6 +462,12 @@ function enforceBookingSequence({ lang, messages, content, isAppointmentFlow }) 
   if (!isAppointmentFlow && !bookingSeed) return content;
   const vehicle = extractVehicle(messages);
   const { hasName, hasPhone } = contactState(messages);
+  const latestClean = latest.trim();
+  const maybePlainName = /^[A-Za-z\u00c0-\u017f.'-]{2,40}$/.test(latestClean) && !/^\d/.test(latestClean);
+  const lastAssistantAskedName = [...messages]
+    .slice()
+    .reverse()
+    .find((message) => message.role === "assistant" && /\b(name|nombre|llamas)\b/.test(folded(message.content)));
   const wantsTires = /(tire|tires|llanta|llantas)/i.test(folded(latest));
   const asksQuantity = /\b(4|two|2|3|5|one|1|pair|set|single|cuatro|dos|tres|cinco|uno|juego|par)\b/i.test(folded(latest));
   if (!vehicle) {
@@ -452,6 +483,11 @@ function enforceBookingSequence({ lang, messages, content, isAppointmentFlow }) 
     return lang === "es"
       ? "Gracias. Tambi\u00e9n dime cu\u00e1ntas llantas necesitas y luego seguimos con tu nombre y tel\u00e9fono."
       : "Thanks. Also tell me how many tires you need, and then we’ll move on to your name and phone number.";
+  }
+  if (vehicle && !hasPhone && (hasName || (maybePlainName && lastAssistantAskedName))) {
+    return lang === "es"
+      ? "Gracias. Ahora solo necesito tu n\u00famero de tel\u00e9fono."
+      : "Thanks. Now I just need your phone number.";
   }
   if (!hasName || !hasPhone) {
     return lang === "es"
