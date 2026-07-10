@@ -63,7 +63,7 @@ export default function Hero() {
               ))}
             </ul>
             <div className="alignment-spotlight__actions">
-              <a href={SITE.phoneHref} className="btn btn--primary">
+              <a href="/quote" className="btn btn--primary">
                 <Icon name="phone" /> {t(alignment.cta)}
               </a>
               <a href="/#services" className="btn btn--ghost">
@@ -91,7 +91,7 @@ export default function Hero() {
             <p className="alignment-popup__kicker">{t(alignment.kicker)}</p>
             <p className="alignment-popup__title">{t(alignment.title)}</p>
             <p className="alignment-popup__stamp">BY HUNTER</p>
-            <a href={SITE.phoneHref} className="btn btn--primary btn--small alignment-popup__cta">
+            <a href="/quote" className="btn btn--primary btn--small alignment-popup__cta">
               <Icon name="phone" /> {t(alignment.cta)}
             </a>
           </div>
