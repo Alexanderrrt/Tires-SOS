@@ -1,21 +1,54 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useT } from "../i18n/LanguageContext";
 import { COPY, REELS, SITE } from "../site.config";
 import Icon from "./Icons";
 import Reveal from "./Reveal";
 
-// Instagram's public per-post thumbnail — works for any public permalink
-// without needing API credentials. Falls back to a branded placeholder (no
-// broken-image icon) if it 404s or Instagram blocks the request.
-function thumbnailUrl(permalink) {
-  const base = permalink.endsWith("/") ? permalink : `${permalink}/`;
-  return `${base}media/?size=l`;
+// Instagram blocks both direct browser hotlinks (ERR_BLOCKED_BY_ORB) and
+// server-side scraping of its thumbnail/og:image (bot-walled shell page) for
+// unauthenticated requests, so a live-fetched screenshot isn't reliable here.
+// To drop in a REAL screenshot for a reel, save it as /public/reels/reel-N.jpg
+// (N = 1-indexed position in REELS below) — it's tried first automatically.
+// Until then, real shop photography is used as an on-brand poster.
+const FALLBACK_POSTERS = ["/storefront.jpg", "/owners-m3.jpg", "/owner.jpg", "/services/new-tires.jpg"];
+
+// Resolves the first candidate URL that actually loads. Runs entirely
+// client-side via a plain Image() probe — deliberately never rendered as a
+// real <img> until we know it works, so there's no SSR/hydration race where
+// a 404 fires its "error" event before React's onError listener is attached.
+function resolveFirstWorkingImage(candidates, onResolved) {
+  let cancelled = false;
+  (async () => {
+    for (const candidate of candidates) {
+      // eslint-disable-next-line no-await-in-loop
+      const ok = await new Promise((resolve) => {
+        const probe = new window.Image();
+        probe.onload = () => resolve(true);
+        probe.onerror = () => resolve(false);
+        probe.src = candidate;
+      });
+      if (cancelled) return;
+      if (ok) {
+        onResolved(candidate);
+        return;
+      }
+    }
+    if (!cancelled) onResolved(null);
+  })();
+  return () => {
+    cancelled = true;
+  };
 }
 
 function ReelCard({ permalink, index }) {
-  const [failed, setFailed] = useState(false);
+  const [src, setSrc] = useState(undefined); // undefined = still probing, null = nothing worked
+
+  useEffect(() => {
+    const candidates = [`/reels/reel-${index + 1}.jpg`, FALLBACK_POSTERS[index % FALLBACK_POSTERS.length]];
+    return resolveFirstWorkingImage(candidates, setSrc);
+  }, [index]);
 
   return (
     <a
@@ -25,15 +58,8 @@ function ReelCard({ permalink, index }) {
       className="reel-card reveal-item"
       style={{ "--d": `${index * 80}ms` }}
     >
-      {!failed ? (
-        <img
-          className="reel-card__thumb"
-          src={thumbnailUrl(permalink)}
-          alt="Tires SOS Rescue Instagram reel"
-          loading="lazy"
-          decoding="async"
-          onError={() => setFailed(true)}
-        />
+      {src ? (
+        <img className="reel-card__thumb" src={src} alt="Tires SOS Rescue Instagram reel" decoding="async" />
       ) : (
         <div className="reel-card__fallback">
           <Icon name="instagram" />
