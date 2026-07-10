@@ -329,8 +329,22 @@ function contactState(messages) {
   return { hasName, hasPhone, userText };
 }
 
+function detectService(messages) {
+  const text = messages
+    .map((message) => message?.content || "")
+    .join(" ");
+  const foldedText = folded(text);
+  if (/(oil change|cambio de aceite|change my oil)/i.test(foldedText)) return "Oil change";
+  if (/(brake|brakes|frenos)/i.test(foldedText)) return "Brakes";
+  if (/(alignment|alineacion)/i.test(foldedText)) return "Alignment";
+  if (/(battery|bateria)/i.test(foldedText)) return "Battery";
+  if (/(tire|tires|llanta|llantas)/i.test(foldedText)) return "Tires";
+  return "";
+}
+
 function buildConversationResult(messages, captureResult) {
   const { hasName, hasPhone, userText } = contactState(messages);
+  const serviceText = detectService(messages);
   const hasVehicle = Boolean(extractVehicle(messages));
   const latestUser = [...messages].reverse().find((message) => message.role === "user")?.content || "";
   const requested = /(appointment|book|booking|schedule|come in|drop off|cita|agendar|programar|reservar|puedo ir|pasar)/i.test(
@@ -343,6 +357,7 @@ function buildConversationResult(messages, captureResult) {
   const leadCaptured = captureResult?.captured === true;
   const completed = leadCaptured && hasName && hasPhone && timeSelected;
   const missingFields = [!hasVehicle && "vehicle", !hasName && "name", !hasPhone && "phone"].filter(Boolean);
+  const bookingLike = Boolean(serviceText || requested || hasVehicle || hasName || hasPhone);
   const actionType = completed
     ? "lead_ready"
     : hasVehicle && hasName && hasPhone
@@ -358,16 +373,17 @@ function buildConversationResult(messages, captureResult) {
       persisted: captureResult?.persisted === true,
       contact: { name: hasName, phone: hasPhone },
       vehicle: { present: hasVehicle },
-      appointment: { requested: requested || timeSelected, timeSelected },
+      appointment: { requested: requested || bookingLike || timeSelected, timeSelected },
     },
   };
 }
 
 function strictBookingReply({ lang, messages, content, isAppointmentFlow }) {
-  if (!isAppointmentFlow) return content;
+  const serviceText = detectService(messages);
+  const simpleServiceFlow = Boolean(serviceText || isSimpleServiceRequest(latestUserMessage(messages)));
+  if (!isAppointmentFlow && !simpleServiceFlow) return content;
   const vehicle = extractVehicle(messages);
   const { hasName, hasPhone } = contactState(messages);
-  const latest = latestUserMessage(messages);
   const wantsVehicle = !vehicle;
   const wantsContact = vehicle && (!hasName || !hasPhone);
   const readyForTimes = vehicle && hasName && hasPhone;
@@ -386,8 +402,14 @@ function strictBookingReply({ lang, messages, content, isAppointmentFlow }) {
       ? "Gracias. Ahora solo necesito tu nombre y tu n\u00famero de tel\u00e9fono para seguir con la cita."
       : "Thanks. Now I just need your name and phone number to keep going with the appointment.";
   }
-  if (/follow up|seguimiento|contact|llamar|called?/.test(folded(latest))) return content;
   return content;
+}
+
+function isSimpleServiceRequest(text) {
+  const foldedText = folded(text);
+  return /(oil change|cambio de aceite|brake service|brakes|frenos|alignment|alineacion|battery|bateria|rotation|inspect|inspection|diagnostic|change my oil)/.test(
+    foldedText,
+  );
 }
 
 function latestUserMessage(messages) {
@@ -774,7 +796,7 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
   const latestText = latestUserMessage(messages);
   const appointmentIntent = /(appointment|book|booking|schedule|come in|drop off|cita|agendar|programar|reservar|puedo ir|pasar)/i.test(
     folded(latestText),
-  );
+  ) || isSimpleServiceRequest(latestText) || Boolean(detectService(messages));
   content = strictBookingReply({
     lang,
     messages,
