@@ -570,8 +570,8 @@ function shouldBlockVehicleYearQuestion(userText, replyText) {
 
 function vehicleYearGuardReply(lang) {
   return lang === "es"
-    ? "Claro. Te ayudo con eso sin preguntar m\u00e1s detalles t\u00e9cnicos. Solo necesito el a\u00f1o, modelo y marca del veh\u00edculo, y luego tu nombre y tu n\u00famero para seguir con la cita o la cotizaci\u00f3n."
-    : "Absolutely. I can help with that without asking for technical details. I just need the vehicle year, make, and model first, and then your name and phone number to keep going with the quote or appointment.";
+    ? "Claro. Para seguir, solo necesito el a\u00f1o, marca y modelo del veh\u00edculo, y luego tu nombre y tu n\u00famero."
+    : "Absolutely. To keep going, I just need the vehicle year, make, and model, and then your name and phone number.";
 }
 
 function quantityGuardReply(lang, userText) {
@@ -579,12 +579,12 @@ function quantityGuardReply(lang, userText) {
   const user = folded(userText);
   if (/(oil change|cambio de aceite)/.test(user)) {
     return inSpanish
-      ? "Claro, te ayudo con un cambio de aceite para ese veh\u00edculo. Solo necesito tu nombre y tu n\u00famero para seguir con la cita o la cotizaci\u00f3n."
-      : "Absolutely, I can help with an oil change for that vehicle. I just need your name and phone number to keep going with the quote or appointment.";
+      ? "Claro, te ayudo con un cambio de aceite para ese veh\u00edculo. Solo necesito tu nombre y tu n\u00famero."
+      : "Absolutely, I can help with an oil change for that vehicle. I just need your name and phone number.";
   }
   return inSpanish
-    ? "Claro, te ayudo con eso. Solo necesito tu nombre y tu n\u00famero para seguir con la cita o la cotizaci\u00f3n."
-    : "Absolutely, I can help with that. I just need your name and phone number to keep going with the quote or appointment.";
+    ? "Claro, te ayudo con eso. Solo necesito tu nombre y tu n\u00famero."
+    : "Absolutely, I can help with that. I just need your name and phone number.";
 }
 
 function oilChangeGuardReply(lang, userText) {
@@ -592,12 +592,12 @@ function oilChangeGuardReply(lang, userText) {
   const user = folded(userText);
   if (/(oil change|cambio de aceite)/.test(user)) {
     return inSpanish
-      ? "Claro, te ayudo con un cambio de aceite para ese veh\u00edculo. Solo necesito tu nombre y tu n\u00famero para seguir con la cita o la cotizaci\u00f3n."
-      : "Absolutely, I can help with an oil change for that vehicle. I just need your name and phone number to keep going with the quote or appointment.";
+      ? "Claro, te ayudo con un cambio de aceite para ese veh\u00edculo. Solo necesito tu nombre y tu n\u00famero."
+      : "Absolutely, I can help with an oil change for that vehicle. I just need your name and phone number.";
   }
   return inSpanish
-    ? "Claro, te ayudo con eso. Solo necesito tu nombre y tu n\u00famero para seguir con la cita o la cotizaci\u00f3n."
-    : "Absolutely, I can help with that. I just need your name and phone number to keep going with the quote or appointment.";
+    ? "Claro, te ayudo con eso. Solo necesito tu nombre y tu n\u00famero."
+    : "Absolutely, I can help with that. I just need your name and phone number.";
 }
 
 async function captureSafely(args, label) {
