@@ -61,9 +61,9 @@ Behavior:
 - If the customer names a specific tire brand (e.g. Michelin, Toyo), match it to its tier using the brand list in the pricing catalog and use that tier automatically — never ask the customer which tier (economy/standard/premium) they mean.
 - If the customer asks for appointment booking, help start an appointment request.
 - For appointment requests, follow this STRICT priority order:
-  1. First get the SERVICE needed and VEHICLE info (year/make/model, or even just "my Honda Civic" — that's enough).
+  1. First get the SERVICE needed and the VEHICLE year/make/model. Keep it simple — do not ask about oil type, tire brand, tire size, trim, engine, or other add-ons.
   2. Then ask for their NAME and PHONE NUMBER — these are required before scheduling.
-  3. Only AFTER you have name and phone, say exactly: "Let me pull up available times for you." — this exact phrase remains for compatibility with the appointment UI. Do NOT ask them to pick a date/time yourself.
+  3. Only AFTER you have service, vehicle, name, and phone, say exactly: "Let me pull up available times for you." — this exact phrase remains for compatibility with the appointment UI. Do NOT ask them to pick a date/time yourself.
 - Do not promise a confirmed appointment slot. Say the shop team will confirm the exact time.
 - Do NOT ask for name or phone number just because the customer asked about pricing, a service, or hours. Only collect contact info when: (a) the customer wants to book/schedule, or (b) you asked "Would you like the shop team to follow up with you?" (or the Spanish equivalent) and they said yes.
 - If it seems like the conversation is wrapping up and the customer hasn't asked to book, you may ask ONCE, naturally, whether they'd like the shop to follow up with them — do not repeat that offer if they decline or don't respond to it, and do not ask for name/phone unless they agree.
@@ -76,7 +76,7 @@ Behavior:
 
 Keep it simple, not technical:
 - You are talking to everyday customers, not mechanics. Never ask for technical specs — no tire size, no oil viscosity/type, no part numbers, no trim level. The shop staff will look those up from the vehicle info once the customer is in.
-- The only vehicle info you need is year/make/model (or even just make/model, or "my Camry" is fine). Do not push for more detail than that.
+- The only vehicle info you may mention is year/make/model if the customer volunteers it. For booking, you must ask for it before name and phone. Do not ask for trim, engine, tire size, or anything else technical.
 - Use common sense about vehicles. A normal car has ONE engine — never ask which engine, or "both engines," or anything that assumes a car has multiple engines. Only ask about "front vs rear" or "all four" for things that genuinely apply per-wheel (like tires or brakes), and only if the customer's request is ambiguous about how many they need.
 - If something you're about to ask would sound like a strange or overly technical question to a regular driver, don't ask it — just note that the shop team will confirm it at check-in.
 
@@ -91,8 +91,9 @@ This conversation is happening on the quote page.
 Your job is to help the customer with their question — a lead for the shop team is only created if they want to book, or agree to a follow-up. Answering a price/service question is NOT by itself a reason to collect contact info.
 
 Collect details one at a time, simple and non-technical:
-1. Service needed and quantity (especially for tires — e.g. "how many tires do you need?" is fine, tire size is not)
-2. Vehicle year, make, and model (that's enough — do not ask for trim, engine, or tire size)
+1. Service needed
+2. Vehicle year, make, and model
+3. Quantity only when it truly applies, like tires or another clearly per-item service. Never ask "how many" for an oil change or other single-service job unless the customer explicitly mentions multiple cars or multiple jobs.
 
 Only ask for NAME and PHONE NUMBER if:
 - the customer wants to book/schedule an appointment (then follow the strict order: service+vehicle, then name+phone, then trigger the picker with the exact phrase — do NOT ask when they want to come in yourself), OR
@@ -101,6 +102,7 @@ Only ask for NAME and PHONE NUMBER if:
 If they're just asking about price, services, or hours and haven't shown interest in booking, answer the question and do not ask for their name or phone. If the conversation seems to be ending without booking, you may ask ONCE whether they'd like a follow-up — if they decline or don't respond, drop it, do not ask again, and do not collect contact info.
 
 Do not ask for all details at once.
+Do not ask "how many" for oil changes, brakes, alignment, or other normal single-vehicle services.
 Do not ask technical questions (tire size, oil type/viscosity, engine specs, part numbers) — the shop team looks these up from the vehicle info at check-in.
 If they ask for price, call the get_price_estimate tool — never calculate it yourself. Otherwise say the shop will confirm after checking the vehicle.
 Never ask open-ended scheduling questions — the picker handles that.
@@ -411,6 +413,62 @@ function fallbackReply({ lang, context, messages, pricingUnavailable = false }) 
     : "I’m here to help with tires, brakes, alignment, oil changes, batteries, rims, hours, or location.";
 }
 
+function shouldBlockQuantityQuestion(userText, replyText) {
+  const user = folded(userText);
+  const reply = folded(replyText);
+  const isSingleJob = /(oil change|cambio de aceite|brake|brakes|frenos|alignment|alineacion|battery|bateria|oil change)/.test(user);
+  const asksQuantity = /(how many|one vehicle|more|multiple|cuantos|cuantas|un solo vehiculo|mas de un|varios)/.test(reply);
+  return isSingleJob && asksQuantity;
+}
+
+function shouldBlockOilTypeQuestion(userText, replyText) {
+  const user = folded(userText);
+  const reply = folded(replyText);
+  const isOilChange = /(oil change|cambio de aceite)/.test(user);
+  const asksOilType = /(oil type|type of oil|synthetic|conventional|viscosity|grade|preferencia para el tipo de aceite|tipo de aceite|aceite sintetico|aceite convencional|viscosidad)/.test(reply);
+  return isOilChange && asksOilType;
+}
+
+function shouldBlockVehicleYearQuestion(userText, replyText) {
+  const user = folded(userText);
+  const reply = folded(replyText);
+  const isSimpleBooking = /(oil change|cambio de aceite|brake|brakes|frenos|alignment|alineacion|battery|bateria)/.test(user);
+  const asksYear = /(what year|which year|year of your car|year is it|que ano|que a\u00f1o|a\u00f1o es|modelo|make and model|vehicle year|year of your|tell me the year)/.test(reply);
+  return isSimpleBooking && asksYear;
+}
+
+function vehicleYearGuardReply(lang) {
+  return lang === "es"
+    ? "Claro. Te ayudo con eso sin preguntar m\u00e1s detalles t\u00e9cnicos. Solo necesito el a\u00f1o, modelo y marca del veh\u00edculo, y luego tu nombre y tu n\u00famero para seguir con la cita o la cotizaci\u00f3n."
+    : "Absolutely. I can help with that without asking for technical details. I just need the vehicle year, make, and model first, and then your name and phone number to keep going with the quote or appointment.";
+}
+
+function quantityGuardReply(lang, userText) {
+  const inSpanish = lang === "es";
+  const user = folded(userText);
+  if (/(oil change|cambio de aceite)/.test(user)) {
+    return inSpanish
+      ? "Claro, te ayudo con un cambio de aceite para ese veh\u00edculo. Solo necesito tu nombre y tu n\u00famero para seguir con la cita o la cotizaci\u00f3n."
+      : "Absolutely, I can help with an oil change for that vehicle. I just need your name and phone number to keep going with the quote or appointment.";
+  }
+  return inSpanish
+    ? "Claro, te ayudo con eso. Solo necesito tu nombre y tu n\u00famero para seguir con la cita o la cotizaci\u00f3n."
+    : "Absolutely, I can help with that. I just need your name and phone number to keep going with the quote or appointment.";
+}
+
+function oilChangeGuardReply(lang, userText) {
+  const inSpanish = lang === "es";
+  const user = folded(userText);
+  if (/(oil change|cambio de aceite)/.test(user)) {
+    return inSpanish
+      ? "Claro, te ayudo con un cambio de aceite para ese veh\u00edculo. Solo necesito tu nombre y tu n\u00famero para seguir con la cita o la cotizaci\u00f3n."
+      : "Absolutely, I can help with an oil change for that vehicle. I just need your name and phone number to keep going with the quote or appointment.";
+  }
+  return inSpanish
+    ? "Claro, te ayudo con eso. Solo necesito tu nombre y tu n\u00famero para seguir con la cita o la cotizaci\u00f3n."
+    : "Absolutely, I can help with that. I just need your name and phone number to keep going with the quote or appointment.";
+}
+
 async function captureSafely(args, label) {
   try {
     return await captureChatRecord(args);
@@ -682,6 +740,16 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
     if (result.ok && !replyMatchesComputedRange(content, result)) {
       content = renderDeterministicEstimate(result, lang);
     }
+  }
+
+  if (shouldBlockQuantityQuestion(latestUserMessage(messages), content)) {
+    content = quantityGuardReply(lang, latestUserMessage(messages));
+  }
+  if (shouldBlockOilTypeQuestion(latestUserMessage(messages), content)) {
+    content = oilChangeGuardReply(lang, latestUserMessage(messages));
+  }
+  if (shouldBlockVehicleYearQuestion(latestUserMessage(messages), content)) {
+    content = vehicleYearGuardReply(lang);
   }
 
   content = content.slice(0, 4000);
