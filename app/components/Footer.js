@@ -2,6 +2,7 @@
 
 import { useT } from "../i18n/LanguageContext";
 import { COPY, SITE } from "../site.config";
+import Reveal from "./Reveal";
 
 export default function Footer() {
   const t = useT();
@@ -14,7 +15,7 @@ export default function Footer() {
 
   return (
     <footer className="footer">
-      <div className="footer__inner">
+      <Reveal className="footer__inner">
         <div>
           <div className="footer__brand">
             <img className="footer__logo" src="/logo-mark.png" alt={SITE.name} />
@@ -60,7 +61,7 @@ export default function Footer() {
             ))}
           </div>
         </div>
-      </div>
+      </Reveal>
 
       <p className="footer__copyright">
         © {year} {SITE.name}. {t(COPY.footer.rights)}
