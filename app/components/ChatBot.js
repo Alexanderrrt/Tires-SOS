@@ -246,6 +246,7 @@ export default function ChatBot({
   showComposer = true,
   mode = "shop",
   turnstileSiteKey = "",
+  initialPrompt = "",
 }) {
   const t = useT();
   const { lang } = useLanguage();
@@ -389,6 +390,16 @@ export default function ChatBot({
       return [{ ...prev[0], content: copy.intro }];
     });
   }, [copy.intro]);
+
+  // A CTA elsewhere on the site (e.g. the alignment spotlight) can pass a
+  // topic-specific prompt so the customer lands with it already typed —
+  // one click on the consent box + send instead of picking a quick prompt.
+  useEffect(() => {
+    if (!initialPrompt) return;
+    setInput((current) => current || initialPrompt);
+    textareaRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    textareaRef.current?.focus();
+  }, [initialPrompt]);
 
   useEffect(() => {
     if (visible) scrollToBottom();

@@ -63,7 +63,7 @@ export default function Hero() {
               ))}
             </ul>
             <div className="alignment-spotlight__actions">
-              <a href="/quote" className="btn btn--primary">
+              <a href="/quote?topic=alignment" className="btn btn--primary">
                 <Icon name="phone" /> {t(alignment.cta)}
               </a>
               <a href="/#services" className="btn btn--ghost">

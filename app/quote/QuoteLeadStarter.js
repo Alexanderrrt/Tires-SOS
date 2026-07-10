@@ -1,10 +1,24 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import ChatBot from "../components/ChatBot";
 import { useLanguage } from "../i18n/LanguageContext";
 
+const TOPIC_PROMPTS = {
+  alignment: { en: "I need a wheel alignment.", es: "Necesito una alineación." },
+};
+
 export default function QuoteLeadStarter({ turnstileSiteKey = "" }) {
   const { lang } = useLanguage();
+  const [topic, setTopic] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setTopic(params.get("topic") || "");
+  }, []);
+
+  const initialPrompt = TOPIC_PROMPTS[topic]?.[lang] || "";
+
   const copy =
     lang === "es"
       ? {
@@ -32,6 +46,7 @@ export default function QuoteLeadStarter({ turnstileSiteKey = "" }) {
           mode="quote"
           className="quote__assistant-chat"
           turnstileSiteKey={turnstileSiteKey}
+          initialPrompt={initialPrompt}
         />
       </aside>
     </section>

@@ -16,9 +16,20 @@ export default function QuoteIntro() {
         };
 
   return (
-    <>
-      <h1 className="section__heading">{copy.heading}</h1>
-      <p className="section__sub">{copy.sub}</p>
-    </>
+    <h1
+      style={{
+        position: "absolute",
+        width: 1,
+        height: 1,
+        padding: 0,
+        margin: -1,
+        overflow: "hidden",
+        clip: "rect(0, 0, 0, 0)",
+        whiteSpace: "nowrap",
+        border: 0,
+      }}
+    >
+      {copy.heading}
+    </h1>
   );
 }
