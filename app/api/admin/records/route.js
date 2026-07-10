@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { verifySession, SESSION_COOKIE } from "../../../../lib/auth";
 import {
   blockSlot,
+  createManualAppointment,
   deleteRecord,
   getChatRecords,
   recordsStoreConfigured,
@@ -67,6 +68,29 @@ export async function PATCH(request) {
       return Response.json({ ok: true, notification, storeConfigured: recordsStoreConfigured() });
     } catch {
       return Response.json({ error: "Notification retry failed." }, { status: 503 });
+    }
+  }
+
+  if (action === "create") {
+    const customerName = typeof payload?.customerName === "string" ? payload.customerName : "";
+    const phone = typeof payload?.phone === "string" ? payload.phone : "";
+    const service = typeof payload?.service === "string" ? payload.service : "";
+    const vehicle = typeof payload?.vehicle === "string" ? payload.vehicle : "";
+    const notes = typeof payload?.notes === "string" ? payload.notes : "";
+    const scheduledDate = typeof payload?.scheduledDate === "string" ? payload.scheduledDate : "";
+    const scheduledTime = typeof payload?.scheduledTime === "string" ? payload.scheduledTime : "";
+    if (!scheduledDate || !scheduledTime) {
+      return Response.json({ error: "Date and time are required." }, { status: 400 });
+    }
+    try {
+      const res = await createManualAppointment({ customerName, phone, service, vehicle, notes, scheduledDate, scheduledTime });
+      return Response.json({ ok: true, ...res, storeConfigured: recordsStoreConfigured() });
+    } catch (error) {
+      const conflict = /booked|blocked|unavailable|conflict/i.test(error?.message || "");
+      return Response.json(
+        { error: error.message || "Create failed." },
+        { status: conflict ? 409 : 422 },
+      );
     }
   }
 

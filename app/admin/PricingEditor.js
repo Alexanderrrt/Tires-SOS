@@ -536,6 +536,28 @@ export default function PricingEditor({
     }
   }
 
+  async function createAppointment(fields) {
+    setSaving(true);
+    setStatus(null);
+    const res = await fetch("/api/admin/records", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "create", ...fields }),
+    });
+    setSaving(false);
+    const body = await res.json().catch(() => ({}));
+    if (res.ok) {
+      setRecords((current) => ({
+        ...current,
+        leads: body.lead ? [body.lead, ...current.leads] : current.leads,
+        appointments: body.appointment ? [body.appointment, ...current.appointments] : current.appointments,
+      }));
+      setStatus({ ok: true, msg: { en: "Appointment created.", es: "Cita creada." } });
+    } else {
+      setStatus({ ok: false, msg: { en: body.error || "Create failed.", es: body.error || "No se pudo crear." } });
+    }
+  }
+
   async function handleBlock(date, time) {
     setStatus(null);
     const res = await fetch("/api/admin/records", {
@@ -572,16 +594,16 @@ export default function PricingEditor({
     }
   }
 
-  async function testSms() {
+  async function testNotification() {
     setSaving(true);
     setStatus(null);
     const res = await fetch("/api/admin/test-notify", { method: "POST" });
     setSaving(false);
     const body = await res.json().catch(() => ({}));
     if (res.ok) {
-      setStatus({ ok: true, msg: { en: "Test SMS sent! Check your phone.", es: "SMS de prueba enviado! Revisa tu telefono." } });
+      setStatus({ ok: true, msg: { en: "Test notification sent! Check the inbox.", es: "Notificacion de prueba enviada! Revisa la bandeja de entrada." } });
     } else {
-      setStatus({ ok: false, msg: { en: body.error || "SMS test failed.", es: body.error || "Prueba de SMS fallo." } });
+      setStatus({ ok: false, msg: { en: body.error || "Notification test failed.", es: body.error || "Fallo la prueba de notificacion." } });
     }
   }
 
@@ -627,8 +649,8 @@ export default function PricingEditor({
                 <button className="btn btn--ghost btn--small" onClick={refreshRecords} disabled={saving}>
                   {saving ? t(E.saving) : t(CHAT_ADMIN.refresh)}
                 </button>
-                <button className="btn btn--ghost btn--small editor__test-sms" onClick={testSms} disabled={saving}>
-                  {t({ en: "Test SMS", es: "Probar SMS" })}
+                <button className="btn btn--ghost btn--small editor__test-notify" onClick={testNotification} disabled={saving}>
+                  {t({ en: "Test notification", es: "Probar notificacion" })}
                 </button>
               </>
             )}
@@ -708,6 +730,7 @@ export default function PricingEditor({
             onDelete={deleteRecord}
             onBlock={handleBlock}
             onUnblock={handleUnblock}
+            onCreate={createAppointment}
             disabled={saving}
             updatingId={updatingId}
           />
@@ -872,6 +895,60 @@ export default function PricingEditor({
             </section>
 
             <section className="editor__group">
+              <h2>{t(E.tireBrandsHeading)}</h2>
+              <p className="editor__hint">{t(E.tireBrandsHint)}</p>
+              <div className="editor__prompt-grid">
+                {(pricing.tireBrands || []).map((brand, i) => (
+                  <div key={brand.id} className="editor__prompt-card">
+                    <label>
+                      <span>{t(E.brandName)}</span>
+                      <input
+                        value={brand.name}
+                        onChange={(e) => edit((n) => (n.tireBrands[i].name = e.target.value))}
+                      />
+                    </label>
+                    <label>
+                      <span>{t(E.brandTierLabel)}</span>
+                      <select
+                        value={brand.tier}
+                        onChange={(e) => edit((n) => (n.tireBrands[i].tier = e.target.value))}
+                      >
+                        {pricing.brandTiers.map((bt) => (
+                          <option key={bt.id} value={bt.id}>
+                            {t(bt.label)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <button
+                      type="button"
+                      className="btn btn--ghost btn--small"
+                      onClick={() => edit((n) => (n.tireBrands = n.tireBrands.filter((b) => b.id !== brand.id)))}
+                    >
+                      {t(E.removeBrand)}
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="btn btn--ghost btn--small"
+                onClick={() =>
+                  edit((n) => {
+                    if (!Array.isArray(n.tireBrands)) n.tireBrands = [];
+                    n.tireBrands.push({
+                      id: `brand-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                      name: "",
+                      tier: n.brandTiers[1]?.id || n.brandTiers[0]?.id || "standard",
+                    });
+                  })
+                }
+              >
+                {t(E.addBrand)}
+              </button>
+            </section>
+
+            <section className="editor__group">
               <h2>{t(E.servicesHeading)}</h2>
               {pricing.services.map((svc, i) => (
                 <div key={svc.id} className="editor__svc">
@@ -893,6 +970,14 @@ export default function PricingEditor({
                         onChange={(e) => edit((n) => (n.services[i].appliesBrandTier = e.target.checked))}
                       />
                       {t(E.appliesBrandTier)}
+                    </label>
+                    <label className="editor__inline-check">
+                      <input
+                        type="checkbox"
+                        checked={svc.chatQuotable === false}
+                        onChange={(e) => edit((n) => (n.services[i].chatQuotable = !e.target.checked))}
+                      />
+                      {t(E.chatQuotableOff)}
                     </label>
                   </div>
                   <p className="editor__hint">{t(E.modelHelp[svc.model])}</p>

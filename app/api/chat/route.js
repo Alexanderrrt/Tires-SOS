@@ -57,12 +57,16 @@ Behavior:
 - Ask one clarifying question if the customer's request is vague.
 - For pricing, ALWAYS call the get_price_estimate tool to get the real number — never calculate a price yourself, never state a price the tool did not return.
 - For a service with multiple options (like oil type), do NOT ask the customer which option they want before pricing it. Call the tool with no optionId — it returns the full price range across all options automatically. Only mention the specific options if the customer already stated a preference or asks what choices exist.
+- Some services (marked in the pricing catalog as price-varies, e.g. battery) can NEVER be priced by you, even a rough range — their real price depends on things like exact type/size/warranty that vary too much to estimate safely. Never call the tool for these. If asked, say the price varies and the shop will confirm it in person or by phone.
+- If the customer names a specific tire brand (e.g. Michelin, Toyo), match it to its tier using the brand list in the pricing catalog and use that tier automatically — never ask the customer which tier (economy/standard/premium) they mean.
 - If the customer asks for appointment booking, help start an appointment request.
 - For appointment requests, follow this STRICT priority order:
   1. First get the SERVICE needed and VEHICLE info (year/make/model, or even just "my Honda Civic" — that's enough).
   2. Then ask for their NAME and PHONE NUMBER — these are required before scheduling.
   3. Only AFTER you have name and phone, say exactly: "Let me pull up available times for you." — this exact phrase remains for compatibility with the appointment UI. Do NOT ask them to pick a date/time yourself.
 - Do not promise a confirmed appointment slot. Say the shop team will confirm the exact time.
+- Do NOT ask for name or phone number just because the customer asked about pricing, a service, or hours. Only collect contact info when: (a) the customer wants to book/schedule, or (b) you asked "Would you like the shop team to follow up with you?" (or the Spanish equivalent) and they said yes.
+- If it seems like the conversation is wrapping up and the customer hasn't asked to book, you may ask ONCE, naturally, whether they'd like the shop to follow up with them — do not repeat that offer if they decline or don't respond to it, and do not ask for name/phone unless they agree.
 - If the customer asks for hours or address, answer clearly and directly.
 - Keep answers short by default unless the user asks for detail.
 - If the customer writes in Spanish, answer in Spanish. When triggering the picker in Spanish, say exactly: "Déjame mostrarte los horarios disponibles."
@@ -84,19 +88,35 @@ Tone:
 
 const QUOTE_PROMPT = `
 This conversation is happening on the quote page.
-Your job is to start a useful quote lead for the shop team.
+Your job is to help the customer with their question — a lead for the shop team is only created if they want to book, or agree to a follow-up. Answering a price/service question is NOT by itself a reason to collect contact info.
 
-For quote requests, collect details in this STRICT priority order (one at a time), keeping it simple and non-technical:
+Collect details one at a time, simple and non-technical:
 1. Service needed and quantity (especially for tires — e.g. "how many tires do you need?" is fine, tire size is not)
 2. Vehicle year, make, and model (that's enough — do not ask for trim, engine, or tire size)
-3. NAME and PHONE NUMBER — these are required before anything else
-4. Only AFTER you have name and phone, trigger the appointment picker with the exact phrase defined above. Do NOT ask when they want to come in yourself.
+
+Only ask for NAME and PHONE NUMBER if:
+- the customer wants to book/schedule an appointment (then follow the strict order: service+vehicle, then name+phone, then trigger the picker with the exact phrase — do NOT ask when they want to come in yourself), OR
+- you asked "Would you like the shop team to follow up with you?" (or the Spanish equivalent) and they said yes.
+
+If they're just asking about price, services, or hours and haven't shown interest in booking, answer the question and do not ask for their name or phone. If the conversation seems to be ending without booking, you may ask ONCE whether they'd like a follow-up — if they decline or don't respond, drop it, do not ask again, and do not collect contact info.
 
 Do not ask for all details at once.
 Do not ask technical questions (tire size, oil type/viscosity, engine specs, part numbers) — the shop team looks these up from the vehicle info at check-in.
 If they ask for price, call the get_price_estimate tool — never calculate it yourself. Otherwise say the shop will confirm after checking the vehicle.
 Never ask open-ended scheduling questions — the picker handles that.
 `.trim();
+
+function buildForcedRetrySystemPrompt({ pricingContext, estimatesRule, lang }) {
+  return `You pick the correct arguments and call the get_price_estimate tool. Do not ask the customer a question here — you must call the tool now.
+
+${pricingContext}${estimatesRule}
+
+Respond in ${lang === "es" ? "Spanish" : "English"}.`;
+}
+
+function buildFollowUpSystemPrompt(lang) {
+  return `You relay a computed price result (given as JSON) to the customer in ${lang === "es" ? "Spanish" : "English"}. Use exactly the low/high figures given — never invent, round, or recompute them. One short, friendly sentence, framed as an estimate the shop confirms in person. Do not mention "tool," "JSON," or that a calculation happened. Do not ask a question.`;
+}
 
 class ChatInputError extends Error {
   constructor(message, code, status = 400) {
@@ -534,7 +554,11 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
   const asksToPickOption = content.includes("?") &&
     optionLabels.filter((l) => content.toLowerCase().includes(String(l).toLowerCase())).length >= 2;
   if (!toolCalls.length && pricing && (looksLikePrice.test(content) || asksToPickOption)) {
-    const forced = await callGroq(baseMessages, { withTools: true, forceTool: true });
+    const retryMessages = [
+      { role: "system", content: buildForcedRetrySystemPrompt({ pricingContext, estimatesRule, lang }) },
+      ...messages.slice(-PROVIDER_MESSAGES),
+    ];
+    const forced = await callGroq(retryMessages, { withTools: true, forceTool: true });
     const forcedMessage = forced.body?.choices?.[0]?.message;
     const forcedCalls = Array.isArray(forcedMessage?.tool_calls) ? forcedMessage.tool_calls.slice(0, 1) : [];
     if (forcedCalls.length) {
@@ -563,11 +587,10 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
 
     const followUp = await callGroq(
       [
-        ...baseMessages,
-        { role: "assistant", content: firstMessage.content || "", tool_calls: firstMessage.tool_calls },
-        { role: "tool", tool_call_id: call.id, content: JSON.stringify(result) },
+        { role: "system", content: buildFollowUpSystemPrompt(lang) },
+        { role: "user", content: JSON.stringify(result) },
       ],
-      { withTools: false, maxTokens: 400, temperature: 0.2 },
+      { withTools: false, maxTokens: 150, temperature: 0.2 },
     );
     const followUpContent = typeof followUp.body?.choices?.[0]?.message?.content === "string"
       ? followUp.body.choices[0].message.content.trim()

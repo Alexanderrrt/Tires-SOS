@@ -89,6 +89,20 @@ const COPY = {
   unblock: { en: "Unblock", es: "Desbloquear" },
   blocked: { en: "Blocked", es: "Bloqueado" },
   blockMode: { en: "Block/Unblock mode", es: "Modo bloquear" },
+  newAppointment: { en: "New Appointment", es: "Nueva Cita" },
+  createTitle: { en: "Create Manual Appointment", es: "Crear Cita Manual" },
+  customerNameLabel: { en: "Customer name", es: "Nombre del cliente" },
+  phoneLabel: { en: "Phone", es: "Telefono" },
+  serviceLabel: { en: "Service", es: "Servicio" },
+  vehicleLabel: { en: "Vehicle", es: "Vehiculo" },
+  notesLabel: { en: "Notes", es: "Notas" },
+  dateLabel: { en: "Date (YYYY-MM-DD)", es: "Fecha (YYYY-MM-DD)" },
+  timeLabel: { en: "Time", es: "Hora" },
+  create: { en: "Create", es: "Crear" },
+  creating: { en: "Creating...", es: "Creando..." },
+  cancel: { en: "Cancel", es: "Cancelar" },
+  createDateHint: { en: "e.g. 2026-07-15. Must be a future business day.",
+    es: "ej. 2026-07-15. Debe ser un dia laboral futuro." },
 };
 
 const APPT_STATUSES = [
@@ -99,11 +113,22 @@ const APPT_STATUSES = [
   { value: "canceled", label: COPY.canceled },
 ];
 
-export default function AppointmentCalendar({ appointments, blockedSlots = [], t, onSchedule, onUnschedule, onStatus, onDelete, onBlock, onUnblock, disabled, updatingId }) {
+export default function AppointmentCalendar({ appointments, blockedSlots = [], t, onSchedule, onUnschedule, onStatus, onDelete, onBlock, onUnblock, onCreate, disabled, updatingId }) {
   const [weekOffset, setWeekOffset] = useState(0);
   const [scheduling, setScheduling] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
   const [blockMode, setBlockMode] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    customerName: "",
+    phone: "",
+    service: "",
+    vehicle: "",
+    notes: "",
+    date: "",
+    time: "",
+  });
+  const [createError, setCreateError] = useState("");
 
   const days = useMemo(() => buildWeek(weekOffset), [weekOffset]);
   const todayStr = getShopDateTime().dateKey;
@@ -180,6 +205,43 @@ export default function AppointmentCalendar({ appointments, blockedSlots = [], t
     setScheduling((prev) => (prev === id ? null : id));
     setSelectedId(null);
     setBlockMode(false);
+  }, []);
+
+  const handleCreateField = useCallback((field, value) => {
+    setCreateForm((prev) => ({ ...prev, [field]: value }));
+    setCreateError("");
+  }, []);
+
+  const handleCreateSubmit = useCallback(() => {
+    const date = createForm.date.trim();
+    const time = createForm.time;
+    if (!date || !time) {
+      setCreateError(t({ en: "Date and time are required.", es: "Fecha y hora son requeridas." }));
+      return;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      setCreateError(t({ en: "Date must be in YYYY-MM-DD format.", es: "La fecha debe estar en formato YYYY-MM-DD." }));
+      return;
+    }
+    onCreate({
+      customerName: createForm.customerName.trim(),
+      phone: createForm.phone.trim(),
+      service: createForm.service.trim(),
+      vehicle: createForm.vehicle.trim(),
+      notes: createForm.notes.trim(),
+      scheduledDate: date,
+      scheduledTime: time,
+    });
+    setShowCreateForm(false);
+    setCreateForm({ customerName: "", phone: "", service: "", vehicle: "", notes: "", date: "", time: "" });
+  }, [createForm, onCreate, t]);
+
+  const handleOpenCreate = useCallback(() => {
+    setShowCreateForm((prev) => !prev);
+    setScheduling(null);
+    setSelectedId(null);
+    setBlockMode(false);
+    setCreateError("");
   }, []);
 
   const weekLabel = useMemo(() => {
@@ -279,6 +341,14 @@ export default function AppointmentCalendar({ appointments, blockedSlots = [], t
         >
           {blockMode ? t(COPY.cancel) : t(COPY.blockMode)}
         </button>
+        <button
+          type="button"
+          className={`btn btn--small ${showCreateForm ? "btn--primary" : "btn--ghost"}`}
+          onClick={handleOpenCreate}
+          disabled={disabled}
+        >
+          {t(COPY.newAppointment)}
+        </button>
       </div>
 
       {scheduling && (
@@ -293,6 +363,102 @@ export default function AppointmentCalendar({ appointments, blockedSlots = [], t
       {blockMode && (
         <div className="cal__banner cal__banner--block">
           <span>{t({ en: "Click slots or days to block/unblock. Blocked slots won't be offered to customers.", es: "Haz clic en horarios o dias para bloquear/desbloquear. Los horarios bloqueados no se ofreceran a los clientes." })}</span>
+        </div>
+      )}
+
+      {showCreateForm && (
+        <div className="cal__create-form">
+          <div className="cal__create-form-head">
+            <h4>{t(COPY.createTitle)}</h4>
+            <button type="button" className="btn btn--ghost btn--small" onClick={() => { setShowCreateForm(false); setCreateError(""); }}>
+              {t(COPY.close)}
+            </button>
+          </div>
+          {createError && <p className="cal__create-error">{createError}</p>}
+          <div className="cal__create-form-grid">
+            <label className="cal__create-field">
+              <span>{t(COPY.customerNameLabel)}</span>
+              <input
+                value={createForm.customerName}
+                onChange={(e) => handleCreateField("customerName", e.target.value)}
+                disabled={disabled}
+              />
+            </label>
+            <label className="cal__create-field">
+              <span>{t(COPY.phoneLabel)}</span>
+              <input
+                value={createForm.phone}
+                onChange={(e) => handleCreateField("phone", e.target.value)}
+                disabled={disabled}
+              />
+            </label>
+            <label className="cal__create-field">
+              <span>{t(COPY.serviceLabel)}</span>
+              <input
+                value={createForm.service}
+                onChange={(e) => handleCreateField("service", e.target.value)}
+                disabled={disabled}
+              />
+            </label>
+            <label className="cal__create-field">
+              <span>{t(COPY.vehicleLabel)}</span>
+              <input
+                value={createForm.vehicle}
+                onChange={(e) => handleCreateField("vehicle", e.target.value)}
+                disabled={disabled}
+              />
+            </label>
+            <label className="cal__create-field cal__create-field--wide">
+              <span>{t(COPY.dateLabel)}</span>
+              <input
+                value={createForm.date}
+                onChange={(e) => handleCreateField("date", e.target.value)}
+                placeholder="2026-07-15"
+                disabled={disabled}
+              />
+              <span className="cal__create-hint">{t(COPY.createDateHint)}</span>
+            </label>
+            <label className="cal__create-field">
+              <span>{t(COPY.timeLabel)}</span>
+              <select
+                value={createForm.time}
+                onChange={(e) => handleCreateField("time", e.target.value)}
+                disabled={disabled}
+              >
+                <option value="">--</option>
+                {ALL_SLOTS.map((slot) => (
+                  <option key={slot} value={slot}>{formatTime12(slot)}</option>
+                ))}
+              </select>
+            </label>
+            <label className="cal__create-field cal__create-field--wide">
+              <span>{t(COPY.notesLabel)}</span>
+              <textarea
+                value={createForm.notes}
+                onChange={(e) => handleCreateField("notes", e.target.value)}
+                rows={3}
+                disabled={disabled}
+              />
+            </label>
+          </div>
+          <div className="cal__create-form-actions">
+            <button
+              type="button"
+              className="btn btn--primary btn--small"
+              onClick={handleCreateSubmit}
+              disabled={disabled}
+            >
+              {disabled ? t(COPY.creating) : t(COPY.create)}
+            </button>
+            <button
+              type="button"
+              className="btn btn--ghost btn--small"
+              onClick={() => { setShowCreateForm(false); setCreateError(""); }}
+              disabled={disabled}
+            >
+              {t(COPY.cancel)}
+            </button>
+          </div>
         </div>
       )}
 
