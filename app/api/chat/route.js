@@ -1,7 +1,14 @@
 import { SERVICES, SITE } from "../../site.config";
 import { getChatSettings } from "../../../lib/chat-settings-store";
 import { captureChatRecord } from "../../../lib/chat-records-store";
-import { loadChatPricingContext } from "../../../lib/chat-pricing-context";
+import { compactPricingContext } from "../../../lib/chat-pricing-context";
+import { getPricing } from "../../../lib/pricing-store";
+import {
+  buildPriceEstimateTool,
+  runPriceEstimateTool,
+  renderDeterministicEstimate,
+  replyMatchesComputedRange,
+} from "../../../lib/chat-price-tool";
 import {
   CHAT_SESSION_COOKIE,
   chatSessionConfigured,
@@ -47,7 +54,7 @@ Behavior:
 - Use contractions and natural conversation.
 - Start with a quick human acknowledgment when appropriate.
 - Ask one clarifying question if the customer's request is vague.
-- For pricing, calculate only from the authoritative pricing rules supplied below. Never invent a price.
+- For pricing, ALWAYS call the get_price_estimate tool to get the real number — never calculate a price yourself, never state a price the tool did not return.
 - If the customer asks for appointment booking, help start an appointment request.
 - For appointment requests, follow this STRICT priority order:
   1. First get the SERVICE needed and VEHICLE info (year/make/model, or even just "my Honda Civic" — that's enough).
@@ -85,7 +92,7 @@ For quote requests, collect details in this STRICT priority order (one at a time
 
 Do not ask for all details at once.
 Do not ask technical questions (tire size, oil type/viscosity, engine specs, part numbers) — the shop team looks these up from the vehicle info at check-in.
-If they ask for price, use the authoritative current estimate rules. Otherwise say the shop will confirm after checking the vehicle.
+If they ask for price, call the get_price_estimate tool — never calculate it yourself. Otherwise say the shop will confirm after checking the vehicle.
 Never ask open-ended scheduling questions — the picker handles that.
 `.trim();
 
@@ -420,13 +427,17 @@ export async function POST(request) {
   const contextTimeout = Math.min(timeoutMs, 5_000);
   const chatSettings = await withTimeout(getChatSettings(), null, contextTimeout);
   const estimatesDisabled = chatSettings?.disableEstimates === true;
-  const pricingContext = estimatesDisabled
-    ? "Estimates are currently turned OFF by the shop. Do not give any price, price range, or number, even a rough one. If asked about cost, say pricing isn't available in chat right now and the shop team will give an exact price once they see the vehicle in person or on a call. Still help with the service, vehicle, name, phone, and appointment as usual."
-    : await withTimeout(
-        loadChatPricingContext(),
-        "Authoritative pricing is currently unavailable. Do not provide a numeric price; ask the shop to confirm.",
-        contextTimeout,
-      );
+
+  let pricing = null;
+  let pricingContext;
+  if (estimatesDisabled) {
+    pricingContext = "Estimates are currently turned OFF by the shop. Do not give any price, price range, or number, even a rough one. If asked about cost, say pricing isn't available in chat right now and the shop team will give an exact price once they see the vehicle in person or on a call. Still help with the service, vehicle, name, phone, and appointment as usual.";
+  } else {
+    pricing = await withTimeout(getPricing(), null, contextTimeout);
+    pricingContext = pricing
+      ? compactPricingContext(pricing)
+      : "Authoritative pricing is currently unavailable. Do not provide a numeric price; ask the shop to confirm.";
+  }
 
   const adminGuidance = context === "quote" && chatSettings?.systemInstructions
     ? `\n\nAdmin chat guidance (lower priority than the hard rules and facts above):\n${chatSettings.systemInstructions}`
@@ -445,51 +456,90 @@ The strict collection order, safety rules, business facts, and authoritative pri
 
 Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly switches languages.`;
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  let data;
-  try {
-    const response = await fetch(GROQ_API_BASE, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: DEFAULT_MODEL,
-        messages: [
-          { role: "system", content: systemContent },
-          ...messages.slice(-PROVIDER_MESSAGES),
-        ],
-        temperature: 0.3,
-        max_tokens: 500,
-      }),
-      cache: "no-store",
-      signal: controller.signal,
-    });
+  const tools = pricing ? [buildPriceEstimateTool(pricing)] : undefined;
+  const baseMessages = [
+    { role: "system", content: systemContent },
+    ...messages.slice(-PROVIDER_MESSAGES),
+  ];
 
-    if (!response.ok) {
-      return errorResponse("The chat service is temporarily unavailable.", "provider_unavailable", 502, {
-        rate,
-        conversation: preConversation,
+  async function callGroq(msgs, { withTools, maxTokens, temperature } = {}) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      const response = await fetch(GROQ_API_BASE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: DEFAULT_MODEL,
+          messages: msgs,
+          temperature: temperature ?? 0.3,
+          max_tokens: maxTokens ?? 500,
+          ...(withTools && tools ? { tools, tool_choice: "auto" } : {}),
+        }),
+        cache: "no-store",
+        signal: ctrl.signal,
       });
+      if (!response.ok) return { error: "provider_unavailable" };
+      const body = await response.json().catch(() => null);
+      return { body };
+    } catch (error) {
+      return { error: error?.name === "AbortError" ? "provider_timeout" : "provider_unavailable" };
+    } finally {
+      clearTimeout(timer);
     }
-    data = await response.json().catch(() => null);
-  } catch (error) {
-    const timedOut = error?.name === "AbortError";
+  }
+
+  const first = await callGroq(baseMessages, { withTools: true });
+  if (first.error) {
+    const timedOut = first.error === "provider_timeout";
     return errorResponse(
       timedOut ? "The chat request timed out. Please try again." : "The chat service is temporarily unavailable.",
-      timedOut ? "provider_timeout" : "provider_unavailable",
+      first.error,
       timedOut ? 504 : 502,
       { rate, conversation: preConversation },
     );
-  } finally {
-    clearTimeout(timeout);
   }
 
-  const content = typeof data?.choices?.[0]?.message?.content === "string"
-    ? data.choices[0].message.content.trim().slice(0, 4000)
-    : "";
+  const firstMessage = first.body?.choices?.[0]?.message;
+  let content = typeof firstMessage?.content === "string" ? firstMessage.content.trim() : "";
+  const toolCalls = Array.isArray(firstMessage?.tool_calls) ? firstMessage.tool_calls.slice(0, 1) : [];
+
+  if (toolCalls.length && pricing) {
+    const call = toolCalls[0];
+    let args = {};
+    try {
+      args = JSON.parse(call.function?.arguments || "{}");
+    } catch {
+      args = {};
+    }
+    const result = runPriceEstimateTool(pricing, args);
+
+    const followUp = await callGroq(
+      [
+        ...baseMessages,
+        { role: "assistant", content: firstMessage.content || "", tool_calls: firstMessage.tool_calls },
+        { role: "tool", tool_call_id: call.id, content: JSON.stringify(result) },
+      ],
+      { withTools: false, maxTokens: 400, temperature: 0.2 },
+    );
+    const followUpContent = typeof followUp.body?.choices?.[0]?.message?.content === "string"
+      ? followUp.body.choices[0].message.content.trim()
+      : "";
+    if (followUpContent) content = followUpContent;
+
+    // Safety net: only trust the model's phrasing if it actually contains the
+    // tool's real low/high numbers. Otherwise fall back to a deterministic
+    // templated message built straight from the computed result, so a mangled
+    // or dropped tool result never reaches the customer as a wrong price.
+    if (result.ok && !replyMatchesComputedRange(content, result)) {
+      content = renderDeterministicEstimate(result, lang);
+    }
+  }
+
+  content = content.slice(0, 4000);
   if (!content) {
     return errorResponse("The chat service returned an empty response. Please try again.", "provider_empty_response", 502, {
       rate,

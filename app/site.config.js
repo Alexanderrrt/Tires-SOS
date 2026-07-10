@@ -391,8 +391,14 @@ export const COPY = {
         en: "Sedan is the 1.0 baseline. Bigger/more premium vehicles cost more.",
         es: "El sedán es la base (1.0). Vehículos más grandes o premium cuestan más.",
       },
+      brandHeading: { en: "Brand tiers", es: "Niveles de marca" },
+      brandHint: {
+        en: "Standard is the 1.0 baseline. Use this for parts where the brand itself — not the vehicle — swings the price (tires, rims, batteries).",
+        es: "Estándar es la base (1.0). Úsalo para partes donde la marca —no el vehículo— cambia el precio (llantas, rines, baterías).",
+      },
       servicesHeading: { en: "Services", es: "Servicios" },
       appliesFactor: { en: "applies vehicle factor", es: "aplica factor de vehículo" },
+      appliesBrandTier: { en: "varies by brand tier", es: "varía por nivel de marca" },
       basePrice: { en: "Base price / unit", es: "Precio base / unidad" },
       partsBase: { en: "Parts base", es: "Base de refacciones" },
       laborHours: { en: "Labor hours", es: "Horas de mano de obra" },
@@ -401,8 +407,8 @@ export const COPY = {
       perJob: { en: "per job", es: "por trabajo" },
       modelHelp: {
         perUnit: {
-          en: "Per-unit price × vehicle factor × qty, plus fees.",
-          es: "Precio por unidad × factor de vehículo × cantidad, más cargos.",
+          en: "Per-unit price × vehicle factor × brand-tier factor × qty, plus fees.",
+          es: "Precio por unidad × factor de vehículo × factor de marca × cantidad, más cargos.",
         },
         labor: {
           en: "Parts + (labor hours × vehicle factor × labor rate).",
@@ -412,7 +418,7 @@ export const COPY = {
           en: "Customer picks one option; that price is used.",
           es: "El cliente elige una opción; se usa ese precio.",
         },
-        flat: { en: "Single flat price.", es: "Un solo precio fijo." },
+        flat: { en: "Flat price × vehicle factor × brand-tier factor (if enabled).", es: "Precio fijo × factor de vehículo × factor de marca (si aplica)." },
       },
       openingEditor: { en: "Opening pricing editor…", es: "Abriendo el editor de precios…" },
     },

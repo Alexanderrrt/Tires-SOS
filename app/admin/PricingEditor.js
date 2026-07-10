@@ -844,6 +844,25 @@ export default function PricingEditor({
             </section>
 
             <section className="editor__group">
+              <h2>{t(E.brandHeading)}</h2>
+              <p className="editor__hint">{t(E.brandHint)}</p>
+              <div className="editor__grid">
+                {(pricing.brandTiers || []).map((bt, i) => (
+                  <label key={bt.id} className="editor__cell">
+                    <span>{t(bt.label)}</span>
+                    <input
+                      type="number"
+                      step="0.05"
+                      min="0"
+                      value={bt.factor}
+                      onChange={numHandler((n, v) => (n.brandTiers[i].factor = v))}
+                    />
+                  </label>
+                ))}
+              </div>
+            </section>
+
+            <section className="editor__group">
               <h2>{t(E.servicesHeading)}</h2>
               {pricing.services.map((svc, i) => (
                 <div key={svc.id} className="editor__svc">
@@ -857,6 +876,14 @@ export default function PricingEditor({
                         onChange={(e) => edit((n) => (n.services[i].appliesVehicleFactor = e.target.checked))}
                       />
                       {t(E.appliesFactor)}
+                    </label>
+                    <label className="editor__inline-check">
+                      <input
+                        type="checkbox"
+                        checked={svc.appliesBrandTier === true}
+                        onChange={(e) => edit((n) => (n.services[i].appliesBrandTier = e.target.checked))}
+                      />
+                      {t(E.appliesBrandTier)}
                     </label>
                   </div>
                   <p className="editor__hint">{t(E.modelHelp[svc.model])}</p>
