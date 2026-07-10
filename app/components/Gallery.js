@@ -1,35 +1,67 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef, useState } from "react";
 import { useT } from "../i18n/LanguageContext";
 import { COPY, REELS, SITE } from "../site.config";
 import Icon from "./Icons";
 import Reveal from "./Reveal";
 
+// Instagram's public per-post thumbnail — works for any public permalink
+// without needing API credentials. Falls back to a branded placeholder (no
+// broken-image icon) if it 404s or Instagram blocks the request.
+function thumbnailUrl(permalink) {
+  const base = permalink.endsWith("/") ? permalink : `${permalink}/`;
+  return `${base}media/?size=l`;
+}
+
+function ReelCard({ permalink, index }) {
+  const [failed, setFailed] = useState(false);
+
+  return (
+    <a
+      href={permalink}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="reel-card reveal-item"
+      style={{ "--d": `${index * 80}ms` }}
+    >
+      {!failed ? (
+        <img
+          className="reel-card__thumb"
+          src={thumbnailUrl(permalink)}
+          alt="Tires SOS Rescue Instagram reel"
+          loading="lazy"
+          decoding="async"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <div className="reel-card__fallback">
+          <Icon name="instagram" />
+        </div>
+      )}
+      <span className="reel-card__scrim" />
+      <span className="reel-card__play" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8 5.5v13l11-6.5-11-6.5z" />
+        </svg>
+      </span>
+      <span className="reel-card__badge">
+        <Icon name="instagram" />
+        Watch on Instagram
+      </span>
+    </a>
+  );
+}
+
 export default function Gallery() {
   const t = useT();
   const trackRef = useRef(null);
-  const processed = useRef(false);
-
-  useEffect(() => {
-    if (processed.current) return;
-    processed.current = true;
-
-    const id = setInterval(() => {
-      if (window.instgrm) {
-        window.instgrm.Embeds.process();
-        clearInterval(id);
-      }
-    }, 200);
-
-    return () => clearInterval(id);
-  }, []);
 
   const scroll = (dir) => {
     const track = trackRef.current;
     if (!track) return;
     const card = track.querySelector(".reel-card");
-    const w = card ? card.offsetWidth + 16 : 320;
+    const w = card ? card.offsetWidth + 16 : 280;
     track.scrollBy({ left: dir * w, behavior: "smooth" });
   };
 
@@ -47,17 +79,7 @@ export default function Gallery() {
           </button>
           <div className="reels-track" ref={trackRef}>
             {REELS.map((permalink, i) => (
-              <div
-                key={permalink}
-                className="reel-card reveal-item"
-                style={{ "--d": `${i * 80}ms` }}
-              >
-                <blockquote
-                  className="instagram-media"
-                  data-instgrm-permalink={permalink}
-                  data-instgrm-version="14"
-                />
-              </div>
+              <ReelCard key={permalink} permalink={permalink} index={i} />
             ))}
           </div>
           <button className="reels-arrow reels-arrow--right" onClick={() => scroll(1)} aria-label="Next reel">

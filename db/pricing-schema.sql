@@ -352,8 +352,9 @@ begin
   if v_lead.id is null then
     raise exception 'CHAT_RESERVATION_LEAD_NOT_FOUND' using errcode = 'P0001';
   end if;
-  if btrim(v_lead.customer_name) = '' or btrim(v_lead.phone) = '' then
-    raise exception 'CHAT_RESERVATION_CONTACT_REQUIRED' using errcode = 'P0001';
+  if btrim(v_lead.service) = '' or btrim(v_lead.vehicle) = '' or
+     btrim(v_lead.customer_name) = '' or btrim(v_lead.phone) = '' then
+    raise exception 'CHAT_RESERVATION_DETAILS_REQUIRED' using errcode = 'P0001';
   end if;
 
   -- Every reservation/block operation on a date uses this lock, closing the race

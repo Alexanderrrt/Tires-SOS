@@ -26,7 +26,10 @@ export async function GET() {
   }
 
   const records = await getChatRecords();
-  return Response.json({ ...records, storeConfigured: recordsStoreConfigured() });
+  return Response.json(
+    { ...records, storeConfigured: recordsStoreConfigured() },
+    { headers: { "Cache-Control": "no-store, max-age=0" } },
+  );
 }
 
 export async function PATCH(request) {

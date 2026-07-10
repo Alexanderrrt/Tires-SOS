@@ -215,6 +215,13 @@ export default function AppointmentCalendar({ appointments, blockedSlots = [], t
   const handleCreateSubmit = useCallback(() => {
     const date = createForm.date.trim();
     const time = createForm.time;
+    if (!createForm.customerName.trim() || !createForm.phone.trim() || !createForm.service.trim() || !createForm.vehicle.trim()) {
+      setCreateError(t({
+        en: "Name, phone, service, and vehicle year/make/model are required.",
+        es: "Nombre, teléfono, servicio, y año/marca/modelo del vehículo son requeridos.",
+      }));
+      return;
+    }
     if (!date || !time) {
       setCreateError(t({ en: "Date and time are required.", es: "Fecha y hora son requeridas." }));
       return;
@@ -234,7 +241,7 @@ export default function AppointmentCalendar({ appointments, blockedSlots = [], t
     });
     setShowCreateForm(false);
     setCreateForm({ customerName: "", phone: "", service: "", vehicle: "", notes: "", date: "", time: "" });
-  }, [createForm, onCreate, t]);
+  }, [createForm, onCreate, t, todayStr]);
 
   const handleOpenCreate = useCallback(() => {
     setShowCreateForm((prev) => !prev);

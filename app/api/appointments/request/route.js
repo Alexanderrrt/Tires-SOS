@@ -4,7 +4,7 @@ import {
   verifyChatSession,
 } from "../../../../lib/chat-session";
 import { checkChatRateLimits, getClientIp } from "../../../../lib/chat-rate-limit";
-import { reserveAppointment } from "../../../../lib/chat-records-store";
+import { getLeadBySession, reserveAppointment } from "../../../../lib/chat-records-store";
 import { deliverLeadNotification } from "../../../../lib/lead-notification-service";
 import { validateShopSlot } from "../../../../lib/appointment-slots";
 
@@ -39,7 +39,7 @@ function reservationErrorStatus(error) {
   const code = typeof error?.code === "string" ? error.code : "";
   const message = typeof error?.message === "string" ? error.message.toLowerCase() : "";
   if (code === "slot_unavailable" || /booked|blocked|unavailable|conflict|unique/.test(message)) return 409;
-  if (code === "lead_incomplete" || /name|phone|contact/.test(message)) return 422;
+  if (code === "lead_incomplete" || /service|vehicle|name|phone|contact|details/.test(message)) return 422;
   return 503;
 }
 
@@ -80,6 +80,33 @@ export async function POST(request) {
     return json({ ok: false, error: validation.message, code: validation.code }, 400);
   }
 
+  let lead;
+  try {
+    lead = await getLeadBySession(session.id);
+  } catch {
+    return json(
+      { ok: false, error: "Appointment storage is temporarily unavailable.", code: "records_unavailable" },
+      503,
+    );
+  }
+  const missingFields = [
+    !lead?.service && "service",
+    !lead?.vehicle && "vehicle",
+    !lead?.customerName && "name",
+    !lead?.phone && "phone",
+  ].filter(Boolean);
+  if (missingFields.length) {
+    return json(
+      {
+        ok: false,
+        error: "Please provide the service, vehicle year/make/model, name, and phone number before selecting a time.",
+        code: "lead_incomplete",
+        missingFields,
+      },
+      422,
+    );
+  }
+
   let reservation;
   try {
     reservation = await reserveAppointment(session.id, date, time);
@@ -91,7 +118,7 @@ export async function POST(request) {
         error: status === 409
           ? "That time is no longer available."
           : status === 422
-            ? "Please provide your name and phone number before selecting a time."
+            ? "Please provide the service, vehicle year/make/model, name, and phone number before selecting a time."
             : "The appointment request could not be saved.",
         code: status === 409 ? "slot_unavailable" : status === 422 ? "lead_incomplete" : "reservation_failed",
       },
