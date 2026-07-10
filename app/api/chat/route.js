@@ -324,7 +324,7 @@ function isBookingConversation(messages) {
   );
   if (bookingPromptAlreadyStarted) return true;
 
-  const priceOrInfoQuestion = /(how much|price|cost|quote|cuanto|precio|cotiz|do you (?:offer|do|have|provide)|can you (?:do|provide)|tienen|ofrecen|hacen)/i.test(latest);
+  const priceOrInfoQuestion = /(how much|price|cost|quote|cuanto|precio|cotiz|\bdo you\b|\bcan you\b|\bdoes\b|tienen|ofrecen|hacen)/i.test(latest);
   const directNeed = /(i need|need to|i want|looking for|my car needs|necesito|quiero|ocupo|busco|mi carro necesita)/i.test(latest);
   const urgentNeed = /(flat tire|tire is flat|ponchad|help today|ayuda hoy|me pueden ayudar hoy)/i.test(latest);
   const service = detectService([{ role: "user", content: latestUserMessage(messages) }]);
