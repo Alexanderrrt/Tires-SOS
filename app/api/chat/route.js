@@ -331,6 +331,7 @@ function contactState(messages) {
 
 function buildConversationResult(messages, captureResult) {
   const { hasName, hasPhone, userText } = contactState(messages);
+  const hasVehicle = Boolean(extractVehicle(messages));
   const latestUser = [...messages].reverse().find((message) => message.role === "user")?.content || "";
   const requested = /(appointment|book|booking|schedule|come in|drop off|cita|agendar|programar|reservar|puedo ir|pasar)/i.test(
     folded(userText),
@@ -341,24 +342,52 @@ function buildConversationResult(messages, captureResult) {
     );
   const leadCaptured = captureResult?.captured === true;
   const completed = leadCaptured && hasName && hasPhone && timeSelected;
-  const missingFields = [!hasName && "name", !hasPhone && "phone"].filter(Boolean);
+  const missingFields = [!hasVehicle && "vehicle", !hasName && "name", !hasPhone && "phone"].filter(Boolean);
   const actionType = completed
     ? "lead_ready"
-    : hasName && hasPhone
+    : hasVehicle && hasName && hasPhone
       ? "show_availability"
       : "collect_details";
 
   return {
     action: { type: actionType, missingFields },
     status: {
-      phase: completed ? "request_received" : hasName && hasPhone ? "ready_for_time" : "collecting",
+      phase: completed ? "request_received" : hasVehicle && hasName && hasPhone ? "ready_for_time" : "collecting",
       completed,
       leadCaptured,
       persisted: captureResult?.persisted === true,
       contact: { name: hasName, phone: hasPhone },
+      vehicle: { present: hasVehicle },
       appointment: { requested: requested || timeSelected, timeSelected },
     },
   };
+}
+
+function strictBookingReply({ lang, messages, content, isAppointmentFlow }) {
+  if (!isAppointmentFlow) return content;
+  const vehicle = extractVehicle(messages);
+  const { hasName, hasPhone } = contactState(messages);
+  const latest = latestUserMessage(messages);
+  const wantsVehicle = !vehicle;
+  const wantsContact = vehicle && (!hasName || !hasPhone);
+  const readyForTimes = vehicle && hasName && hasPhone;
+  if (readyForTimes) {
+    return lang === "es"
+      ? "Perfecto, gracias. Ya tengo todo y te muestro los horarios disponibles."
+      : "Perfect, thanks. I’ve got everything I need, and I’m pulling up available times for you.";
+  }
+  if (wantsVehicle) {
+    return lang === "es"
+      ? "Claro. Necesito el a\u00f1o, marca y modelo del veh\u00edculo para seguir con la cita."
+      : "Absolutely. I need the vehicle year, make, and model to keep going with the appointment.";
+  }
+  if (wantsContact) {
+    return lang === "es"
+      ? "Gracias. Ahora solo necesito tu nombre y tu n\u00famero de tel\u00e9fono para seguir con la cita."
+      : "Thanks. Now I just need your name and phone number to keep going with the appointment.";
+  }
+  if (/follow up|seguimiento|contact|llamar|called?/.test(folded(latest))) return content;
+  return content;
 }
 
 function latestUserMessage(messages) {
@@ -741,6 +770,17 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
       content = renderDeterministicEstimate(result, lang);
     }
   }
+
+  const latestText = latestUserMessage(messages);
+  const appointmentIntent = /(appointment|book|booking|schedule|come in|drop off|cita|agendar|programar|reservar|puedo ir|pasar)/i.test(
+    folded(latestText),
+  );
+  content = strictBookingReply({
+    lang,
+    messages,
+    content,
+    isAppointmentFlow: appointmentIntent || preConversation.status.appointment.requested || preConversation.status.contact.name || preConversation.status.contact.phone,
+  });
 
   if (shouldBlockQuantityQuestion(latestUserMessage(messages), content)) {
     content = quantityGuardReply(lang, latestUserMessage(messages));
