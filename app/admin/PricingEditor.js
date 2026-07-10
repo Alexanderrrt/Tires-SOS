@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLanguage, useT } from "../i18n/LanguageContext";
 import { COPY } from "../site.config";
@@ -641,6 +642,9 @@ export default function PricingEditor({
             <button type="button" className="lang-toggle" onClick={toggleLang} aria-label="Toggle language">
               {lang === "en" ? "ES" : "EN"}
             </button>
+            <Link className="btn btn--ghost btn--small" href="/">
+              Home
+            </Link>
             <button className="btn btn--ghost btn--small" onClick={logout} disabled={loggingOut || saving}>
               {loggingOut ? t(E.loggingOut) : t(E.logOut)}
             </button>
