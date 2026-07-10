@@ -373,7 +373,7 @@ export default function ChatBot({
   useEffect(() => {
     if (mode !== "quote") return;
     let alive = true;
-    fetch("/api/chat-settings")
+    fetch("/api/chat-settings", { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : null))
       .then((settings) => {
         if (alive && settings) setAdminChatSettings(settings);

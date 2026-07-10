@@ -17,6 +17,8 @@ import {
 } from "../../../lib/chat-session";
 import { checkChatRateLimits, getClientIp } from "../../../lib/chat-rate-limit";
 import { recordGroqResponse, recordGroqError } from "../../../lib/groq-status";
+import { MAKES } from "../../../lib/vehicles";
+import { formatMoney } from "../../../lib/quote";
 
 const GROQ_API_BASE = "https://api.groq.com/openai/v1/chat/completions";
 const DEFAULT_MODEL = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
@@ -118,7 +120,7 @@ Respond in ${lang === "es" ? "Spanish" : "English"}.`;
 }
 
 function buildFollowUpSystemPrompt(lang) {
-  return `You relay a computed price result (given as JSON) to the customer in ${lang === "es" ? "Spanish" : "English"}. Use exactly the low/high figures given — never invent, round, or recompute them. One short, friendly sentence, framed as an estimate the shop confirms in person. Do not mention "tool," "JSON," or that a calculation happened. Do not ask a question.`;
+  return `You relay a computed price result (given as JSON) to the customer in ${lang === "es" ? "Spanish" : "English"}. Use exactly the low/high figures given — never invent, round, or recompute them. One short, friendly sentence, framed as an estimate the shop confirms in person. Only mention a vehicle class if the JSON explicitly contains vehicleClass. Do not mention "tool," "JSON," or that a calculation happened. Do not ask a question.`;
 }
 
 class ChatInputError extends Error {
@@ -315,13 +317,15 @@ function isBookingConversation(messages) {
   );
   if (explicitBooking) return true;
 
-  const bookingPromptAlreadyStarted = messages.some(
-    (message) =>
-      message.role === "assistant" &&
-      /(year.*make.*model|ano.*marca.*modelo|name.*appointment|nombre.*cita|phone number|numero de telefono|horarios disponibles|available times)/i.test(
-        folded(message.content),
-      ),
-  );
+  const conversationIncludesPriceQuestion = /(how much|price|cost|quote|cuanto|precio|cotiz)/i.test(folded(userText));
+  const bookingPromptAlreadyStarted = messages.some((message) => {
+    if (message.role !== "assistant") return false;
+    const text = folded(message.content);
+    const appointmentCue = /(appointment|cita)/i.test(text);
+    const fieldCue = /(year.*make.*model|ano.*marca.*modelo|name|nombre|phone number|numero de telefono|horarios disponibles|available times)/i.test(text);
+    const bookingVehiclePrompt = /(year.*make.*model|ano.*marca.*modelo)/i.test(text) && !conversationIncludesPriceQuestion;
+    return (appointmentCue && fieldCue) || bookingVehiclePrompt;
+  });
   if (bookingPromptAlreadyStarted) return true;
 
   const priceOrInfoQuestion = /(how much|price|cost|quote|cuanto|precio|cotiz|\bdo you\b|\bcan you\b|\bdoes\b|tienen|ofrecen|hacen)/i.test(latest);
@@ -329,7 +333,166 @@ function isBookingConversation(messages) {
   const urgentNeed = /(flat tire|tire is flat|ponchad|help today|ayuda hoy|me pueden ayudar hoy)/i.test(latest);
   const service = detectService([{ role: "user", content: latestUserMessage(messages) }]);
   const bareService = Boolean(service) && latest.split(/\s+/).filter(Boolean).length <= 6;
-  return (directNeed || urgentNeed || bareService) && !priceOrInfoQuestion && Boolean(service);
+  return (directNeed || urgentNeed || bareService) && (!priceOrInfoQuestion || urgentNeed) && Boolean(service);
+}
+
+function serviceAvailabilityReply(lang, messages) {
+  const latest = folded(latestUserMessage(messages));
+  if (!/(do you (?:do|offer|have|provide)|can you (?:do|provide)|hacen|ofrecen|tienen)/i.test(latest)) return "";
+  const service = detectService([{ role: "user", content: latestUserMessage(messages) }]);
+  if (!service) return "";
+  const labels = {
+    "Oil change": { en: "oil changes", es: "cambios de aceite" },
+    "Flat repair": { en: "flat-tire repair", es: "reparación de ponchaduras" },
+    "Tire rotation": { en: "tire rotations", es: "rotación de llantas" },
+    Tires: { en: "tire service", es: "servicio de llantas" },
+    Brakes: { en: "brake service", es: "servicio de frenos" },
+    Alignment: { en: "wheel alignments", es: "alineación" },
+    Battery: { en: "battery service", es: "servicio de baterías" },
+    "Rims / wheels": { en: "rim and wheel service", es: "servicio de rines" },
+    Inspection: { en: "vehicle inspections", es: "inspecciones" },
+    Diagnostic: { en: "diagnostics", es: "diagnóstico" },
+    Maintenance: { en: "maintenance service", es: "mantenimiento" },
+  };
+  const label = labels[service] || { en: "that service", es: "ese servicio" };
+  return lang === "es"
+    ? `Sí, ofrecemos ${label.es}. Puedes venir sin cita o te ayudo a agendar.`
+    : `Yes, we offer ${label.en}. Walk-ins are welcome, or I can help you book an appointment.`;
+}
+
+function isPriceQuestion(messages) {
+  return /(how much|price|cost|quote|cuanto|precio|cotiz)/i.test(folded(latestUserMessage(messages)));
+}
+
+function hasPriceQuestion(messages) {
+  const userText = messages
+    .filter((message) => message.role === "user")
+    .map((message) => message.content)
+    .join(" ");
+  return /(how much|price|cost|quote|cuanto|precio|cotiz)/i.test(folded(userText));
+}
+
+const PRICE_SERVICE_IDS = {
+  "Oil change": "oil-change",
+  "Flat repair": "flat-repair",
+  "Tire rotation": "tire-rotation",
+  "Wheel balancing": "wheel-balancing",
+  Tires: "new-tires",
+  Brakes: "brakes",
+  Alignment: "alignment",
+  Battery: "battery",
+  "Rims / wheels": "rims",
+  Suspension: "suspension",
+  TPMS: "tpms",
+};
+
+function compactKey(value) {
+  return folded(value).replace(/[^a-z0-9]/g, "");
+}
+
+function vehicleClassForText(vehicle, pricing) {
+  const key = compactKey(vehicle);
+  const make = [...MAKES]
+    .sort((a, b) => compactKey(b.name?.en || b.id).length - compactKey(a.name?.en || a.id).length)
+    .find((item) => {
+      const nameKey = compactKey(item.name?.en || "");
+      const idKey = compactKey(item.id || "");
+      return (nameKey && key.startsWith(nameKey)) || (idKey && key.startsWith(idKey));
+    });
+  const classId = make?.classId || "";
+  return pricing.vehicleClasses?.some((item) => item.id === classId) ? classId : "";
+}
+
+function quantityFromConversation(messages, serviceName) {
+  const values = {
+    one: 1, uno: 1, una: 1,
+    two: 2, dos: 2,
+    three: 3, tres: 3,
+    four: 4, cuatro: 4,
+  };
+  const parse = (text) => {
+    const match = folded(text).match(/\b(1|2|3|4|one|two|three|four|uno|una|dos|tres|cuatro)\b/);
+    if (!match) return null;
+    return Number(match[1]) || values[match[1]] || null;
+  };
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (message.role !== "user") continue;
+    const sameService = detectService([{ role: "user", content: message.content }]) === serviceName;
+    const quantityPrompt = /(how many|cuantas|cuantos)/i.test(folded(messages[index - 1]?.content || ""));
+    if (sameService || quantityPrompt) {
+      const quantity = parse(message.content);
+      if (quantity) return quantity;
+    }
+  }
+  return null;
+}
+
+function mergeVehicleClassResults(pricing, args) {
+  const results = (pricing.vehicleClasses || []).map((vehicleClass) =>
+    runPriceEstimateTool(pricing, { ...args, vehicleClass: vehicleClass.id }),
+  );
+  const valid = results.filter((result) => result.ok);
+  if (!valid.length) return results[0] || { ok: false };
+  const low = Math.min(...valid.map((result) => result.low));
+  const high = Math.max(...valid.map((result) => result.high));
+  return {
+    ...valid[0],
+    vehicleClass: undefined,
+    low,
+    high,
+    lowFormatted: formatMoney(low, valid[0].currency),
+    highFormatted: formatMoney(high, valid[0].currency),
+  };
+}
+
+function deterministicPriceReply(pricing, messages, lang) {
+  if (!pricing || !hasPriceQuestion(messages)) return null;
+  const serviceName = detectService(messages);
+  const serviceId = PRICE_SERVICE_IDS[serviceName];
+  const service = pricing.services?.find((item) => item.id === serviceId);
+  if (!service) return null;
+
+  if (service.chatQuotable === false) {
+    return lang === "es"
+      ? "El precio de ese servicio varía según el vehículo. El taller te confirmará el precio exacto después de revisarlo."
+      : "The price for that service varies by vehicle. The shop will confirm the exact price after checking it.";
+  }
+
+  const vehicle = extractVehicle(messages);
+  if (service.appliesVehicleFactor && !vehicle) {
+    return lang === "es"
+      ? "Para darte un estimado correcto, ¿cuál es el año, la marca y el modelo de tu vehículo?"
+      : "To give you an accurate estimate, what is the year, make, and model of your vehicle?";
+  }
+
+  const quantity = service.model === "perUnit" ? quantityFromConversation(messages, serviceName) : null;
+  if (service.model === "perUnit" && !quantity) {
+    return lang === "es"
+      ? `¿Cuántos ${service.label?.es?.toLowerCase() || "artículos"} necesitas cotizar?`
+      : `How many ${service.label?.en?.toLowerCase() || "items"} do you need priced?`;
+  }
+
+  const userText = folded(messages.filter((message) => message.role === "user").map((message) => message.content).join(" "));
+  const namedBrand = (pricing.tireBrands || []).find((brand) => userText.includes(folded(brand.name || "")));
+  const brandTier = namedBrand?.tier || (/\b(premium|alta gama)\b/.test(userText) ? "premium" : /\b(economy|budget|economica|barata)\b/.test(userText) ? "economy" : "standard");
+  let optionId;
+  if (service.id === "oil-change") {
+    if (/(full synthetic|sintetico completo)/.test(userText)) optionId = "full-synthetic";
+    else if (/(synthetic blend|semi sintetico)/.test(userText)) optionId = "synthetic-blend";
+    else if (/(conventional|convencional)/.test(userText)) optionId = "conventional";
+  }
+
+  const vehicleClass = vehicle ? vehicleClassForText(vehicle, pricing) : "";
+  const args = {
+    ...(vehicleClass ? { vehicleClass } : {}),
+    brandTier,
+    services: [{ id: service.id, ...(quantity ? { qty: quantity } : {}), ...(optionId ? { optionId } : {}) }],
+  };
+  const result = service.appliesVehicleFactor && !vehicleClass
+    ? mergeVehicleClassResults(pricing, args)
+    : runPriceEstimateTool(pricing, args);
+  return result.ok ? renderDeterministicEstimate(result, lang) : null;
 }
 
 function buildConversationResult(messages, captureResult) {
@@ -382,8 +545,8 @@ function enforceBookingSequence({ lang, messages, content, isAppointmentFlow }) 
   }
   if (!fields.vehicle) {
     return lang === "es"
-      ? "Perfecto. ¿Cuál es el año, la marca y el modelo de tu vehículo?"
-      : "Great. What is the year, make, and model of your vehicle?";
+      ? "Perfecto. ¿Cuál es el año, la marca y el modelo de tu vehículo para la cita?"
+      : "Great. What is the year, make, and model of the vehicle for the appointment?";
   }
   if (!fields.customerName) {
     return lang === "es"
@@ -572,6 +735,37 @@ export async function POST(request) {
     );
   }
 
+  const serviceInfo = serviceAvailabilityReply(lang, messages);
+  if (serviceInfo) {
+    return json(
+      {
+        message: serviceInfo,
+        action: preConversation.action,
+        status: preConversation.status,
+      },
+      { rate },
+    );
+  }
+
+  const timeoutMs = requestTimeoutMs();
+  const contextTimeout = Math.min(timeoutMs, 5_000);
+  const chatSettings = await withTimeout(getChatSettings(), null, contextTimeout);
+  const estimatesDisabled = chatSettings?.disableEstimates === true;
+
+  if (estimatesDisabled && isPriceQuestion(messages)) {
+    const content = lang === "es"
+      ? "Por ahora no damos precios por chat. El taller confirmará el precio exacto después de revisar tu vehículo."
+      : "Pricing is not available in chat right now. The shop will confirm the exact price after checking your vehicle.";
+    return json(
+      {
+        message: content,
+        action: preConversation.action,
+        status: preConversation.status,
+      },
+      { rate },
+    );
+  }
+
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return errorResponse("Chat is temporarily unavailable.", "provider_not_configured", 503, {
@@ -579,11 +773,6 @@ export async function POST(request) {
       conversation: preConversation,
     });
   }
-
-  const timeoutMs = requestTimeoutMs();
-  const contextTimeout = Math.min(timeoutMs, 5_000);
-  const chatSettings = await withTimeout(getChatSettings(), null, contextTimeout);
-  const estimatesDisabled = chatSettings?.disableEstimates === true;
 
   let pricing = null;
   let pricingContext;
@@ -594,6 +783,18 @@ export async function POST(request) {
     pricingContext = pricing
       ? compactPricingContext(pricing)
       : "Authoritative pricing is currently unavailable. Do not provide a numeric price; ask the shop to confirm.";
+  }
+
+  const directPriceReply = !estimatesDisabled ? deterministicPriceReply(pricing, messages, lang) : null;
+  if (directPriceReply) {
+    return json(
+      {
+        message: directPriceReply,
+        action: preConversation.action,
+        status: preConversation.status,
+      },
+      { rate },
+    );
   }
 
   const adminGuidance = context === "quote" && chatSettings?.systemInstructions
@@ -714,7 +915,8 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
   const asksToPickOption = content.includes("?") &&
     (optionLabels.filter((l) => content.toLowerCase().includes(String(l).toLowerCase())).length >= 2 ||
       shouldBlockOilTypeQuestion(latestUserMessage(messages), content));
-  if (!toolCalls.length && pricing && (looksLikePrice.test(content) || asksToPickOption)) {
+  const unresolvedKnownPriceRequest = hasPriceQuestion(messages) && Boolean(detectService(messages));
+  if (!toolCalls.length && pricing && (looksLikePrice.test(content) || asksToPickOption || unresolvedKnownPriceRequest)) {
     const retryMessages = [
       { role: "system", content: buildForcedRetrySystemPrompt({ pricingContext, estimatesRule, lang }) },
       ...messages.slice(-PROVIDER_MESSAGES),
@@ -753,26 +955,42 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
     } catch {
       args = {};
     }
-    const result = runPriceEstimateTool(pricing, args);
-
-    const followUp = await callGroq(
-      [
-        { role: "system", content: buildFollowUpSystemPrompt(lang) },
-        { role: "user", content: JSON.stringify(result) },
-      ],
-      { withTools: false, maxTokens: 150, temperature: 0.2 },
+    const requestedServiceIds = Array.isArray(args?.services)
+      ? args.services.map((item) => item?.id).filter(Boolean)
+      : [];
+    const needsVehicle = requestedServiceIds.some(
+      (id) => pricing.services?.find((service) => service.id === id)?.appliesVehicleFactor === true,
     );
-    const followUpContent = typeof followUp.body?.choices?.[0]?.message?.content === "string"
-      ? followUp.body.choices[0].message.content.trim()
-      : "";
-    if (followUpContent) content = followUpContent;
 
-    // Safety net: only trust the model's phrasing if it actually contains the
-    // tool's real low/high numbers. Otherwise fall back to a deterministic
-    // templated message built straight from the computed result, so a mangled
-    // or dropped tool result never reaches the customer as a wrong price.
-    if (result.ok && !replyMatchesComputedRange(content, result)) {
-      content = renderDeterministicEstimate(result, lang);
+    if (needsVehicle && !extractVehicle(messages)) {
+      content = lang === "es"
+        ? "Para darte un estimado correcto, ¿cuál es el año, la marca y el modelo de tu vehículo?"
+        : "To give you an accurate estimate, what is the year, make, and model of your vehicle?";
+    } else {
+      const result = runPriceEstimateTool(pricing, args);
+      const resultForReply = extractVehicle(messages)
+        ? result
+        : { ...result, vehicleClass: undefined };
+
+      const followUp = await callGroq(
+        [
+          { role: "system", content: buildFollowUpSystemPrompt(lang) },
+          { role: "user", content: JSON.stringify(resultForReply) },
+        ],
+        { withTools: false, maxTokens: 150, temperature: 0.2 },
+      );
+      const followUpContent = typeof followUp.body?.choices?.[0]?.message?.content === "string"
+        ? followUp.body.choices[0].message.content.trim()
+        : "";
+      if (followUpContent) content = followUpContent;
+
+      // Safety net: only trust the model's phrasing if it actually contains the
+      // tool's real low/high numbers. Otherwise fall back to a deterministic
+      // templated message built straight from the computed result, so a mangled
+      // or dropped tool result never reaches the customer as a wrong price.
+      if (result.ok && !replyMatchesComputedRange(content, result)) {
+        content = renderDeterministicEstimate(result, lang);
+      }
     }
   }
 
