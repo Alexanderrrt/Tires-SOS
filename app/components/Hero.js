@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useT } from "../i18n/LanguageContext";
 import { COPY, SITE } from "../site.config";
 import Icon from "./Icons";
+import PirelliBadge from "./PirelliBadge";
 
 function TreadRing() {
   return (
@@ -132,9 +133,7 @@ export default function Hero() {
             <div className="hero__collab hero__enter" style={{ "--d": "420ms" }}>
               <p className="hero__collab-kicker">{t(COPY.hero.collab.kicker)}</p>
               <div className="hero__collab-logos" aria-label={t(COPY.hero.collab.title)}>
-                <img src="/brands/pirelli.svg" alt="Pirelli" />
-                <span className="hero__collab-x">×</span>
-                <img src="/brands/ironman.svg" alt="Ironman" />
+                <PirelliBadge />
               </div>
               <p className="hero__collab-title">{t(COPY.hero.collab.title)}</p>
               <p className="hero__collab-body">{t(COPY.hero.collab.body)}</p>

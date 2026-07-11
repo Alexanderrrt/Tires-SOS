@@ -5,6 +5,7 @@ import { useT } from "../i18n/LanguageContext";
 import { COPY, SERVICES } from "../site.config";
 import Icon from "./Icons";
 import Reveal from "./Reveal";
+import PirelliBadge from "./PirelliBadge";
 
 export default function Services() {
   const t = useT();
@@ -16,6 +17,7 @@ export default function Services() {
         <Reveal>
           <h2 className="section__heading">{t(COPY.services.heading)}</h2>
           <p className="section__sub">{t(COPY.services.sub)}</p>
+          <PirelliBadge compact className="section__pirelli" />
         </Reveal>
 
         <Reveal className="services-grid">

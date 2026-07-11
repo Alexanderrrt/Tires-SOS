@@ -61,16 +61,13 @@ export const SITE = {
 
 export const BRAND_SHOWCASE = [
   {
-    name: "Pirelli x Ironman",
-    logos: [
-      { src: "/brands/pirelli.svg", alt: "Pirelli" },
-      { src: "/brands/ironman.svg", alt: "Ironman" },
-    ],
+    name: "Pirelli",
+    logo: "/brands/pirelli.svg",
     tagline: {
-      en: "Official collaborator spotlight. Ask about Pirelli x Ironman through chat or WhatsApp.",
-      es: "Colaboración oficial destacada. Pregunta por Pirelli x Ironman por chat o WhatsApp.",
+      en: "Pirelli performance, prominently featured at Tires SOS Rescue.",
+      es: "Rendimiento Pirelli, destacado en Tires SOS Rescue.",
     },
-    collab: true,
+    featured: true,
   },
   {
     name: "Continental",
@@ -246,7 +243,7 @@ export const SERVICES = [
 // Strings for the scrolling marquee strip. Deliberately mixed EN/ES —
 // it reads as one bilingual banner, so it does not switch with the toggle.
 export const MARQUEE_ITEMS = [
-  "Pirelli x Ironman",
+  "Pirelli",
   "Continental",
   "Dunlop",
   "Falken",
@@ -279,11 +276,11 @@ export const OWNERS_RIDE = {
     es: "Cada carro que entra al taller recibe exactamente el mismo trato. Tu carro es nuestro carro, parce.",
   },
   collab: {
-    kicker: { en: "Official collaboration", es: "Colaboración oficial" },
-    title: { en: "Pirelli x Ironman", es: "Pirelli x Ironman" },
+    kicker: { en: "Pirelli spotlight", es: "Destacado Pirelli" },
+    title: { en: "Performance starts here", es: "El rendimiento empieza aqui" },
     body: {
-      en: "Brand spotlight across the site. Ask about these tire lines by chat or WhatsApp.",
-      es: "Marca destacada en todo el sitio. Pregunta por estas llantas por chat o WhatsApp.",
+      en: "Ask us about Pirelli tires through chat or WhatsApp.",
+      es: "Pregunta por llantas Pirelli por chat o WhatsApp.",
     },
   },
 };
@@ -413,11 +410,11 @@ export const COPY = {
       es: "Snap Finance y Afterpay disponibles — pagos flexibles a tu manera",
     },
     collab: {
-      kicker: { en: "Official collaborator", es: "Colaborador oficial" },
-      title: { en: "Pirelli x Ironman", es: "Pirelli x Ironman" },
+      kicker: { en: "Pirelli spotlight", es: "Destacado Pirelli" },
+      title: { en: "Performance starts here", es: "El rendimiento empieza aqui" },
       body: {
-        en: "Brand spotlight across the site. Ask about these tire lines by chat or WhatsApp only.",
-        es: "Marca destacada en todo el sitio. Pregunta por estas llantas solo por chat o WhatsApp.",
+        en: "Ask us about Pirelli tires through chat or WhatsApp.",
+        es: "Pregunta por llantas Pirelli por chat o WhatsApp.",
       },
       cta: { en: "Ask by WhatsApp", es: "Pregunta por WhatsApp" },
     },
@@ -450,10 +447,10 @@ export const COPY = {
       en: "Flexible financing and rewards to keep you on the road.",
       es: "Financiamiento flexible y recompensas para mantenerte en el camino.",
     },
-    collabTitle: { en: "Official collaborator", es: "Colaborador oficial" },
+    collabTitle: { en: "Pirelli performance", es: "Rendimiento Pirelli" },
     collabBody: {
-      en: "Pirelli x Ironman stays featured across the site. All brand questions go through chat or WhatsApp.",
-      es: "Pirelli x Ironman aparece destacado en todo el sitio. Todas las preguntas de marca van por chat o WhatsApp.",
+      en: "Premium engineering, confident grip, and a tire built for the road ahead.",
+      es: "Ingenieria premium, agarre confiable y llantas hechas para el camino.",
     },
     collabCta: { en: "Ask on WhatsApp", es: "Pregunta por WhatsApp" },
     financeTitle: { en: "Buy Now, Pay Later", es: "Compra Ahora, Paga Después" },

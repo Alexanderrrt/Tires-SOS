@@ -3,6 +3,7 @@
 import { useT } from "../i18n/LanguageContext";
 import { COPY, SITE } from "../site.config";
 import Reveal from "./Reveal";
+import PirelliBadge from "./PirelliBadge";
 
 export default function Footer() {
   const t = useT();
@@ -28,6 +29,7 @@ export default function Footer() {
               </span>
             </div>
           </div>
+          <PirelliBadge compact className="footer__pirelli" />
           {SITE.locations.map((loc) => (
             <p key={loc.id}>{loc.full}</p>
           ))}

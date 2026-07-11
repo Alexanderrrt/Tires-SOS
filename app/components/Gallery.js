@@ -5,6 +5,7 @@ import { useT } from "../i18n/LanguageContext";
 import { COPY, REELS, SITE } from "../site.config";
 import Icon from "./Icons";
 import Reveal from "./Reveal";
+import PirelliBadge from "./PirelliBadge";
 
 // Instagram blocks both direct browser hotlinks (ERR_BLOCKED_BY_ORB) and
 // server-side scraping of its thumbnail/og:image (bot-walled shell page) for
@@ -190,6 +191,7 @@ export default function Gallery() {
         <Reveal>
           <h2 className="section__heading">{t(COPY.gallery.heading)}</h2>
           <p className="section__sub">{t(COPY.gallery.sub)}</p>
+          <PirelliBadge compact className="section__pirelli" />
         </Reveal>
 
         <Reveal className="reels-wrapper">

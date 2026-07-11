@@ -96,7 +96,7 @@ export default function BrandPopups() {
 
         <p className="brand-popup__kicker">{t(WE_CARRY)}</p>
         <BrandLogo brand={brand} />
-        <p className={`brand-popup__tagline ${brand.collab ? "brand-popup__tagline--collab" : ""}`}>
+        <p className={`brand-popup__tagline ${brand.featured ? "brand-popup__tagline--featured" : ""}`}>
           {t(brand.tagline)}
         </p>
 

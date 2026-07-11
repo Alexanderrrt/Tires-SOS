@@ -6,6 +6,7 @@ import { COPY, SITE } from "../site.config";
 import { getShopDateTime } from "../../lib/shop-time";
 import Icon from "./Icons";
 import Reveal from "./Reveal";
+import PirelliBadge from "./PirelliBadge";
 
 function LocationCard({ loc, t }) {
   return (
@@ -54,6 +55,7 @@ export default function Location() {
       <div className="section__inner">
         <Reveal>
           <h2 className="section__heading">{t(COPY.location.heading)}</h2>
+          <PirelliBadge compact className="section__pirelli" />
         </Reveal>
 
         <Reveal className="location-storefront">

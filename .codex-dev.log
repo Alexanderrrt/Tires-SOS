@@ -1,0 +1,32 @@
+
+> tires-sos-rescue@1.0.0 dev
+> next dev
+
+ ⚠ Port 3000 is in use, trying 3001 instead.
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3001
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1574ms
+ ○ Compiling / ...
+ ✓ Compiled / in 2.9s (526 modules)
+ GET / 200 in 3193ms
+ ⚠ Cross origin request detected from 127.0.0.1 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ ○ Compiling /api/chat/session ...
+ ✓ Compiled /api/chat/session in 526ms (591 modules)
+ GET /reels/reel-2.jpg 404 in 1820ms
+ GET /reels/reel-4.jpg 404 in 1815ms
+ GET /reels/reel-3.jpg 404 in 1822ms
+ GET /reels/reel-1.jpg 404 in 1826ms
+ GET /api/chat/session 200 in 2747ms
+ GET /api/chat/session 200 in 2749ms
+ GET / 200 in 73ms
+ GET /api/chat/session 200 in 22ms
+ GET /api/chat/session 200 in 31ms
+ GET /reels/reel-1.jpg 404 in 36ms
+ GET /reels/reel-2.jpg 404 in 57ms
+ GET /reels/reel-3.jpg 404 in 55ms
+ GET /reels/reel-4.jpg 404 in 55ms
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: incorrect data check

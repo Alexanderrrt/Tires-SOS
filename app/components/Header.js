@@ -6,6 +6,7 @@ import { useOpenStatus } from "../hooks/useOpenStatus";
 import { useSecretAdminTap } from "../hooks/useSecretAdminTap";
 import { COPY, SITE } from "../site.config";
 import Icon from "./Icons";
+import PirelliBadge from "./PirelliBadge";
 
 export default function Header() {
   const { lang, toggleLang } = useLanguage();
@@ -37,6 +38,8 @@ export default function Header() {
             </span>
           </span>
         </a>
+
+        <PirelliBadge compact className="header__pirelli" />
 
         <nav className="header__nav">
           <a href="/#services">{t(COPY.nav.services)}</a>

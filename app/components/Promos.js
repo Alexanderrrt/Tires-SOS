@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useT } from "../i18n/LanguageContext";
 import { COPY, SITE } from "../site.config";
 import Reveal from "./Reveal";
+import PirelliBadge from "./PirelliBadge";
 
 export default function Promos() {
   const t = useT();
@@ -47,10 +48,8 @@ export default function Promos() {
         <Reveal className="promo-collab">
           <div className="promo-collab__inner">
             <p className="promo-collab__kicker">{t(COPY.promos.collabTitle)}</p>
-            <div className="promo-collab__logos" aria-label="Pirelli x Ironman">
-              <img src="/brands/pirelli.svg" alt="Pirelli" />
-              <span>×</span>
-              <img src="/brands/ironman.svg" alt="Ironman" />
+            <div className="promo-collab__logos" aria-label="Pirelli">
+              <PirelliBadge />
             </div>
             <p className="promo-collab__body">{t(COPY.promos.collabBody)}</p>
             <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noopener noreferrer" className="btn btn--ghost btn--small">
