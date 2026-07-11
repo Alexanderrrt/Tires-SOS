@@ -99,7 +99,7 @@ export async function POST(request) {
     return json(
       {
         ok: false,
-        error: "Please provide the service, vehicle year/make/model, name, and phone number before selecting a time.",
+        error: "Please provide the service, vehicle year/make/model, name, and WhatsApp number before selecting a time.",
         code: "lead_incomplete",
         missingFields,
       },
@@ -118,7 +118,7 @@ export async function POST(request) {
         error: status === 409
           ? "That time is no longer available."
           : status === 422
-            ? "Please provide the service, vehicle year/make/model, name, and phone number before selecting a time."
+            ? "Please provide the service, vehicle year/make/model, name, and WhatsApp number before selecting a time."
             : "The appointment request could not be saved.",
         code: status === 409 ? "slot_unavailable" : status === 422 ? "lead_incomplete" : "reservation_failed",
       },

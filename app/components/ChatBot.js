@@ -154,7 +154,7 @@ function AppointmentPicker({ t, lang, onSelect, onSessionExpired, disabled = fal
         <p className="chat-picker__title">
           {t({ en: "Times are temporarily unavailable.", es: "Los horarios no están disponibles por ahora." })}
         </p>
-        <p>{t({ en: "You can retry or call the shop for help.", es: "Puedes intentar de nuevo o llamar al taller." })}</p>
+        <p>{t({ en: "You can retry or use WhatsApp for help.", es: "Puedes intentar de nuevo o usar WhatsApp para ayuda." })}</p>
         <button type="button" className="btn btn--ghost btn--small" onClick={() => setRetryKey((value) => value + 1)}>
           {t({ en: "Retry", es: "Intentar de nuevo" })}
         </button>
@@ -174,7 +174,7 @@ function AppointmentPicker({ t, lang, onSelect, onSessionExpired, disabled = fal
         <p className="chat-picker__title">
           {t({ en: "No online times are open right now.", es: "No hay horarios disponibles en linea por ahora." })}
         </p>
-        <p>{t({ en: "Please call the shop and we will help you directly.", es: "Llama al taller y te ayudamos directamente." })}</p>
+        <p>{t({ en: "Please use WhatsApp and we will help you directly.", es: "Usa WhatsApp y te ayudamos directamente." })}</p>
       </div>
     );
   }
@@ -463,7 +463,7 @@ export default function ChatBot({
             role: "assistant",
             content: saved
               ? t({
-                  en: "I saved the details you sent, but I could not answer just now. You can retry or call the shop.",
+                  en: "I saved the details you sent, but I could not answer just now. You can retry or use WhatsApp.",
                   es: "Guardé los datos que enviaste, pero no pude responder ahora. Intenta de nuevo o llama al taller.",
                 })
               : copy.fallback,
@@ -556,8 +556,8 @@ export default function ChatBot({
               es: `Tu solicitud para ${selection.label} quedó guardada. El taller puede verla; la notificación está pendiente.`,
             })
         : t({
-            en: "The request is only stored temporarily. Please call the shop to make sure the time is held.",
-            es: "La solicitud solo está guardada temporalmente. Llama al taller para asegurar el horario.",
+            en: "The request is only stored temporarily. Please use WhatsApp to make sure the time is held.",
+            es: "La solicitud solo está guardada temporalmente. Usa WhatsApp para asegurar el horario.",
           });
 
       setMessages((previous) => [
@@ -570,7 +570,7 @@ export default function ChatBot({
     } catch (reservationError) {
       if (reservationError.message !== "session") {
         setPickerUsed(false);
-        setError(t({ en: "We could not reserve that time. Please retry or call the shop.", es: "No pudimos reservar ese horario. Intenta de nuevo o llama al taller." }));
+        setError(t({ en: "We could not reserve that time. Please retry or use WhatsApp.", es: "No pudimos reservar ese horario. Intenta de nuevo o usa WhatsApp." }));
       }
     } finally {
       busyRef.current = false;
@@ -623,7 +623,9 @@ export default function ChatBot({
               </div>
               <div>
                 <span>{t(copy.callUs)}</span>
-                <a href={SITE.phoneHref}>{SITE.phone}</a>
+                <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noreferrer">
+                  {t(copy.whatsapp)}
+                </a>
               </div>
               <div>
                 <span>{t(copy.whatsapp)}</span>
@@ -650,8 +652,8 @@ export default function ChatBot({
                   ) : (
                     <p className="chat-panel__error">
                       {t({
-                        en: "The security check is not configured. Please call the shop.",
-                        es: "La verificación no está configurada. Llama al taller.",
+                        en: "The security check is not configured. Please use WhatsApp.",
+                        es: "La verificación no está configurada. Usa WhatsApp.",
                       })}
                     </p>
                   )}
@@ -745,8 +747,8 @@ export default function ChatBot({
                           es: "Tu solicitud está guardada en el panel del taller. La notificación está pendiente.",
                         })
                     : t({
-                        en: "This request is only stored temporarily. Please call the shop to confirm.",
-                        es: "Esta solicitud solo está guardada temporalmente. Llama al taller para confirmar.",
+                        en: "This request is only stored temporarily. Please use WhatsApp to confirm.",
+                        es: "Esta solicitud solo está guardada temporalmente. Usa WhatsApp para confirmar.",
                       })}
                 </p>
                 <button type="button" className="btn btn--primary chat-panel__new-chat" onClick={startNewChat}>

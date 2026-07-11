@@ -8,11 +8,12 @@ export const SITE = {
   // UPDATE this once the real domain is attached in Vercel.
   url: "https://tires-sos.vercel.app",
   tagline: {
-    en: "Tire specialists. Fast service, best prices in the Bay Area. We speak your language.",
-    es: "Especialistas en llantas. Servicio rápido, los mejores precios del Bay Area. Aquí te atendemos como en casa.",
+    en: "Tire specialists. Fast service, actual brands, and WhatsApp-first support. We speak your language.",
+    es: "Especialistas en llantas. Servicio rápido, marcas reales y atención primero por WhatsApp. Aquí te atendemos como en casa.",
   },
   phone: "(408) 332-8962",
-  phoneHref: "tel:+14083328962",
+  phoneHref: "https://wa.me/14083328962",
+  whatsappHref: "https://wa.me/14083328962",
   // WhatsApp number in international format, digits only (used by wa.me).
   // Confirm this line is WhatsApp-enabled, or replace with the shop's WhatsApp.
   whatsapp: "14083328962",
@@ -58,6 +59,117 @@ export const SITE = {
   ],
 };
 
+export const BRAND_SHOWCASE = [
+  {
+    name: "Pirelli x Ironman",
+    logos: [
+      { src: "/brands/pirelli.svg", alt: "Pirelli" },
+      { src: "/brands/ironman.svg", alt: "Ironman" },
+    ],
+    tagline: {
+      en: "Official collaborator spotlight. Ask about Pirelli x Ironman through chat or WhatsApp.",
+      es: "Colaboración oficial destacada. Pregunta por Pirelli x Ironman por chat o WhatsApp.",
+    },
+    collab: true,
+  },
+  {
+    name: "Continental",
+    logo: "/brands/continental.svg",
+    tagline: {
+      en: "Continental tires â€” premium driving feel, stocked for the Bay Area.",
+      es: "Llantas Continental â€” manejo premium, disponibles para el Bay Area.",
+    },
+  },
+  {
+    name: "Dunlop",
+    logo: "/brands/dunlop.svg",
+    tagline: {
+      en: "Dunlop tires â€” performance-minded grip and everyday reliability.",
+      es: "Llantas Dunlop â€” agarre para rendimiento y confiabilidad diaria.",
+    },
+  },
+  {
+    name: "Falken",
+    logo: "/brands/falken.svg",
+    tagline: {
+      en: "Falken tires â€” high performance with a street-ready price.",
+      es: "Llantas Falken â€” alto rendimiento con precio amigable.",
+    },
+  },
+  {
+    name: "General",
+    logo: "/brands/general.svg",
+    tagline: {
+      en: "General tires â€” dependable traction for the daily grind.",
+      es: "Llantas General â€” tracciÃ³n confiable para el dÃ­a a dÃ­a.",
+    },
+  },
+  {
+    name: "GT Radial",
+    logo: "/brands/gt-radial.svg",
+    tagline: {
+      en: "GT Radial tires â€” balanced value, comfort, and road control.",
+      es: "Llantas GT Radial â€” balance entre valor, comodidad y control.",
+    },
+  },
+  {
+    name: "Hankook",
+    logo: "/brands/hankook.svg",
+    tagline: {
+      en: "Hankook tires â€” smart value with strong everyday performance.",
+      es: "Llantas Hankook â€” gran valor y rendimiento diario.",
+    },
+  },
+  {
+    name: "Ironman",
+    logo: "/brands/ironman.svg",
+    tagline: {
+      en: "Ironman tires â€” our bold value line for drivers who want savings.",
+      es: "Llantas Ironman â€” nuestra lÃ­nea de valor para ahorrar mÃ¡s.",
+    },
+  },
+  {
+    name: "Kumho",
+    logo: "/brands/kumho.svg",
+    tagline: {
+      en: "Kumho tires â€” practical performance for real-world roads.",
+      es: "Llantas Kumho â€” rendimiento prÃ¡ctico para calles reales.",
+    },
+  },
+  {
+    name: "Laufenn",
+    logo: "/brands/laufenn.svg",
+    tagline: {
+      en: "Laufenn tires â€” clean handling and everyday dependability.",
+      es: "Llantas Laufenn â€” manejo limpio y confianza diaria.",
+    },
+  },
+  {
+    name: "Nexen",
+    logo: "/brands/nexen.svg",
+    tagline: {
+      en: "Nexen tires â€” modern comfort and value on the road.",
+      es: "Llantas Nexen â€” comodidad moderna y buen valor.",
+    },
+  },
+  {
+    name: "Nokian",
+    logo: "/brands/nokian.svg",
+    tagline: {
+      en: "Nokian tires â€” trusted performance in changing conditions.",
+      es: "Llantas Nokian â€” confianza en condiciones cambiantes.",
+    },
+  },
+  {
+    name: "Toyo",
+    logo: "/brands/toyo.svg",
+    tagline: {
+      en: "Toyo tires â€” a favorite for dependable performance and value.",
+      es: "Llantas Toyo â€” favoritas por su rendimiento y valor.",
+    },
+  },
+];
+
 export const SERVICES = [
   {
     id: "new-tires",
@@ -65,8 +177,8 @@ export const SERVICES = [
     image: "/services/new-tires.jpg",
     title: { en: "New Tires", es: "Llantas Nuevas" },
     desc: {
-      en: "All major brands and sizes, at the best prices in the Bay Area.",
-      es: "Todas las marcas y medidas principales, a los mejores precios del Bay Area.",
+      en: "Continental, Dunlop, Falken, General, GT Radial, Hankook, Ironman, Kumho, Laufenn, Nexen, Nokian, and Toyo.",
+      es: "Continental, Dunlop, Falken, General, GT Radial, Hankook, Ironman, Kumho, Laufenn, Nexen, Nokian y Toyo.",
     },
   },
   {
@@ -134,16 +246,20 @@ export const SERVICES = [
 // Strings for the scrolling marquee strip. Deliberately mixed EN/ES —
 // it reads as one bilingual banner, so it does not switch with the toggle.
 export const MARQUEE_ITEMS = [
-  "Llantas Nuevas",
-  "Brakes",
-  "Alineación",
-  "Oil Change",
-  "Rines",
-  "Batteries",
-  "Flat Repair",
-  "Best Prices in the Bay Area",
-  "Snap Finance Available",
-  "Afterpay Available",
+  "Pirelli x Ironman",
+  "Continental",
+  "Dunlop",
+  "Falken",
+  "General",
+  "GT Radial",
+  "Hankook",
+  "Ironman",
+  "Kumho",
+  "Laufenn",
+  "Nexen",
+  "Nokian",
+  "Toyo",
+  "Chat or WhatsApp only",
 ];
 
 // Instagram reels featured in the "From the Shop" section.
@@ -162,6 +278,14 @@ export const OWNERS_RIDE = {
     en: "Every car that rolls into the shop gets treated the exact same way. Your ride is our ride.",
     es: "Cada carro que entra al taller recibe exactamente el mismo trato. Tu carro es nuestro carro, parce.",
   },
+  collab: {
+    kicker: { en: "Official collaboration", es: "Colaboración oficial" },
+    title: { en: "Pirelli x Ironman", es: "Pirelli x Ironman" },
+    body: {
+      en: "Brand spotlight across the site. Ask about these tire lines by chat or WhatsApp.",
+      es: "Marca destacada en todo el sitio. Pregunta por estas llantas por chat o WhatsApp.",
+    },
+  },
 };
 
 export const CHAT = {
@@ -174,7 +298,7 @@ export const CHAT = {
   },
   fastAnswers: { en: "Fast answers", es: "Respuestas rápidas" },
   liveChat: { en: "Live chat", es: "Chat en vivo" },
-  callUs: { en: "Call us", es: "Llámanos" },
+  callUs: { en: "WhatsApp", es: "WhatsApp" },
   whatsapp: { en: "WhatsApp", es: "WhatsApp" },
   openChat: { en: "Open chat", es: "Abrir chat" },
   close: { en: "Close chat", es: "Cerrar chat" },
@@ -189,8 +313,8 @@ export const CHAT = {
   send: { en: "Send", es: "Enviar" },
   typing: { en: "Typing...", es: "Escribiendo..." },
   fallback: {
-    en: "I couldn’t reach the chat service just now. Please call the shop or try again in a moment.",
-    es: "No pude conectar con el chat por ahora. Llama al taller o intenta de nuevo en un momento.",
+    en: "I couldn’t reach the chat service just now. Please use WhatsApp or try again in a moment.",
+    es: "No pude conectar con el chat por ahora. Usa WhatsApp o intenta de nuevo en un momento.",
   },
   intro: {
     en: "Ask about tires, brakes, alignment, oil changes, batteries, rims, hours, location, or walk-in help.",
@@ -229,7 +353,7 @@ export const COPY = {
     location: { en: "Location", es: "Ubicación" },
     reviews: { en: "Reviews", es: "Reseñas" },
     quote: { en: "Get a Quote", es: "Cotizar" },
-    callNow: { en: "Call Now", es: "Llamar" },
+    callNow: { en: "WhatsApp", es: "WhatsApp" },
   },
   quote: {
     heading: { en: "Instant Price Estimate", es: "Estimado de Precio Instantáneo" },
@@ -260,7 +384,7 @@ export const COPY = {
   },
   hero: {
     kicker: { en: "San José, CA", es: "San José, CA" },
-    callNow: { en: "Call Now", es: "Llamar Ahora" },
+    callNow: { en: "WhatsApp", es: "WhatsApp" },
     directions: { en: "Get Directions", es: "Cómo Llegar" },
     note: {
       en: "Walk-ins welcome — no appointment needed. Shop service only.",
@@ -287,6 +411,15 @@ export const COPY = {
     afterpay: {
       en: "Snap Finance & Afterpay available — flexible payments on your terms",
       es: "Snap Finance y Afterpay disponibles — pagos flexibles a tu manera",
+    },
+    collab: {
+      kicker: { en: "Official collaborator", es: "Colaborador oficial" },
+      title: { en: "Pirelli x Ironman", es: "Pirelli x Ironman" },
+      body: {
+        en: "Brand spotlight across the site. Ask about these tire lines by chat or WhatsApp only.",
+        es: "Marca destacada en todo el sitio. Pregunta por estas llantas solo por chat o WhatsApp.",
+      },
+      cta: { en: "Ask by WhatsApp", es: "Pregunta por WhatsApp" },
     },
   },
   services: {
@@ -317,6 +450,12 @@ export const COPY = {
       en: "Flexible financing and rewards to keep you on the road.",
       es: "Financiamiento flexible y recompensas para mantenerte en el camino.",
     },
+    collabTitle: { en: "Official collaborator", es: "Colaborador oficial" },
+    collabBody: {
+      en: "Pirelli x Ironman stays featured across the site. All brand questions go through chat or WhatsApp.",
+      es: "Pirelli x Ironman aparece destacado en todo el sitio. Todas las preguntas de marca van por chat o WhatsApp.",
+    },
+    collabCta: { en: "Ask on WhatsApp", es: "Pregunta por WhatsApp" },
     financeTitle: { en: "Buy Now, Pay Later", es: "Compra Ahora, Paga Después" },
     financeSub: {
       en: "Snap Finance & Afterpay available. Snap Finance approvals from $300 to $5,000. Afterpay lets you split purchases into 4 easy payments. No perfect credit needed.",

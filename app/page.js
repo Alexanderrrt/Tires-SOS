@@ -10,7 +10,6 @@ import Reviews from "./components/Reviews";
 import Footer from "./components/Footer";
 import BrandPopups from "./components/BrandPopups";
 import ChatBot from "./components/ChatBot";
-import { SITE } from "./site.config";
 
 export default function HomePage() {
   return (
@@ -27,7 +26,7 @@ export default function HomePage() {
         <Reviews />
       </main>
       <Footer />
-      <BrandPopups phoneHref={SITE.phoneHref} />
+      <BrandPopups />
       <ChatBot mode="shop" turnstileSiteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""} />
     </>
   );

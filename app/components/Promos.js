@@ -44,6 +44,21 @@ export default function Promos() {
         </Reveal>
 
         {/* Driver Program — hero-style featured banner */}
+        <Reveal className="promo-collab">
+          <div className="promo-collab__inner">
+            <p className="promo-collab__kicker">{t(COPY.promos.collabTitle)}</p>
+            <div className="promo-collab__logos" aria-label="Pirelli x Ironman">
+              <img src="/brands/pirelli.svg" alt="Pirelli" />
+              <span>×</span>
+              <img src="/brands/ironman.svg" alt="Ironman" />
+            </div>
+            <p className="promo-collab__body">{t(COPY.promos.collabBody)}</p>
+            <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noopener noreferrer" className="btn btn--ghost btn--small">
+              {t(COPY.promos.collabCta)}
+            </a>
+          </div>
+        </Reveal>
+
         <Reveal className="driver-banner-wrapper">
           {driverOpen ? (
             <div className="driver-banner">

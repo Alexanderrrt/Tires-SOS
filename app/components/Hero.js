@@ -64,7 +64,7 @@ export default function Hero() {
             </ul>
             <div className="alignment-spotlight__actions">
               <a href="/quote?topic=alignment" className="btn btn--primary">
-                <Icon name="phone" /> {t(alignment.cta)}
+                <Icon name="chat" /> {t(alignment.cta)}
               </a>
               <a href="/#services" className="btn btn--ghost">
                 {t(alignment.ctaSecondary)} <Icon name="arrow" />
@@ -92,7 +92,7 @@ export default function Hero() {
             <p className="alignment-popup__title">{t(alignment.title)}</p>
             <p className="alignment-popup__stamp">BY HUNTER</p>
             <a href="/quote" className="btn btn--primary btn--small alignment-popup__cta">
-              <Icon name="phone" /> {t(alignment.cta)}
+              <Icon name="chat" /> {t(alignment.cta)}
             </a>
           </div>
         </div>
@@ -115,8 +115,8 @@ export default function Hero() {
               <a href="/quote" className="btn btn--primary">
                 {t(COPY.quote.ctaFromHome)} <Icon name="arrow" />
               </a>
-              <a href={SITE.phoneHref} className="btn btn--ghost">
-                <Icon name="phone" /> {t(COPY.hero.callNow)}
+              <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noreferrer" className="btn btn--ghost">
+                <Icon name="chat" /> {t(COPY.hero.callNow)}
               </a>
               <a href={SITE.locations[0].mapsHref} target="_blank" rel="noopener noreferrer" className="btn btn--ghost">
                 <Icon name="pin" /> {t(COPY.hero.directions)}
@@ -128,6 +128,20 @@ export default function Hero() {
               <span className="afterpay-chip afterpay-chip--mint">Afterpay</span>
               {t(COPY.hero.afterpay)}
             </p>
+
+            <div className="hero__collab hero__enter" style={{ "--d": "420ms" }}>
+              <p className="hero__collab-kicker">{t(COPY.hero.collab.kicker)}</p>
+              <div className="hero__collab-logos" aria-label={t(COPY.hero.collab.title)}>
+                <img src="/brands/pirelli.svg" alt="Pirelli" />
+                <span className="hero__collab-x">×</span>
+                <img src="/brands/ironman.svg" alt="Ironman" />
+              </div>
+              <p className="hero__collab-title">{t(COPY.hero.collab.title)}</p>
+              <p className="hero__collab-body">{t(COPY.hero.collab.body)}</p>
+              <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noreferrer" className="btn btn--ghost btn--small hero__collab-cta">
+                <Icon name="chat" /> {t(COPY.hero.collab.cta)}
+              </a>
+            </div>
 
             <p className="hero__note hero__enter" style={{ "--d": "460ms" }}>
               {t(COPY.hero.note)}

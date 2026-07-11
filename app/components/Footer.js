@@ -31,7 +31,9 @@ export default function Footer() {
           {SITE.locations.map((loc) => (
             <p key={loc.id}>{loc.full}</p>
           ))}
-          <a href={SITE.phoneHref}>{SITE.phone}</a>
+          <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noreferrer">
+            WhatsApp
+          </a>
           <p className="footer__payments">
             <span className="afterpay-chip">Snap Finance</span>
             <span className="afterpay-chip afterpay-chip--mint">Afterpay</span>

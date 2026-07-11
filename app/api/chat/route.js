@@ -29,7 +29,7 @@ const MAX_MESSAGE_CHARS = 2000;
 const MAX_TOTAL_MESSAGE_CHARS = 24_000;
 
 const BUSINESS_FACTS = [
-  `Phone: ${SITE.phone}`,
+  `WhatsApp: ${SITE.phone}`,
   `WhatsApp: ${SITE.whatsapp}`,
   `Locations: ${SITE.locations.map((location) => location.full).join("; ")}`,
   `Hours: ${SITE.hours
@@ -60,26 +60,26 @@ Behavior:
 - Ask one clarifying question if the customer's request is vague.
 - For pricing, ALWAYS call the get_price_estimate tool to get the real number — never calculate a price yourself, never state a price the tool did not return.
 - For a service with multiple options (like oil type), do NOT ask the customer which option they want before pricing it. Call the tool with no optionId — it returns the full price range across all options automatically. Only mention the specific options if the customer already stated a preference or asks what choices exist.
-- Some services (marked in the pricing catalog as price-varies, e.g. battery) can NEVER be priced by you, even a rough range — their real price depends on things like exact type/size/warranty that vary too much to estimate safely. Never call the tool for these. If asked, say the price varies and the shop will confirm it in person or by phone.
+- Some services (marked in the pricing catalog as price-varies, e.g. battery) can NEVER be priced by you, even a rough range — their real price depends on things like exact type/size/warranty that vary too much to estimate safely. Never call the tool for these. If asked, say the price varies and the shop will confirm it in person or through WhatsApp.
 - If the customer names a specific tire brand (e.g. Michelin, Toyo), match it to its tier using the brand list in the pricing catalog and use that tier automatically — never ask the customer which tier (economy/standard/premium) they mean.
 - If the customer asks for appointment booking, help start an appointment request.
 - For appointment requests, follow this STRICT priority order:
   1. First get the SERVICE needed and the VEHICLE year/make/model. Keep it simple — do not ask about oil type, tire brand, tire size, trim, engine, or other add-ons.
-  2. Then ask for their NAME and PHONE NUMBER — these are required before scheduling.
-  3. Only AFTER you have service, vehicle, name, and phone, say exactly: "Let me pull up available times for you." — this exact phrase remains for compatibility with the appointment UI. Do NOT ask them to pick a date/time yourself.
+  2. Then ask for their NAME and WHATSAPP NUMBER — these are required before scheduling.
+  3. Only AFTER you have service, vehicle, name, and WhatsApp number, say exactly: "Let me pull up available times for you." — this exact phrase remains for compatibility with the appointment UI. Do NOT ask them to pick a date/time yourself.
 - Do not promise a confirmed appointment slot. Say the shop team will confirm the exact time.
-- Do NOT ask for name or phone number just because the customer asked about pricing, a service, or hours. Only collect contact info when: (a) the customer wants to book/schedule, or (b) you asked "Would you like the shop team to follow up with you?" (or the Spanish equivalent) and they said yes.
-- If it seems like the conversation is wrapping up and the customer hasn't asked to book, you may ask ONCE, naturally, whether they'd like the shop to follow up with them — do not repeat that offer if they decline or don't respond to it, and do not ask for name/phone unless they agree.
+- Do NOT ask for name or WhatsApp number just because the customer asked about pricing, a service, or hours. Only collect contact info when: (a) the customer wants to book/schedule, or (b) you asked "Would you like the shop team to follow up with you?" (or the Spanish equivalent) and they said yes.
+- If it seems like the conversation is wrapping up and the customer hasn't asked to book, you may ask ONCE, naturally, whether they'd like the shop to follow up with them — do not repeat that offer if they decline or don't respond to it, and do not ask for name/WhatsApp unless they agree.
 - If the customer asks for hours or address, answer clearly and directly.
 - Keep answers short by default unless the user asks for detail.
 - If the customer writes in Spanish, answer in Spanish. When triggering the picker in Spanish, say exactly: "Déjame mostrarte los horarios disponibles."
 - If the customer writes in English, answer in English.
 - Never invent business facts. When unsure, say you need to confirm at the shop.
-- Never ask open-ended "when would you like to come in?" questions. Once you have name and phone, trigger the picker.
+- Never ask open-ended "when would you like to come in?" questions. Once you have name and WhatsApp number, trigger the picker.
 
 Keep it simple, not technical:
 - You are talking to everyday customers, not mechanics. Never ask for technical specs — no tire size, no oil viscosity/type, no part numbers, no trim level. The shop staff will look those up from the vehicle info once the customer is in.
-- The only vehicle info you may mention is year/make/model if the customer volunteers it. For booking, you must ask for it before name and phone. Do not ask for trim, engine, tire size, or anything else technical.
+- The only vehicle info you may mention is year/make/model if the customer volunteers it. For booking, you must ask for it before name and WhatsApp number. Do not ask for trim, engine, tire size, or anything else technical.
 - Use common sense about vehicles. A normal car has ONE engine — never ask which engine, or "both engines," or anything that assumes a car has multiple engines. Only ask about "front vs rear" or "all four" for things that genuinely apply per-wheel (like tires or brakes), and only if the customer's request is ambiguous about how many they need.
 - If something you're about to ask would sound like a strange or overly technical question to a regular driver, don't ask it — just note that the shop team will confirm it at check-in.
 
@@ -98,11 +98,11 @@ Collect details one at a time, simple and non-technical:
 2. Vehicle year, make, and model
 3. Quantity only when it truly applies, like tires or another clearly per-item service. Never ask "how many" for an oil change or other single-service job unless the customer explicitly mentions multiple cars or multiple jobs.
 
-Only ask for NAME and PHONE NUMBER if:
-- the customer wants to book/schedule an appointment (then follow the strict order: service+vehicle, then name+phone, then trigger the picker with the exact phrase — do NOT ask when they want to come in yourself), OR
+Only ask for NAME and WHATSAPP NUMBER if:
+- the customer wants to book/schedule an appointment (then follow the strict order: service+vehicle, then name+WhatsApp, then trigger the picker with the exact phrase — do NOT ask when they want to come in yourself), OR
 - you asked "Would you like the shop team to follow up with you?" (or the Spanish equivalent) and they said yes.
 
-If they're just asking about price, services, or hours and haven't shown interest in booking, answer the question and do not ask for their name or phone. If the conversation seems to be ending without booking, you may ask ONCE whether they'd like a follow-up — if they decline or don't respond, drop it, do not ask again, and do not collect contact info.
+If they're just asking about price, services, or hours and haven't shown interest in booking, answer the question and do not ask for their name or WhatsApp number. If the conversation seems to be ending without booking, you may ask ONCE whether they'd like a follow-up — if they decline or don't respond, drop it, do not ask again, and do not collect contact info.
 
 Do not ask for all details at once.
 Do not ask "how many" for oil changes, brakes, alignment, or other normal single-vehicle services.
@@ -322,7 +322,7 @@ function isBookingConversation(messages) {
     if (message.role !== "assistant") return false;
     const text = folded(message.content);
     const appointmentCue = /(appointment|cita)/i.test(text);
-    const fieldCue = /(year.*make.*model|ano.*marca.*modelo|name|nombre|phone number|numero de telefono|horarios disponibles|available times)/i.test(text);
+    const fieldCue = /(year.*make.*model|ano.*marca.*modelo|name|nombre|phone number|whatsapp number|numero de telefono|numero de whatsapp|horarios disponibles|available times)/i.test(text);
     const bookingVehiclePrompt = /(year.*make.*model|ano.*marca.*modelo)/i.test(text) && !conversationIncludesPriceQuestion;
     return (appointmentCue && fieldCue) || bookingVehiclePrompt;
   });
@@ -556,7 +556,7 @@ function enforceBookingSequence({ lang, messages, content, isAppointmentFlow }) 
   if (!fields.phone) {
     return lang === "es"
       ? "Perfecto. ¿Cuál es tu número de teléfono?"
-      : "Perfect. What is your phone number?";
+      : "Perfect. What is your WhatsApp number?";
   }
   return lang === "es"
     ? "Perfecto, gracias. Ya tengo todo. Te muestro los horarios disponibles."
@@ -596,7 +596,7 @@ function fallbackReply({ lang, context, messages, pricingUnavailable = false }) 
     if (pricingUnavailable) {
       return inSpanish
         ? "Por ahora no puedo dar un precio exacto aqu\u00ed. Cu\u00e9ntame qu\u00e9 servicio necesitas y el taller te confirma el precio al ver el veh\u00edculo."
-        : "I can’t give an exact price in chat right now. Tell me what service you need and the shop will confirm the price once they see the vehicle.";
+        : "I can’t give an exact price in chat right now. Tell me what service you need and the shop will confirm the price once they see the vehicle or on WhatsApp.";
     }
     return inSpanish
       ? "Puedo ayudarte con una cotizaci\u00f3n. Cu\u00e9ntame qu\u00e9 servicio necesitas y el veh\u00edculo para darte el mejor estimado."
@@ -777,7 +777,7 @@ export async function POST(request) {
   let pricing = null;
   let pricingContext;
   if (estimatesDisabled) {
-    pricingContext = "Estimates are currently turned OFF by the shop. Do not give any price, price range, or number, even a rough one. If asked about cost, say pricing isn't available in chat right now and the shop team will give an exact price once they see the vehicle in person or on a call. Still help with the service, vehicle, name, phone, and appointment as usual.";
+    pricingContext = "Estimates are currently turned OFF by the shop. Do not give any price, price range, or number, even a rough one. If asked about cost, say pricing isn't available in chat right now and the shop team will give an exact price once they see the vehicle in person or through WhatsApp. Still help with the service, vehicle, name, WhatsApp number, and appointment as usual.";
   } else {
     pricing = await withTimeout(getPricing(), null, contextTimeout);
     pricingContext = pricing

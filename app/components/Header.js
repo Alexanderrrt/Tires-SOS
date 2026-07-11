@@ -63,8 +63,8 @@ export default function Header() {
             {lang === "en" ? "ES" : "EN"}
           </button>
 
-          <a href={SITE.phoneHref} className="btn btn--primary btn--small">
-            <Icon name="phone" /> {t(COPY.nav.callNow)}
+          <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noreferrer" className="btn btn--primary btn--small">
+            <Icon name="chat" /> {t(COPY.nav.callNow)}
           </a>
         </div>
       </div>
