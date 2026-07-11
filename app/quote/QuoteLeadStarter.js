@@ -22,10 +22,10 @@ export default function QuoteLeadStarter({ turnstileSiteKey = "" }) {
   const copy =
     lang === "es"
       ? {
-          kicker: "Mostrador de cotizacion con IA",
-          title: "Cuentanos lo que necesitas y comienza tu cotizacion",
+          kicker: "Mostrador de cotización con IA",
+          title: "Cuéntanos lo que necesitas y comienza tu cotización",
           body:
-            "Pregunta por detalles del servicio, tiempos o rangos de precio. El asistente inicia la cotizacion y envia el lead al equipo del taller.",
+            "Pregunta por detalles del servicio, tiempos o rangos de precio. El asistente inicia la cotización y envía el contacto al equipo del taller.",
         }
       : {
           kicker: "AI-assisted quote desk",

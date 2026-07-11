@@ -18,15 +18,15 @@ const QUOTE_CHAT = {
   },
   promptRepair: {
     en: "I have a flat tire. Can you help today?",
-    es: "Tengo una llanta ponchada. Me pueden ayudar hoy?",
+    es: "Tengo una llanta ponchada. ¿Me pueden ayudar hoy?",
   },
   promptBrakes: {
     en: "How much for brakes on my car?",
-    es: "Cuanto cuesta revisar los frenos de mi carro?",
+    es: "¿Cuánto cuesta revisar los frenos de mi carro?",
   },
   promptFinance: {
     en: "Do you offer financing?",
-    es: "Ofrecen financiamiento?",
+    es: "¿Ofrecen financiamiento?",
   },
   placeholder: {
     en: "Tell us the service or question...",
@@ -39,15 +39,15 @@ const QUOTE_CHAT = {
     },
     {
       en: "I have a flat tire. Can you help today?",
-      es: "Tengo una llanta ponchada. Me pueden ayudar hoy?",
+      es: "Tengo una llanta ponchada. ¿Me pueden ayudar hoy?",
     },
     {
       en: "How much for brakes on my car?",
-      es: "Cuanto cuesta revisar los frenos de mi carro?",
+      es: "¿Cuánto cuesta revisar los frenos de mi carro?",
     },
     {
       en: "Do you offer financing?",
-      es: "Ofrecen financiamiento?",
+      es: "¿Ofrecen financiamiento?",
     },
   ],
   intro: {
@@ -84,7 +84,7 @@ function BubbleMeta({ role, createdAt }) {
   const time = formatTime(createdAt);
   return (
     <span className="chat-bubble__meta">
-      {role === "assistant" ? "Tires SOS" : lang === "es" ? "Tu" : "You"}{time ? ` - ${time}` : ""}
+      {role === "assistant" ? "Tires SOS" : lang === "es" ? "Tú" : "You"}{time ? ` - ${time}` : ""}
     </span>
   );
 }
@@ -152,7 +152,7 @@ function AppointmentPicker({ t, lang, onSelect, onSessionExpired, disabled = fal
     return (
       <div className="chat-picker chat-picker--error" role="status">
         <p className="chat-picker__title">
-          {t({ en: "Times are temporarily unavailable.", es: "Los horarios no estan disponibles por ahora." })}
+          {t({ en: "Times are temporarily unavailable.", es: "Los horarios no están disponibles por ahora." })}
         </p>
         <p>{t({ en: "You can retry or call the shop for help.", es: "Puedes intentar de nuevo o llamar al taller." })}</p>
         <button type="button" className="btn btn--ghost btn--small" onClick={() => setRetryKey((value) => value + 1)}>
@@ -355,7 +355,7 @@ export default function ChatBot({
   }, []);
 
   const handleSessionExpired = useCallback(() => {
-    setError(t({ en: "Your secure chat session expired. Please try again.", es: "Tu sesion segura expiro. Intenta de nuevo." }));
+    setError(t({ en: "Your secure chat session expired. Please try again.", es: "Tu sesión segura expiró. Intenta de nuevo." }));
     bootstrapSession();
   }, [bootstrapSession, t]);
 
@@ -456,7 +456,7 @@ export default function ChatBot({
       if (!res.ok) {
         if (res.status === 401) handleSessionExpired();
         const saved = data?.status?.leadCaptured;
-        setError(data?.error || t({ en: "Chat is temporarily unavailable.", es: "El chat no esta disponible por ahora." }));
+        setError(data?.error || t({ en: "Chat is temporarily unavailable.", es: "El chat no está disponible por ahora." }));
         setMessages((previous) => [
           ...previous,
           {
@@ -464,7 +464,7 @@ export default function ChatBot({
             content: saved
               ? t({
                   en: "I saved the details you sent, but I could not answer just now. You can retry or call the shop.",
-                  es: "Guarde los datos que enviaste, pero no pude responder ahora. Intenta de nuevo o llama al taller.",
+                  es: "Guardé los datos que enviaste, pero no pude responder ahora. Intenta de nuevo o llama al taller.",
                 })
               : copy.fallback,
             createdAt: Date.now(),
@@ -533,7 +533,7 @@ export default function ChatBot({
             role: "assistant",
             content: t({
               en: "That time was just taken. I refreshed the available times—please choose another one.",
-              es: "Ese horario acaba de ocuparse. Actualice los horarios; elige otro, por favor.",
+              es: "Ese horario acaba de ocuparse. Actualicé los horarios; elige otro, por favor.",
             }),
             createdAt: Date.now(),
           },
@@ -549,15 +549,15 @@ export default function ChatBot({
         ? notificationStatus === "provider_accepted" || notificationStatus === "sent"
           ? t({
               en: `Your request for ${selection.label} is reserved, and the shop notification was accepted. The team will confirm it with you.`,
-              es: `Tu solicitud para ${selection.label} quedo reservada y la notificacion fue aceptada. El equipo te la confirmara.`,
+              es: `Tu solicitud para ${selection.label} quedó reservada y la notificación fue aceptada. El equipo te la confirmará.`,
             })
           : t({
               en: `Your request for ${selection.label} is safely saved. The shop can see it in the admin desk; notification delivery is pending.`,
-              es: `Tu solicitud para ${selection.label} quedo guardada. El taller puede verla; la notificacion esta pendiente.`,
+              es: `Tu solicitud para ${selection.label} quedó guardada. El taller puede verla; la notificación está pendiente.`,
             })
         : t({
             en: "The request is only stored temporarily. Please call the shop to make sure the time is held.",
-            es: "La solicitud solo esta guardada temporalmente. Llama al taller para asegurar el horario.",
+            es: "La solicitud solo está guardada temporalmente. Llama al taller para asegurar el horario.",
           });
 
       setMessages((previous) => [
@@ -638,7 +638,7 @@ export default function ChatBot({
                 <p>{t({ en: "Starting a secure chat...", es: "Iniciando un chat seguro..." })}</p>
               ) : session.turnstileRequired ? (
                 <div>
-                  <p>{t({ en: "Please complete the security check to continue.", es: "Completa la verificacion para continuar." })}</p>
+                  <p>{t({ en: "Please complete the security check to continue.", es: "Completa la verificación para continuar." })}</p>
                   {turnstileSiteKey ? (
                     <TurnstileChallenge
                       siteKey={turnstileSiteKey}
@@ -651,7 +651,7 @@ export default function ChatBot({
                     <p className="chat-panel__error">
                       {t({
                         en: "The security check is not configured. Please call the shop.",
-                        es: "La verificacion no esta configurada. Llama al taller.",
+                        es: "La verificación no está configurada. Llama al taller.",
                       })}
                     </p>
                   )}
@@ -678,10 +678,10 @@ export default function ChatBot({
               <span>
                 {t({
                   en: "I agree to send these details to the shop and its service providers under the",
-                  es: "Acepto enviar estos datos al taller y sus proveedores segun la",
+                  es: "Acepto enviar estos datos al taller y sus proveedores según la",
                 })}{" "}
                 <a href="/privacy" target="_blank" rel="noreferrer">
-                  {t({ en: "Privacy Policy", es: "Politica de Privacidad" })}
+                  {t({ en: "Privacy Policy", es: "Política de Privacidad" })}
                 </a>.
               </span>
             </label>
@@ -738,15 +738,15 @@ export default function ChatBot({
                     ? completion.notificationStatus === "provider_accepted" || completion.notificationStatus === "sent"
                       ? t({
                           en: "Your appointment request is saved. The shop alert was accepted, but the team still needs to confirm the time.",
-                          es: "Tu solicitud esta guardada. La alerta fue aceptada, pero el equipo todavia debe confirmar el horario.",
+                          es: "Tu solicitud está guardada. La alerta fue aceptada, pero el equipo todavía debe confirmar el horario.",
                         })
                       : t({
                           en: "Your appointment request is saved in the shop dashboard. Notification delivery is pending.",
-                          es: "Tu solicitud esta guardada en el panel del taller. La notificacion esta pendiente.",
+                          es: "Tu solicitud está guardada en el panel del taller. La notificación está pendiente.",
                         })
                     : t({
                         en: "This request is only stored temporarily. Please call the shop to confirm.",
-                        es: "Esta solicitud solo esta guardada temporalmente. Llama al taller para confirmar.",
+                        es: "Esta solicitud solo está guardada temporalmente. Llama al taller para confirmar.",
                       })}
                 </p>
                 <button type="button" className="btn btn--primary chat-panel__new-chat" onClick={startNewChat}>

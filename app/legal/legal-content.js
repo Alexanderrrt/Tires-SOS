@@ -1,13 +1,13 @@
 export const LEGAL_PAGES = {
   privacy: {
-    title: { en: "Privacy Policy", es: "Politica de Privacidad" },
+    title: { en: "Privacy Policy", es: "Política de Privacidad" },
     intro: {
       en: "This policy explains what we collect, how we use it, and the practical limits of a small local shop website.",
-      es: "Esta politica explica que recopilamos, como la usamos y los limites practicos de un sitio web de un taller local.",
+      es: "Esta política explica qué recopilamos, cómo usamos la información y los límites prácticos del sitio web de un taller local.",
     },
     sections: [
       {
-        heading: { en: "Information we collect", es: "Informacion que recopilamos" },
+        heading: { en: "Information we collect", es: "Información que recopilamos" },
         items: {
           en: [
             "Contact details you send through chat, forms, WhatsApp, phone, or email.",
@@ -15,14 +15,14 @@ export const LEGAL_PAGES = {
             "Vehicle and service details needed to answer quote requests.",
           ],
           es: [
-            "Datos de contacto que envias por chat, formularios, WhatsApp, telefono o correo.",
-            "Datos basicos de uso como paginas visitadas, tipo de dispositivo y ubicacion aproximada desde tu red o navegador.",
-            "Datos del vehiculo y servicios necesarios para responder cotizaciones.",
+            "Datos de contacto que envías por chat, formularios, WhatsApp, teléfono o correo.",
+            "Datos básicos de uso, como páginas visitadas, tipo de dispositivo y ubicación aproximada desde tu red o navegador.",
+            "Datos del vehículo y servicios necesarios para responder cotizaciones.",
           ],
         },
       },
       {
-        heading: { en: "How we use it", es: "Como la usamos" },
+        heading: { en: "How we use it", es: "Cómo usamos la información" },
         items: {
           en: [
             "To answer questions, provide estimates, and follow up on requested work.",
@@ -31,7 +31,7 @@ export const LEGAL_PAGES = {
           ],
           es: [
             "Para responder preguntas, dar estimados y dar seguimiento al trabajo solicitado.",
-            "Para mejorar el sitio, mantenerlo seguro y entender que es util.",
+            "Para mejorar el sitio, mantenerlo seguro y entender qué es útil.",
             "Para cumplir obligaciones legales, de seguridad y comerciales.",
           ],
         },
@@ -46,10 +46,10 @@ export const LEGAL_PAGES = {
             "Instagram, Google Maps, WhatsApp, Groq, EmailJS, email providers, and mobile carriers may process information under their own privacy policies.",
           ],
           es: [
-            "No vendemos informacion personal.",
-            "Podemos usar proveedores para alojamiento, mensajeria, incrustaciones, mapas y chat con IA.",
-            "Los datos del chat y de cotizaciones pueden ser procesados por Groq para generar respuestas y por EmailJS, un servicio de correo y la pasarela de correo a SMS del operador movil para avisar al equipo del taller.",
-            "Instagram, Google Maps, WhatsApp, Groq, EmailJS, proveedores de correo y operadores moviles pueden procesar informacion segun sus propias politicas de privacidad.",
+            "No vendemos información personal.",
+            "Podemos usar proveedores para alojamiento, mensajería, contenido integrado, mapas y chat con IA.",
+            "Los datos del chat y de las cotizaciones pueden ser procesados por Groq para generar respuestas y por EmailJS, un servicio de correo, y la pasarela de correo a SMS del operador móvil para avisar al equipo del taller.",
+            "Instagram, Google Maps, WhatsApp, Groq, EmailJS, proveedores de correo y operadores móviles pueden procesar información según sus propias políticas de privacidad.",
           ],
         },
       },
@@ -61,13 +61,13 @@ export const LEGAL_PAGES = {
             "Third-party services may use their own cookies and tracking technologies.",
           ],
           es: [
-            "Podemos usar almacenamiento del navegador para recordar el idioma y la sesion de administrador.",
-            "Los servicios de terceros pueden usar sus propias cookies y tecnologias de seguimiento.",
+            "Podemos usar almacenamiento del navegador para recordar el idioma y la sesión de administrador.",
+            "Los servicios de terceros pueden usar sus propias cookies y tecnologías de seguimiento.",
           ],
         },
       },
       {
-        heading: { en: "Retention and deletion", es: "Retencion y eliminacion" },
+        heading: { en: "Retention and deletion", es: "Retención y eliminación" },
         items: {
           en: [
             "We keep chat, lead, and appointment information only as long as reasonably needed to respond, maintain business records, resolve disputes, and meet legal obligations.",
@@ -75,9 +75,9 @@ export const LEGAL_PAGES = {
             "To request access, correction, or deletion of your information, call (408) 332-8962. We will address applicable requests subject to legal and business record obligations.",
           ],
           es: [
-            "Conservamos la informacion de chats, clientes potenciales y citas solo durante el tiempo razonablemente necesario para responder, mantener registros comerciales, resolver disputas y cumplir obligaciones legales.",
-            "Los proveedores de servicios pueden conservar copias de acuerdo con sus propias politicas de retencion.",
-            "Para solicitar acceso, correccion o eliminacion de tu informacion, llama al (408) 332-8962. Atenderemos las solicitudes aplicables sujetas a obligaciones legales y de registros comerciales.",
+            "Conservamos la información de chats, clientes potenciales y citas solo durante el tiempo razonablemente necesario para responder, mantener registros comerciales, resolver disputas y cumplir obligaciones legales.",
+            "Los proveedores de servicios pueden conservar copias de acuerdo con sus propias políticas de retención.",
+            "Para solicitar acceso, corrección o eliminación de tu información, llama al (408) 332-8962. Atenderemos las solicitudes aplicables sujetas a obligaciones legales y de registros comerciales.",
           ],
         },
       },
@@ -85,16 +85,16 @@ export const LEGAL_PAGES = {
         heading: { en: "Contact", es: "Contacto" },
         items: {
           en: ["Tires SOS Rescue", "623 E Taylor St, San Jose, CA 95112", "(408) 332-8962"],
-          es: ["Tires SOS Rescue", "623 E Taylor St, San Jose, CA 95112", "(408) 332-8962"],
+          es: ["Tires SOS Rescue", "623 E Taylor St, San José, CA 95112", "(408) 332-8962"],
         },
       },
     ],
   },
   terms: {
-    title: { en: "Terms of Use", es: "Terminos de Uso" },
+    title: { en: "Terms of Use", es: "Términos de Uso" },
     intro: {
       en: "These terms are meant to keep the website practical and straightforward for customers and the shop.",
-      es: "Estos terminos buscan que el sitio sea practico y claro para clientes y para el taller.",
+      es: "Estos términos buscan que el sitio sea práctico y claro para los clientes y el taller.",
     },
     sections: [
       {
@@ -106,8 +106,8 @@ export const LEGAL_PAGES = {
             "You are responsible for the accuracy of the details you provide.",
           ],
           es: [
-            "Usa el sitio de forma legal y no intentes interrumpirlo, extraer datos o abusar de el.",
-            "No envies informacion falsa, dañina o no autorizada.",
+            "Usa el sitio de forma legal y no intentes interrumpirlo, extraer datos ni abusar de él.",
+            "No envíes información falsa, dañina o no autorizada.",
             "Eres responsable de la exactitud de los datos que compartes.",
           ],
         },
@@ -121,8 +121,8 @@ export const LEGAL_PAGES = {
             "Offers and financing programs can change without notice and may have separate eligibility rules.",
           ],
           es: [
-            "Los precios en linea son solo estimados, a menos que el taller los confirme en persona o por escrito.",
-            "El precio final puede cambiar despues de la inspeccion, revision de piezas, evaluacion de mano de obra o condicion del vehiculo.",
+            "Los precios en línea son solo estimados, a menos que el taller los confirme en persona o por escrito.",
+            "El precio final puede cambiar después de la inspección, revisión de piezas, evaluación de mano de obra o condición del vehículo.",
             "Las ofertas y programas de financiamiento pueden cambiar sin aviso y pueden tener reglas separadas.",
           ],
         },
@@ -135,8 +135,8 @@ export const LEGAL_PAGES = {
             "We are not responsible for outages, policy changes, or content on third-party services.",
           ],
           es: [
-            "Instagram, Google Maps, WhatsApp, Groq, EmailJS, proveedores de correo y operadores moviles son servicios separados con sus propias politicas y terminos.",
-            "No somos responsables de caidas, cambios de politica o contenido en servicios de terceros.",
+            "Instagram, Google Maps, WhatsApp, Groq, EmailJS, proveedores de correo y operadores móviles son servicios separados con sus propias políticas y términos.",
+            "No somos responsables de caídas, cambios de política o contenido en servicios de terceros.",
           ],
         },
       },
@@ -161,8 +161,8 @@ export const LEGAL_PAGES = {
             "Your continued use of the site means you accept the updated terms.",
           ],
           es: [
-            "Podemos actualizar estos terminos publicando una nueva version en el sitio.",
-            "El uso continuo del sitio significa que aceptas los terminos actualizados.",
+            "Podemos actualizar estos términos publicando una nueva versión en el sitio.",
+            "El uso continuo del sitio significa que aceptas los términos actualizados.",
           ],
         },
       },
@@ -170,7 +170,7 @@ export const LEGAL_PAGES = {
         heading: { en: "Contact", es: "Contacto" },
         items: {
           en: ["Tires SOS Rescue", "623 E Taylor St, San Jose, CA 95112", "(408) 332-8962"],
-          es: ["Tires SOS Rescue", "623 E Taylor St, San Jose, CA 95112", "(408) 332-8962"],
+          es: ["Tires SOS Rescue", "623 E Taylor St, San José, CA 95112", "(408) 332-8962"],
         },
       },
     ],
@@ -179,7 +179,7 @@ export const LEGAL_PAGES = {
     title: { en: "Site Disclaimer", es: "Aviso Legal" },
     intro: {
       en: "This page gathers the practical disclaimers people usually want in one place.",
-      es: "Esta pagina agrupa los avisos practicos que normalmente se quieren tener claros.",
+      es: "Esta página reúne los avisos prácticos que normalmente se quieren tener claros.",
     },
     sections: [
       {
@@ -190,8 +190,8 @@ export const LEGAL_PAGES = {
             "The final price depends on the vehicle, parts, labor, and what the technician finds on site.",
           ],
           es: [
-            "Los estimados en linea son solo rangos aproximados y no reemplazan una inspeccion en persona.",
-            "El precio final depende del vehiculo, piezas, mano de obra y lo que encuentre el tecnico en el taller.",
+            "Los estimados en línea son solo rangos aproximados y no reemplazan una inspección en persona.",
+            "El precio final depende del vehículo, las piezas, la mano de obra y lo que encuentre el técnico en el taller.",
           ],
         },
       },
@@ -204,12 +204,12 @@ export const LEGAL_PAGES = {
           ],
           es: [
             "Este sitio no ofrece servicio de emergencia en carretera ni remolque.",
-            "Si estas en peligro inmediato, contacta a los servicios de emergencia locales.",
+            "Si estás en peligro inmediato, contacta a los servicios de emergencia locales.",
           ],
         },
       },
       {
-        heading: { en: "Human review matters", es: "La revision humana importa" },
+        heading: { en: "Human review matters", es: "La revisión humana importa" },
         items: {
           en: [
             "Chat responses and quote guidance are informational only.",
@@ -225,7 +225,7 @@ export const LEGAL_PAGES = {
         heading: { en: "Contact", es: "Contacto" },
         items: {
           en: ["Tires SOS Rescue", "623 E Taylor St, San Jose, CA 95112", "(408) 332-8962"],
-          es: ["Tires SOS Rescue", "623 E Taylor St, San Jose, CA 95112", "(408) 332-8962"],
+          es: ["Tires SOS Rescue", "623 E Taylor St, San José, CA 95112", "(408) 332-8962"],
         },
       },
     ],

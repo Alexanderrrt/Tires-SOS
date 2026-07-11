@@ -8,8 +8,8 @@ export default function Footer() {
   const t = useT();
   const year = new Date().getFullYear();
   const legalLinks = [
-    { href: "/privacy", label: { en: "Privacy Policy", es: "Politica de Privacidad" } },
-    { href: "/terms", label: { en: "Terms of Use", es: "Terminos de Uso" } },
+    { href: "/privacy", label: { en: "Privacy Policy", es: "Política de Privacidad" } },
+    { href: "/terms", label: { en: "Terms of Use", es: "Términos de Uso" } },
     { href: "/disclaimer", label: { en: "Disclaimer", es: "Aviso Legal" } },
   ];
 
