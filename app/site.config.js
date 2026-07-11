@@ -411,10 +411,14 @@ export const COPY = {
     },
     collab: {
       kicker: { en: "Pirelli spotlight", es: "Destacado Pirelli" },
-      title: { en: "Performance starts here", es: "El rendimiento empieza aqui" },
+      title: { en: "Own every turn.", es: "Domina cada curva." },
       body: {
-        en: "Ask us about Pirelli tires through chat or WhatsApp.",
-        es: "Pregunta por llantas Pirelli por chat o WhatsApp.",
+        en: "Precision grip. Confident control. Pirelli performance for the road ahead.",
+        es: "Agarre preciso. Control total. Rendimiento Pirelli para el camino.",
+      },
+      features: {
+        en: ["Precision grip", "Confident control", "Premium performance"],
+        es: ["Agarre preciso", "Control total", "Rendimiento premium"],
       },
       cta: { en: "Ask by WhatsApp", es: "Pregunta por WhatsApp" },
     },
@@ -447,10 +451,10 @@ export const COPY = {
       en: "Flexible financing and rewards to keep you on the road.",
       es: "Financiamiento flexible y recompensas para mantenerte en el camino.",
     },
-    collabTitle: { en: "Pirelli performance", es: "Rendimiento Pirelli" },
+    collabTitle: { en: "Engineered to perform", es: "Disenadas para rendir" },
     collabBody: {
-      en: "Premium engineering, confident grip, and a tire built for the road ahead.",
-      es: "Ingenieria premium, agarre confiable y llantas hechas para el camino.",
+      en: "Bring legendary Pirelli performance to every mile.",
+      es: "Lleva el rendimiento legendario de Pirelli a cada milla.",
     },
     collabCta: { en: "Ask on WhatsApp", es: "Pregunta por WhatsApp" },
     financeTitle: { en: "Buy Now, Pay Later", es: "Compra Ahora, Paga Después" },

@@ -2075,6 +2075,244 @@ h3 {
   color: var(--paper-dim);
 }
 
+/* Pirelli campaign placements */
+.hero__collab {
+  position: relative;
+  grid-template-columns: minmax(0, 1.25fr) minmax(130px, 0.75fr);
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 216, 0, 0.42);
+  background: #090909;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.38);
+}
+
+.hero__collab::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: #da001d;
+}
+
+.hero__collab-copy {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  align-content: center;
+  gap: 0.7rem;
+  padding: 1.35rem 1.1rem 1.35rem 1.35rem;
+}
+
+.hero__collab-kicker {
+  color: #ffd800;
+}
+
+.hero__collab-title {
+  max-width: 9ch;
+  font-size: clamp(1.75rem, 3.2vw, 2.7rem);
+  line-height: 0.92;
+  text-transform: uppercase;
+  letter-spacing: -0.035em;
+}
+
+.hero__collab-body {
+  max-width: 34ch;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.hero__collab-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.hero__collab-features span {
+  padding: 0.25rem 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.76);
+  font-family: var(--display);
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hero__collab-cta,
+.promo-collab__cta {
+  width: fit-content;
+  color: #fff;
+  border-color: #da001d;
+  background: #da001d;
+  box-shadow: 0 8px 24px rgba(218, 0, 29, 0.28);
+}
+
+.hero__collab-cta:hover,
+.promo-collab__cta:hover {
+  color: #101010;
+  border-color: #ffd800;
+  background: #ffd800;
+}
+
+.hero__collab-product {
+  position: relative;
+  min-height: 290px;
+  overflow: hidden;
+  background: #161616;
+}
+
+.hero__collab-product::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #090909 0%, transparent 42%), linear-gradient(0deg, rgba(218, 0, 29, 0.28), transparent 55%);
+}
+
+.hero__collab-product img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.2) brightness(0.78);
+  transform: scale(1.08);
+}
+
+.hero__collab-speedline {
+  position: absolute;
+  z-index: 2;
+  right: -28px;
+  bottom: 28px;
+  width: 150px;
+  height: 12px;
+  background: #da001d;
+  transform: skewX(-28deg);
+  box-shadow: 0 -18px 0 rgba(218, 0, 29, 0.65), 0 -36px 0 rgba(218, 0, 29, 0.25);
+}
+
+.promo-collab__inner {
+  position: relative;
+  grid-template-columns: minmax(280px, 0.82fr) minmax(0, 1.18fr);
+  gap: 0;
+  min-height: 310px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 216, 0, 0.36);
+  background: #090909;
+}
+
+.promo-collab__visual {
+  position: relative;
+  min-height: 310px;
+  overflow: hidden;
+}
+
+.promo-collab__visual::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 50%, #090909 100%), linear-gradient(0deg, rgba(0, 0, 0, 0.55), transparent 55%);
+}
+
+.promo-collab__visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.25) brightness(0.76);
+}
+
+.promo-collab__number {
+  position: absolute;
+  z-index: 2;
+  left: 1rem;
+  bottom: -0.25rem;
+  color: rgba(255, 216, 0, 0.82);
+  font-family: var(--display);
+  font-size: 5rem;
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1;
+}
+
+.promo-collab__content {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 0.9rem;
+  padding: 2rem clamp(1.4rem, 4vw, 3.5rem);
+}
+
+.promo-collab__content::after {
+  content: "P";
+  position: absolute;
+  z-index: -1;
+  right: 1.2rem;
+  bottom: -2.2rem;
+  color: rgba(218, 0, 29, 0.1);
+  font-family: var(--display);
+  font-size: 14rem;
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1;
+}
+
+.promo-collab__kicker {
+  max-width: 12ch;
+  color: var(--paper);
+  font-size: clamp(1.8rem, 4vw, 3.5rem);
+  font-style: italic;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+}
+
+.promo-collab__body {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 1rem;
+}
+
+.promo-collab__rule {
+  width: min(180px, 45%);
+  height: 4px;
+  background: linear-gradient(90deg, #da001d 0 70%, #ffd800 70%);
+  transform: skewX(-22deg);
+}
+
+@media (max-width: 700px) {
+  .hero__collab {
+    grid-template-columns: 1fr;
+  }
+
+  .hero__collab-product {
+    min-height: 155px;
+    order: -1;
+  }
+
+  .hero__collab-product::after {
+    background: linear-gradient(0deg, #090909 0%, transparent 72%);
+  }
+
+  .hero__collab-title {
+    font-size: 2.15rem;
+  }
+
+  .promo-collab__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .promo-collab__visual {
+    min-height: 190px;
+  }
+
+  .promo-collab__visual::after {
+    background: linear-gradient(0deg, #090909 0%, transparent 70%);
+  }
+
+  .promo-collab__content {
+    padding: 1.5rem;
+  }
+}
+
 .promo-card {
   display: grid;
   grid-template-columns: 1fr;

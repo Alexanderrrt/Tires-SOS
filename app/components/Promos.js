@@ -5,6 +5,7 @@ import { useT } from "../i18n/LanguageContext";
 import { COPY, SITE } from "../site.config";
 import Reveal from "./Reveal";
 import PirelliBadge from "./PirelliBadge";
+import Icon from "./Icons";
 
 export default function Promos() {
   const t = useT();
@@ -47,14 +48,21 @@ export default function Promos() {
         {/* Driver Program — hero-style featured banner */}
         <Reveal className="promo-collab">
           <div className="promo-collab__inner">
-            <p className="promo-collab__kicker">{t(COPY.promos.collabTitle)}</p>
-            <div className="promo-collab__logos" aria-label="Pirelli">
-              <PirelliBadge />
+            <div className="promo-collab__visual" aria-hidden="true">
+              <img src="/services/new-tires.jpg" alt="" />
+              <span className="promo-collab__number">01</span>
             </div>
-            <p className="promo-collab__body">{t(COPY.promos.collabBody)}</p>
-            <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noopener noreferrer" className="btn btn--ghost btn--small">
-              {t(COPY.promos.collabCta)}
-            </a>
+            <div className="promo-collab__content">
+              <div className="promo-collab__logos" aria-label="Pirelli">
+                <PirelliBadge />
+              </div>
+              <p className="promo-collab__kicker">{t(COPY.promos.collabTitle)}</p>
+              <p className="promo-collab__body">{t(COPY.promos.collabBody)}</p>
+              <div className="promo-collab__rule" aria-hidden="true" />
+              <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noopener noreferrer" className="btn btn--small promo-collab__cta">
+                <Icon name="chat" /> {t(COPY.promos.collabCta)}
+              </a>
+            </div>
           </div>
         </Reveal>
 
