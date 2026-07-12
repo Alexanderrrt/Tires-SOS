@@ -86,3 +86,21 @@ Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allow
 <w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
 <w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\0.pack.gz'
  ✓ Compiled in 445ms (515 modules)
+TypeError: Cannot read properties of undefined (reading 'baseUrl')
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:461:92
+    at Array.forEach (<anonymous>)
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:452:174
+    at Array.forEach (<anonymous>)
+    at Watchpack.<anonymous> (C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:445:141)
+ ⨯ unhandledRejection: TypeError: Cannot read properties of undefined (reading 'baseUrl')
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:461:92
+    at Array.forEach (<anonymous>)
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:452:174
+    at Array.forEach (<anonymous>)
+    at Watchpack.<anonymous> (C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:445:141)
+ ⨯ unhandledRejection: TypeError: Cannot read properties of undefined (reading 'baseUrl')
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:461:92
+    at Array.forEach (<anonymous>)
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:452:174
+    at Array.forEach (<anonymous>)
+    at Watchpack.<anonymous> (C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:445:141)

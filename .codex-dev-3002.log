@@ -163,3 +163,21 @@ Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allow
  ✓ Compiled in 642ms (529 modules)
 <w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
  ✓ Compiled in 460ms (515 modules)
+TypeError: Cannot read properties of undefined (reading 'baseUrl')
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:461:92
+    at Array.forEach (<anonymous>)
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:452:174
+    at Array.forEach (<anonymous>)
+    at Watchpack.<anonymous> (C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:445:141)
+ ⨯ unhandledRejection: TypeError: Cannot read properties of undefined (reading 'baseUrl')
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:461:92
+    at Array.forEach (<anonymous>)
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:452:174
+    at Array.forEach (<anonymous>)
+    at Watchpack.<anonymous> (C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:445:141)
+ ⨯ unhandledRejection: TypeError: Cannot read properties of undefined (reading 'baseUrl')
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:461:92
+    at Array.forEach (<anonymous>)
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:452:174
+    at Array.forEach (<anonymous>)
+    at Watchpack.<anonymous> (C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:445:141)
