@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useT } from "../i18n/LanguageContext";
 import { COPY, SITE } from "../site.config";
 import Icon from "./Icons";
-import PirelliBadge from "./PirelliBadge";
 
 function TreadRing() {
   return (
@@ -130,26 +129,20 @@ export default function Hero() {
               {t(COPY.hero.afterpay)}
             </p>
 
-            <div className="hero__collab hero__enter" style={{ "--d": "420ms" }}>
-              <div className="hero__collab-copy">
-                <p className="hero__collab-kicker">{t(COPY.hero.collab.kicker)}</p>
-                <div className="hero__collab-logos" aria-label="Pirelli">
-                  <PirelliBadge />
-                </div>
-                <p className="hero__collab-title">{t(COPY.hero.collab.title)}</p>
-                <p className="hero__collab-body">{t(COPY.hero.collab.body)}</p>
-                <div className="hero__collab-features">
-                  {t(COPY.hero.collab.features).map((feature) => <span key={feature}>{feature}</span>)}
-                </div>
-                <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noreferrer" className="btn btn--small hero__collab-cta">
-                  <Icon name="chat" /> {t(COPY.hero.collab.cta)}
-                </a>
-              </div>
-              <div className="hero__collab-product" aria-hidden="true">
-                <span className="hero__collab-speedline" />
-                <img src="/services/new-tires.jpg" alt="" />
-              </div>
-            </div>
+            <a
+              href={SITE.whatsappHref || SITE.phoneHref}
+              target="_blank"
+              rel="noreferrer"
+              className="hero__flyer hero__enter"
+              style={{ "--d": "420ms" }}
+              aria-label="Ask about the four-tire $340 promotion on WhatsApp"
+            >
+              <img
+                src="/sos-340-flyer.png"
+                alt="Four new tires from $340 with installation, balancing, alignment, and 40,000-mile warranty"
+              />
+              <span className="hero__flyer-cta"><Icon name="chat" /> Ask on WhatsApp</span>
+            </a>
 
             <p className="hero__note hero__enter" style={{ "--d": "460ms" }}>
               {t(COPY.hero.note)}

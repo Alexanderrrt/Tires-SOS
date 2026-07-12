@@ -62,3 +62,32 @@ digest: "3484992154"
  GET /_next/static/chunks/app/page.js 404 in 78ms
  GET /_next/static/chunks/app/layout.js 404 in 76ms
 <w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: invalid stored block lengths
+ ✓ Compiled in 642ms (526 modules)
+ ✓ Compiled in 257ms (512 modules)
+ ✓ Compiled in 130ms (512 modules)
+ ✓ Compiled in 326ms (526 modules)
+ ✓ Compiled in 2.5s (526 modules)
+ ✓ Compiled in 353ms (512 modules)
+ ✓ Compiled in 1319ms (512 modules)
+ ✓ Compiled in 496ms (526 modules)
+ ✓ Compiled in 629ms (526 modules)
+ ✓ Compiled in 542ms (515 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\0.pack.gz'
+ ✓ Compiled in 551ms (529 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
+ ✓ Compiled in 396ms (515 modules)
+ ✓ Compiled in 153ms (515 modules)
+ ✓ Compiled in 327ms (515 modules)
+ ✓ Compiled in 494ms (529 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
+ ✓ Compiled in 394ms (515 modules)
+ ✓ Compiled in 144ms (515 modules)
+ ✓ Compiled in 435ms (529 modules)
+ ✓ Compiled in 154ms (515 modules)
+ ✓ Compiled in 383ms (529 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
+ ✓ Compiled in 451ms (515 modules)
+ ✓ Compiled in 568ms (529 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
+ ✓ Compiled in 402ms (515 modules)

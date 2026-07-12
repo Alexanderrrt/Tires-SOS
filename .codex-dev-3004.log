@@ -1,0 +1,88 @@
+
+> tires-sos-rescue@1.0.0 dev
+> next dev -p 3004
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3004
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 2s
+ ○ Compiling / ...
+ ✓ Compiled / in 4.7s (553 modules)
+ GET / 200 in 4897ms
+ ⚠ Cross origin request detected from 127.0.0.1 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 2.5s (591 modules)
+ GET /reels/reel-1.jpg 404 in 2988ms
+ GET /reels/reel-3.jpg 404 in 2988ms
+ GET /reels/reel-2.jpg 404 in 2990ms
+ GET /reels/reel-4.jpg 404 in 3072ms
+ GET /api/chat/session 200 in 3090ms
+ GET /api/chat/session 200 in 3102ms
+ GET / 200 in 85ms
+ GET /api/chat/session 200 in 34ms
+ GET /api/chat/session 200 in 70ms
+ GET /reels/reel-4.jpg 404 in 56ms
+ GET /reels/reel-3.jpg 404 in 58ms
+ GET /reels/reel-2.jpg 404 in 61ms
+ GET /reels/reel-1.jpg 404 in 63ms
+ ✓ Compiled in 725ms (605 modules)
+ ✓ Compiled in 326ms (591 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\server-development\0.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\server-development\0.pack.gz'
+ ✓ Compiled in 474ms (512 modules)
+ ✓ Compiled in 526ms (526 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\server-development\0.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\server-development\0.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\0.pack.gz'
+ ✓ Compiled in 665ms (526 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\0.pack.gz'
+ ✓ Compiled in 424ms (515 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
+ ✓ Compiled in 432ms (529 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET / 200 in 162ms
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
+ GET / 200 in 61ms
+ ✓ Compiled in 388ms (515 modules)
+ ✓ Compiled in 149ms (515 modules)
+ ✓ Compiled in 292ms (515 modules)
+ GET / 200 in 118ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 680ms (594 modules)
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /api/chat/session 200 in 1417ms
+ GET /api/chat/session 200 in 1405ms
+ GET /reels/reel-2.jpg 404 in 1400ms
+ GET /reels/reel-1.jpg 404 in 1402ms
+ GET /reels/reel-3.jpg 404 in 1400ms
+ GET /_next/static/webpack/0528c62d1900d544.webpack.hot-update.json 404 in 812ms
+ GET /reels/reel-4.jpg 404 in 25ms
+ GET / 200 in 52ms
+ GET /api/chat/session 200 in 25ms
+ GET /reels/reel-1.jpg 404 in 34ms
+ GET /reels/reel-2.jpg 404 in 38ms
+ GET /api/chat/session 200 in 47ms
+ GET /reels/reel-3.jpg 404 in 44ms
+ GET /reels/reel-4.jpg 404 in 68ms
+ ✓ Compiled in 610ms (608 modules)
+ GET / 200 in 87ms
+ GET /api/chat/session 200 in 35ms
+ GET /reels/reel-2.jpg 404 in 29ms
+ GET /reels/reel-1.jpg 404 in 30ms
+ GET /reels/reel-3.jpg 404 in 29ms
+ GET /api/chat/session 200 in 68ms
+ GET /reels/reel-4.jpg 404 in 67ms
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
+ ✓ Compiled in 448ms (515 modules)
+ ✓ Compiled in 160ms (515 modules)
+ ✓ Compiled in 480ms (529 modules)
+ ✓ Compiled in 160ms (515 modules)
+ ✓ Compiled in 436ms (529 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\1.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\1.pack.gz'
+ ✓ Compiled in 349ms (515 modules)
+ ✓ Compiled in 618ms (529 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\0.pack.gz'
+ ✓ Compiled in 445ms (515 modules)

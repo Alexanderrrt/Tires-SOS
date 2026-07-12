@@ -128,3 +128,38 @@ Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allow
  GET /reels/reel-4.jpg 404 in 75ms
  GET /reels/reel-3.jpg 404 in 78ms
  GET /api/chat/session 200 in 112ms
+ ✓ Compiled in 710ms (526 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\server-development\0.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\server-development\0.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\9.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\9.pack.gz'
+ ✓ Compiled in 303ms (512 modules)
+ ✓ Compiled in 152ms (512 modules)
+ ✓ Compiled in 346ms (526 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\server-development\0.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\server-development\0.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\0.pack.gz'
+ ✓ Compiled in 2.4s (526 modules)
+ ✓ Compiled in 240ms (512 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: EPERM: operation not permitted, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\server-development\0.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\server-development\0.pack.gz'
+ ✓ Compiled in 1381ms (512 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\server-development\0.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\server-development\0.pack.gz'
+ ✓ Compiled in 496ms (526 modules)
+ ✓ Compiled in 664ms (526 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\0.pack.gz'
+ ✓ Compiled in 529ms (515 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
+ ✓ Compiled in 471ms (529 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
+ ✓ Compiled in 440ms (515 modules)
+ ✓ Compiled in 158ms (515 modules)
+ ✓ Compiled in 357ms (515 modules)
+ ✓ Compiled in 520ms (529 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
+ ✓ Compiled in 408ms (515 modules)
+ ✓ Compiled in 125ms (515 modules)
+ ✓ Compiled in 418ms (529 modules)
+ ✓ Compiled in 141ms (515 modules)
+ ✓ Compiled in 378ms (529 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
+ ✓ Compiled in 474ms (515 modules)
+ ✓ Compiled in 642ms (529 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: too many length or distance symbols
+ ✓ Compiled in 460ms (515 modules)

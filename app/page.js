@@ -10,6 +10,7 @@ import Reviews from "./components/Reviews";
 import Footer from "./components/Footer";
 import BrandPopups from "./components/BrandPopups";
 import ChatBot from "./components/ChatBot";
+import CinematicVideo from "./components/CinematicVideo";
 
 export default function HomePage() {
   return (
@@ -18,6 +19,7 @@ export default function HomePage() {
       <main>
         <Hero />
         <Marquee />
+        <CinematicVideo />
         <Services />
         <Gallery />
         <Promos />

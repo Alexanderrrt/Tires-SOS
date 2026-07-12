@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useT } from "../i18n/LanguageContext";
 import { COPY, SITE } from "../site.config";
 import Reveal from "./Reveal";
@@ -9,19 +8,12 @@ import Icon from "./Icons";
 
 export default function Promos() {
   const t = useT();
-  const [driverOpen, setDriverOpen] = useState(true);
-  const [driverDismissed, setDriverDismissed] = useState(false);
 
   function waMsg(text) {
     return `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(text)}`;
   }
 
-  const driverWa = waMsg(
-    t({
-      en: "Hi, I'm interested in the Driver Program — 4 tires for $340!",
-      es: "Hola, me interesa el Programa del Conductor — 4 llantas por $340!",
-    })
-  );
+  const pirelliWa = waMsg("Hola, me interesa la oferta Pirelli de 4 llantas por $499.");
   const financeWa = waMsg(
     t({
       en: "Hi, I'd like to know more about Snap Finance and Afterpay!",
@@ -34,8 +26,6 @@ export default function Promos() {
       es: "Hola, quiero una tarjeta de fidelidad!",
     })
   );
-
-  const includes = t(COPY.promos.driverIncludes);
 
   return (
     <section id="promos" className="section section--tread">
@@ -67,59 +57,19 @@ export default function Promos() {
         </Reveal>
 
         <Reveal className="driver-banner-wrapper">
-          {driverOpen ? (
-            <div className="driver-banner">
-              <button
-                className="driver-banner__toggle"
-                onClick={() => setDriverOpen(false)}
-                aria-label="Collapse"
-              >
-                −
-              </button>
-              <div className="driver-banner__flag" aria-hidden="true" />
-              <div className="driver-banner__content">
-                <p className="driver-banner__kicker">
-                  {t(COPY.promos.driverTitle)}
-                </p>
-                <div className="driver-banner__price">
-                  {COPY.promos.driverPrice}
-                </div>
-                <p className="driver-banner__desc">{t(COPY.promos.driverSub)}</p>
-                <ul className="driver-banner__list">
-                  {includes.map((item) => (
-                    <li key={item}>✓ {item}</li>
-                  ))}
-                </ul>
-                <a
-                  href={driverWa}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn--primary"
-                >
-                  {t(COPY.promos.driverCta)}
-                </a>
-              </div>
-            </div>
-          ) : driverDismissed ? null : (
-            <div className="driver-popup" role="dialog" aria-label="Driver Program">
-              <div className="driver-popup__inner">
-                <button
-                  type="button"
-                  className="driver-popup__close"
-                  onClick={() => setDriverDismissed(true)}
-                  aria-label="Close"
-                >
-                  &times;
-                </button>
-                <div className="driver-popup__flag" />
-                <p className="driver-popup__kicker">{t(COPY.promos.driverTitle)}</p>
-                <div className="driver-popup__price">{COPY.promos.driverPrice}</div>
-                <a href={driverWa} target="_blank" rel="noopener noreferrer" className="btn btn--primary btn--small driver-popup__cta">
-                  {t(COPY.promos.driverCta)}
-                </a>
-              </div>
-            </div>
-          )}
+          <a
+            href={pirelliWa}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="promo-flyer"
+            aria-label="Ask about the Pirelli four-tire $499 promotion on WhatsApp"
+          >
+            <img
+              src="/pirelli-499-flyer.png"
+              alt="Pirelli P4 Persist AS Plus special: four 195/65R15 tires for $499 with installation, balancing, alignment, and 85,000-mile warranty"
+            />
+            <span className="promo-flyer__cta"><Icon name="chat" /> Ask on WhatsApp</span>
+          </a>
         </Reveal>
 
         <Reveal className="promos-grid">

@@ -1079,6 +1079,64 @@ h3 {
   opacity: 0.5;
 }
 
+/* ---------- Cinematic shop film ---------- */
+.cinema { position: relative; min-height: 620px; overflow: hidden; isolation: isolate; background: #050403; }
+.cinema__ambient { position: absolute; z-index: -3; inset: -8%; background: url("/sobre-ruedas-poster.jpg") center/cover no-repeat; filter: blur(34px) saturate(.75) brightness(.34); transform: scale(1.12); }
+.cinema::before { content: ""; position: absolute; z-index: -2; inset: 0; background: linear-gradient(90deg, rgba(5,4,3,.94) 0%, rgba(5,4,3,.5) 44%, rgba(5,4,3,.72) 100%), linear-gradient(0deg, #050403 0%, transparent 28%, transparent 72%, #050403 100%); }
+.cinema::after { content: ""; position: absolute; z-index: 5; inset: 0; pointer-events: none; box-shadow: inset 0 1px 0 rgba(255,112,0,.65), inset 0 -1px 0 rgba(255,112,0,.45); }
+.cinema__grain { position: absolute; z-index: -1; inset: 0; opacity: .2; pointer-events: none; background-image: var(--tread); background-size: 90px 90px; mix-blend-mode: soft-light; }
+.cinema__inner { display: grid; grid-template-columns: minmax(0,.9fr) minmax(280px,.58fr); align-items: center; gap: clamp(1.5rem,4vw,4rem); width: min(calc(100% - 2.5rem),var(--max-width)); min-height: 620px; margin: 0 auto; padding: 2.5rem 0; }
+.cinema__copy { position: relative; z-index: 2; max-width: 36rem; }
+.cinema__brands { position: relative; z-index: 2; width: 100%; }
+.cinema__brands h2 { max-width: 14ch; margin: 0 0 1.5rem; color: #fff; font-family: var(--display); font-size: clamp(2.2rem,4.5vw,4.2rem); font-style: italic; font-weight: 900; line-height: .92; letter-spacing: -.035em; text-transform: uppercase; }
+.cinema__brand-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: .7rem; }
+.cinema__brand { display: grid; place-items: center; min-height: 72px; padding: .7rem; overflow: hidden; border: 1px solid rgba(255,255,255,.1); border-radius: .65rem; background: rgba(250,249,247,.96); box-shadow: 0 8px 22px rgba(0,0,0,.2); transition: border-color .2s ease, transform .2s ease; }
+.cinema__brand:hover { border-color: var(--orange); transform: translateY(-3px); }
+.cinema__brand img { display: block; width: 100%; max-width: 125px; height: 38px; object-fit: contain; }
+.cinema__brand-cta { width: fit-content; margin-top: 1.25rem; border-color: var(--orange); color: #111; background: var(--orange); }
+.cinema__brand-cta:hover { border-color: #fff; color: #111; background: #fff; }
+.cinema__kicker { margin: 0 0 1rem; color: var(--orange); font-family: var(--display); font-size: .75rem; letter-spacing: .18em; text-transform: uppercase; }
+.cinema__kicker::before { content: ""; display: inline-block; width: 2.5rem; height: 2px; margin-right: .7rem; vertical-align: middle; background: var(--orange); }
+.cinema__copy h2 { max-width: 8ch; margin: 0; color: #fff; font-family: var(--display); font-size: clamp(4rem,8vw,7.4rem); font-style: italic; font-weight: 900; line-height: .82; letter-spacing: -.055em; text-transform: uppercase; text-shadow: 0 12px 36px rgba(0,0,0,.42); }
+.cinema__copy > p:not(.cinema__kicker) { max-width: 38ch; margin: 1.7rem 0 1.4rem; color: rgba(255,255,255,.7); font-size: 1.05rem; line-height: 1.7; }
+.cinema__runtime { display: inline-flex; align-items: center; gap: .7rem; color: rgba(255,255,255,.54); font-family: var(--display); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; }
+.cinema__runtime i { width: 4px; height: 4px; border-radius: 50%; background: var(--orange); }
+.cinema__frame { position: relative; justify-self: center; width: min(100%,315px); padding: .7rem 1.25rem; background: #030303; box-shadow: 0 30px 80px rgba(0,0,0,.62), 0 0 0 1px rgba(255,126,24,.35); transform: rotate(1.2deg); }
+.cinema__frame::before, .cinema__frame::after { content: ""; position: absolute; z-index: 2; left: 1.25rem; right: 1.25rem; height: 5.2%; pointer-events: none; background: linear-gradient(180deg,rgba(0,0,0,.86),transparent); }
+.cinema__frame::before { top: .7rem; }
+.cinema__frame::after { bottom: .7rem; transform: rotate(180deg); }
+.cinema__video { display: block; width: 100%; aspect-ratio: 9/16; object-fit: cover; background: #080706; }
+.cinema__sprockets { position: absolute; top: .7rem; bottom: .7rem; width: .7rem; opacity: .7; background: repeating-linear-gradient(to bottom,transparent 0 9px,#8d501f 9px 17px,transparent 17px 27px); }
+.cinema__sprockets--left { left: .35rem; }
+.cinema__sprockets--right { right: .35rem; }
+.cinema__controls { position: absolute; z-index: 4; right: 2.2rem; bottom: 1.65rem; display: flex; gap: .45rem; }
+.cinema__controls button { display: grid; place-items: center; width: 2.7rem; height: 2.7rem; padding: 0; border: 1px solid rgba(255,255,255,.28); border-radius: 50%; color: #fff; background: rgba(5,4,3,.78); backdrop-filter: blur(10px); cursor: pointer; transition: color .2s ease, background .2s ease, transform .2s ease; }
+.cinema__controls button:hover, .cinema__controls button:focus-visible { color: #111; background: var(--orange); transform: translateY(-2px); }
+.cinema__controls svg { width: 1.1rem; height: 1.1rem; }
+
+@media (max-width: 820px) {
+  .cinema, .cinema__inner { min-height: auto; }
+  .cinema__inner { grid-template-columns: 1fr; gap: 1.75rem; padding: 3rem 0; }
+  .cinema__copy { text-align: center; margin-inline: auto; }
+  .cinema__brands { text-align: center; }
+  .cinema__brands h2 { margin-inline: auto; }
+  .cinema__brand-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .cinema__brand-cta { margin-inline: auto; }
+  .cinema__copy h2, .cinema__copy > p:not(.cinema__kicker) { margin-inline: auto; }
+  .cinema__kicker::before { display: none; }
+  .cinema__frame { width: min(82vw,320px); transform: none; }
+}
+
+@media (max-width: 520px) {
+  .cinema__brand-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: .55rem; }
+  .cinema__brand { min-height: 64px; padding: .55rem; }
+  .cinema__brand img { height: 32px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinema__frame { transform: none; }
+}
+
 /* ---------- Sections — left-aligned editorial rhythm ---------- */
 
 .section {
@@ -2075,7 +2133,125 @@ h3 {
   color: var(--paper-dim);
 }
 
+.promo-flyer {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin-inline: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 216, 0, 0.36);
+  border-radius: var(--r-lg);
+  background: #080808;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.24);
+  isolation: isolate;
+}
+
+.promo-flyer img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.promo-flyer__cta {
+  position: absolute;
+  z-index: 2;
+  right: 1rem;
+  bottom: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.55rem;
+  color: #fff;
+  background: rgba(12, 12, 12, 0.92);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  font-family: var(--display);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.promo-flyer:hover .promo-flyer__cta {
+  color: #111;
+  background: #ffd800;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 700px) {
+  .promo-flyer {
+    width: 100%;
+  }
+
+  .promo-flyer__cta {
+    right: 0.55rem;
+    bottom: 0.55rem;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.62rem;
+  }
+}
+
 /* Pirelli campaign placements */
+.hero__flyer {
+  position: relative;
+  display: block;
+  width: min(100%, 31rem);
+  margin: 0 0 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 125, 0, 0.65);
+  border-radius: var(--r-lg);
+  background: #080808;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.4);
+  isolation: isolate;
+}
+
+.hero__flyer img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.hero__flyer-cta {
+  position: absolute;
+  z-index: 2;
+  right: 0.85rem;
+  bottom: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 0.5rem;
+  color: #fff;
+  background: rgba(7, 7, 7, 0.9);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  font-family: var(--display);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.hero__flyer:hover .hero__flyer-cta {
+  color: #111;
+  background: var(--orange);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 700px) {
+  .hero__flyer {
+    width: 100%;
+  }
+
+  .hero__flyer-cta {
+    right: 0.55rem;
+    bottom: 0.55rem;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.62rem;
+  }
+}
+
 .hero__collab {
   position: relative;
   grid-template-columns: minmax(0, 1.25fr) minmax(130px, 0.75fr);
