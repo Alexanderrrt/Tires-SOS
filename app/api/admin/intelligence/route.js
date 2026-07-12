@@ -1,10 +1,17 @@
+import { cookies } from "next/headers";
 import { getOptimizationHistory } from "@/lib/supabase-client";
+import { SESSION_COOKIE, verifySession } from "@/lib/auth";
 
 /**
  * Get latest intelligence data for dashboard
  * POST /api/admin/intelligence
  */
 export async function GET(request) {
+  const token = cookies().get(SESSION_COOKIE)?.value;
+  if (!(await verifySession(token))) {
+    return Response.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
   try {
     // Get latest optimization run
     const history = await getOptimizationHistory(1);
@@ -21,18 +28,19 @@ export async function GET(request) {
     }
 
     // Parse the stored data
+    const insights = latestRun.metrics || {};
     const data = {
       timestamp: latestRun.run_date || latestRun.created_at,
-      anomalies: latestRun.recommendations?.anomalies || {},
-      predictions: latestRun.recommendations?.predictions || {},
-      bidAdjustments: latestRun.recommendations?.bidAdjustments || {},
-      crossPlatformInsights: latestRun.recommendations?.crossPlatformInsights || {},
-      keywordOpportunities: latestRun.recommendations?.keywordOpportunities || {},
-      conversionPaths: latestRun.recommendations?.conversionPaths || {},
-      sentimentInsights: latestRun.recommendations?.sentimentInsights || {},
-      spendForecast: latestRun.recommendations?.spendForecast || {},
-      recommendations: latestRun.recommendations?.recommendations || {},
-      metrics: latestRun.metrics || {},
+      anomalies: insights.anomalies || {},
+      predictions: insights.roasForecasts || {},
+      bidAdjustments: insights.bidAdjustments || {},
+      crossPlatformInsights: insights.crossPlatformInsights || {},
+      keywordOpportunities: insights.keywordOpportunities || {},
+      conversionPaths: insights.conversionPaths || {},
+      sentimentInsights: insights.sentimentInsights || {},
+      spendForecast: insights.spendForecast || {},
+      recommendations: latestRun.recommendations || {},
+      metrics: insights,
     };
 
     return new Response(JSON.stringify(data), {

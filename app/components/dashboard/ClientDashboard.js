@@ -1,19 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function ClientDashboard({ client }) {
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("overview"); // overview, campaigns, keywords, actions
 
-  useEffect(() => {
-    fetchMetrics();
-    const interval = setInterval(fetchMetrics, 15000); // Refresh every 15s
-    return () => clearInterval(interval);
-  }, [client.id]);
-
-  async function fetchMetrics() {
+  const fetchMetrics = useCallback(async () => {
     try {
       const response = await fetch(
         `/api/dashboard/clients/${client.id}/metrics?days=30`
@@ -24,7 +18,13 @@ export default function ClientDashboard({ client }) {
     } catch (error) {
       console.error("Error fetching metrics:", error);
     }
-  }
+  }, [client.id]);
+
+  useEffect(() => {
+    fetchMetrics();
+    const interval = setInterval(fetchMetrics, 15000); // Refresh every 15s
+    return () => clearInterval(interval);
+  }, [fetchMetrics]);
 
   if (loading) {
     return <div style={{ padding: "20px", textAlign: "center" }}>Loading...</div>;
