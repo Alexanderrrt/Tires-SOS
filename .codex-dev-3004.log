@@ -104,3 +104,98 @@ TypeError: Cannot read properties of undefined (reading 'baseUrl')
     at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:452:174
     at Array.forEach (<anonymous>)
     at Watchpack.<anonymous> (C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:445:141)
+ ⨯ ./app/layout.js:1:1
+Module not found: Can't resolve '@clerk/nextjs'
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m {[33mClerkProvider[39m} [36mfrom[39m [32m"@clerk/nextjs"[39m[33m;[39m[0m
+[0m [90m   |[39m [31m[1m^[22m[39m[0m
+[0m [90m 2 |[39m [36mimport[39m { [33mBarlow[39m[33m,[39m [33mBarlow_Condensed[39m[33m,[39m [33mCaveat[39m } [36mfrom[39m [32m"next/font/google"[39m[33m;[39m[0m
+[0m [90m 3 |[39m [36mimport[39m [32m"./globals.css"[39m[33m;[39m[0m
+[0m [90m 4 |[39m [36mimport[39m [33mJsonLd[39m [36mfrom[39m [32m"./components/JsonLd"[39m[33m;[39m[0m
+
+https://nextjs.org/docs/messages/module-not-found
+   Reload env: .env.local
+ ○ Compiling /middleware ...
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ ./app/layout.js:1:1
+Module not found: Can't resolve '@clerk/nextjs'
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m {[33mClerkProvider[39m} [36mfrom[39m [32m"@clerk/nextjs"[39m[33m;[39m[0m
+[0m [90m   |[39m [31m[1m^[22m[39m[0m
+[0m [90m 2 |[39m [36mimport[39m { [33mBarlow[39m[33m,[39m [33mBarlow_Condensed[39m[33m,[39m [33mCaveat[39m } [36mfrom[39m [32m"next/font/google"[39m[33m;[39m[0m
+[0m [90m 3 |[39m [36mimport[39m [32m"./globals.css"[39m[33m;[39m[0m
+[0m [90m 4 |[39m [36mimport[39m [33mJsonLd[39m [36mfrom[39m [32m"./components/JsonLd"[39m[33m;[39m[0m
+
+https://nextjs.org/docs/messages/module-not-found
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\server-development\1.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\server-development\1.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development-fallback\0.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development-fallback\0.pack.gz'
+   Reload env: .env.local
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development-fallback\0.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development-fallback\0.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\server'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/page' in C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\server\app\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/page' in 'C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/page (expected C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\server\app\page.js)
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/_not-found/page' in C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\server\app\_not-found\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/_not-found/page' in 'C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/_not-found/page (expected C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\server\app\_not-found\page.js)
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/api/chat/session/route' in C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\server\app\api\chat\session\route.js', but to 'Error: Can't resolve '../../../../.next/server/app/api/chat/session/route' in 'C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/api/chat/session/route (expected C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\server\app\api\chat\session\route.js)
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
