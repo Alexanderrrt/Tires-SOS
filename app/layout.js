@@ -1,3 +1,4 @@
+import {ClerkProvider} from "@clerk/nextjs";
 import { Barlow, Barlow_Condensed, Caveat } from "next/font/google";
 import "./globals.css";
 import JsonLd from "./components/JsonLd";
@@ -93,8 +94,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${displayFont.variable} ${bodyFont.variable} ${signatureFont.variable}`}>
       <body>
-        <JsonLd />
-        <LanguageProvider>{children}</LanguageProvider>
+        <ClerkProvider>
+          <JsonLd />
+          <LanguageProvider>{children}</LanguageProvider>
+        </ClerkProvider>
       </body>
     </html>
   );

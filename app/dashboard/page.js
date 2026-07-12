@@ -1,5 +1,5 @@
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import SimplifiedDashboard from "../components/dashboard/SimplifiedDashboard";
 
 export const metadata = {
@@ -8,12 +8,10 @@ export const metadata = {
 };
 
 export default async function DashboardPage() {
-  // Check authentication
-  const cookieStore = cookies();
-  const token = cookieStore.get("dashboard_token");
+  const { userId } = await auth();
 
-  if (!token) {
-    redirect("/dashboard/login");
+  if (!userId) {
+    redirect("/sign-in?redirect_url=/dashboard");
   }
 
   return <SimplifiedDashboard />;

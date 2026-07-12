@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { UserButton } from "@clerk/nextjs";
 
 export default function SimplifiedDashboard() {
   const [clients, setClients] = useState([]);
@@ -415,9 +416,12 @@ export default function SimplifiedDashboard() {
       {/* TOP BAR */}
       <div className="top-bar">
         <h1 className="top-bar-title">🎛️ Campaign Dashboard</h1>
-        <button className="help-button" onClick={() => setShowHelp(!showHelp)}>
-          {showHelp ? "Hide Help" : "Show Help"}
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <button className="help-button" onClick={() => setShowHelp(!showHelp)}>
+            {showHelp ? "Hide Help" : "Show Help"}
+          </button>
+          <UserButton afterSignOutUrl="/sign-in" />
+        </div>
       </div>
 
       {/* HELP BANNER */}
