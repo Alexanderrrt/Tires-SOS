@@ -27,3 +27,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 .env*
+RESPONSE_SHORT.txt
+RESPONSE_TO_CLIENT.md
+TIRES_SOS_CONTRACT_UPDATED.html
