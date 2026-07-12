@@ -31,15 +31,15 @@ const NAV_SECTIONS = [
   {
     title: "Analytics",
     items: [
-      { id: "reports", icon: "📈", label: "Reports", requires: "soon" },
-      { id: "alerts", icon: "🔔", label: "Alerts", requires: "soon" },
+      { id: "reports", icon: "📈", label: "Reports", requires: "any" },
+      { id: "alerts", icon: "🔔", label: "Alerts", requires: "any" },
     ],
   },
   {
     title: "Business",
     items: [
       { id: "automation", icon: "⚡", label: "Automation", requires: null },
-      { id: "billing", icon: "💳", label: "Billing", requires: "soon" },
+      { id: "billing", icon: "💳", label: "Billing", requires: null },
       { id: "settings", icon: "⚙️", label: "Settings", requires: null },
     ],
   },
@@ -50,7 +50,7 @@ const QUICK_ACTIONS = [
   { icon: "⏸️", label: "Pause Campaign", requires: "any" },
   { icon: "➕", label: "New Ad", requires: "any" },
   { icon: "🔑", label: "Keywords", requires: "google_ads" },
-  { icon: "📊", label: "Full Report", requires: "soon" },
+  { icon: "📊", label: "Full Report", requires: "any", action: "report" },
   { icon: "📧", label: "Email Client", requires: "any", action: "email" },
 ];
 
@@ -74,6 +74,10 @@ export default function SimplifiedDashboard() {
   const [busyAction, setBusyAction] = useState(null);
   const [lastRun, setLastRun] = useState(null);
   const [toast, setToast] = useState(null);
+  const [reportDays, setReportDays] = useState(7);
+  const [reportData, setReportData] = useState(null);
+  const [alerts, setAlerts] = useState(null);
+  const [invoices, setInvoices] = useState(null);
 
   const showToast = useCallback((message, tone = "ok") => {
     setToast({ message, tone });
@@ -195,6 +199,41 @@ export default function SimplifiedDashboard() {
       setBusyPlatform(null);
     }
   }
+
+  // Reports: fetch when the view opens or the range changes
+  useEffect(() => {
+    if (view !== "reports" || !selectedClient) return;
+    setReportData(null);
+    fetch(`/api/dashboard/clients/${selectedClient.id}/metrics?days=${reportDays}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data && typeof data.totalSpend === "number") setReportData(data);
+      })
+      .catch(() => {});
+  }, [view, reportDays, selectedClient]);
+
+  // Alerts: check when the view opens and metrics are available
+  useEffect(() => {
+    if (view !== "alerts" || !metrics) return;
+    setAlerts(null);
+    fetch("/api/dashboard/alerts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ metrics, adBudget: selectedClient?.ad_budget || 500 }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => setAlerts(data?.alerts || []))
+      .catch(() => setAlerts([]));
+  }, [view, metrics, selectedClient]);
+
+  // Billing: fetch invoices when the view opens
+  useEffect(() => {
+    if (view !== "billing" || invoices) return;
+    fetch("/api/dashboard/invoices")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => setInvoices(data?.invoices || []))
+      .catch(() => setInvoices([]));
+  }, [view, invoices]);
 
   async function runOptimization() {
     setBusyAction("optimize");
@@ -389,6 +428,30 @@ export default function SimplifiedDashboard() {
         .insight-icon { font-size: 24px; margin-bottom: 10px; }
         .insight h4 { margin: 0 0 6px; font-size: 14px; }
         .insight p { margin: 0; font-size: 12.5px; color: #64748b; line-height: 1.5; }
+
+        /* reports table */
+        .rtable { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .rtable th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: #64748b; padding: 8px 10px; border-bottom: 2px solid #e2e8f0; }
+        .rtable td { padding: 9px 10px; border-bottom: 1px solid #f1f5f9; }
+        .rtable tr:last-child td { border-bottom: none; }
+        .rtable .num { text-align: right; font-weight: 700; }
+        .range-btns { display: flex; gap: 6px; margin-left: auto; }
+        .range-btn { border: 1px solid #e2e8f0; background: white; color: #475569; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+        .range-btn.active { background: #6366f1; border-color: #6366f1; color: white; }
+
+        /* alerts */
+        .alert-row { display: flex; gap: 14px; align-items: flex-start; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; background: white; }
+        .alert-row + .alert-row { margin-top: 10px; }
+        .alert-row.CRITICAL { border-color: #fecaca; background: #fef2f2; }
+        .alert-row.WARNING { border-color: #fde68a; background: #fffbeb; }
+        .alert-row.INFO { border-color: #bfdbfe; background: #eff6ff; }
+        .alert-icon { font-size: 20px; }
+        .alert-title { font-weight: 800; font-size: 13.5px; margin: 0 0 3px; }
+        .alert-detail { font-size: 12.5px; color: #475569; margin: 0; line-height: 1.5; }
+        .alert-sev { margin-left: auto; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 20px; flex-shrink: 0; }
+        .alert-sev.CRITICAL { background: #dc2626; color: white; }
+        .alert-sev.WARNING { background: #f59e0b; color: white; }
+        .alert-sev.INFO { background: #3b82f6; color: white; }
 
         .toast {
           position: fixed; bottom: 24px; right: 24px; z-index: 100; padding: 13px 20px;
@@ -586,6 +649,8 @@ export default function SimplifiedDashboard() {
                             showToast(lockReason(a.requires), "warn");
                           } else if (a.action === "email") {
                             emailClientReport();
+                          } else if (a.action === "report") {
+                            setView("reports");
                           }
                         }}
                       >
@@ -687,6 +752,148 @@ export default function SimplifiedDashboard() {
                 Data syncs automatically after the first daily optimization run pulls from your connected accounts.
               </p>
             </div>
+          )}
+
+          {/* -------- REPORTS -------- */}
+          {!viewLocked && view === "reports" && (
+            <>
+              <div className="card" style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 22px" }}>
+                <strong style={{ fontSize: 14 }}>📈 Performance report — {selectedClient?.client_name}</strong>
+                <div className="range-btns">
+                  {[7, 14, 30].map((d) => (
+                    <button key={d} className={`range-btn ${reportDays === d ? "active" : ""}`} onClick={() => setReportDays(d)}>
+                      {d} days
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {!reportData ? (
+                <div className="empty card">Loading report…</div>
+              ) : (
+                <>
+                  <div className="stats">
+                    <div className="stat"><div className="stat-top"><span className="stat-label">Spend</span><span className="stat-icon">💰</span></div><div className="stat-value">${reportData.totalSpend.toFixed(0)}</div><div className="stat-sub">last {reportDays} days</div></div>
+                    <div className="stat"><div className="stat-top"><span className="stat-label">Conversions</span><span className="stat-icon">🎯</span></div><div className="stat-value">{reportData.totalConversions}</div><div className="stat-sub">CTR {reportData.avgCTR}%</div></div>
+                    <div className="stat"><div className="stat-top"><span className="stat-label">ROAS</span><span className="stat-icon">📈</span></div><div className="stat-value">{reportData.avgROAS}x</div><div className="stat-sub">{reportData.trend}</div></div>
+                    <div className="stat"><div className="stat-top"><span className="stat-label">Clicks</span><span className="stat-icon">🔗</span></div><div className="stat-value">{reportData.totalClicks.toLocaleString()}</div><div className="stat-sub">${reportData.avgCPC} avg CPC</div></div>
+                  </div>
+                  <div className="card">
+                    <h3 className="card-title">By platform</h3>
+                    <table className="rtable">
+                      <thead><tr><th>Platform</th><th className="num">Spend</th><th className="num">Clicks</th><th className="num">Conversions</th><th className="num">ROAS</th></tr></thead>
+                      <tbody>
+                        {Object.entries(reportData.byPlatform).map(([key, d]) => (
+                          <tr key={key}>
+                            <td>{PLATFORM_META[key]?.icon} {PLATFORM_META[key]?.label || key}</td>
+                            <td className="num">${d.spend.toFixed(0)}</td>
+                            <td className="num">{d.clicks.toLocaleString()}</td>
+                            <td className="num">{d.conversions}</td>
+                            <td className="num">{d.roas}x</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="card">
+                    <h3 className="card-title">Daily breakdown</h3>
+                    {reportData.daily.length === 0 ? (
+                      <div className="empty" style={{ padding: 20 }}>No daily data yet — fills in after the first sync.</div>
+                    ) : (
+                      <table className="rtable">
+                        <thead><tr><th>Date</th><th className="num">Spend</th><th className="num">Clicks</th><th className="num">Conversions</th></tr></thead>
+                        <tbody>
+                          {reportData.daily.map((d) => (
+                            <tr key={d.date}>
+                              <td>{d.date}</td>
+                              <td className="num">${d.spend.toFixed(2)}</td>
+                              <td className="num">{d.clicks.toLocaleString()}</td>
+                              <td className="num">{d.conversions}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {/* -------- ALERTS -------- */}
+          {!viewLocked && view === "alerts" && (
+            <>
+              <div className="card" style={{ padding: "14px 22px" }}>
+                <p style={{ margin: 0, fontSize: 13.5, color: "#475569" }}>
+                  🔔 Checks run against the last 7 days of metrics: budget usage, declining ROAS, wasted spend,
+                  ad fatigue, and the AI engine&apos;s anomaly detection.
+                </p>
+              </div>
+              {alerts === null ? (
+                <div className="empty card">Checking for issues…</div>
+              ) : alerts.length === 0 ? (
+                <div className="empty card">
+                  <div className="empty-icon">✅</div>
+                  <p style={{ fontWeight: 700, color: "#15803d", marginBottom: 4 }}>All clear</p>
+                  <p style={{ margin: 0 }}>No budget, performance, or anomaly issues detected right now.</p>
+                </div>
+              ) : (
+                <div>
+                  {alerts.map((a, i) => (
+                    <div key={i} className={`alert-row ${a.severity}`}>
+                      <span className="alert-icon">{a.icon}</span>
+                      <div>
+                        <p className="alert-title">{a.title}</p>
+                        <p className="alert-detail">{a.detail}</p>
+                      </div>
+                      <span className={`alert-sev ${a.severity}`}>{a.severity}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* -------- BILLING -------- */}
+          {view === "billing" && (
+            <>
+              <div className="stats" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+                <div className="stat"><div className="stat-top"><span className="stat-label">Maintenance</span><span className="stat-icon">🔧</span></div><div className="stat-value">$150<span style={{ fontSize: 14, color: "#94a3b8" }}>/mo</span></div><div className="stat-sub">website + API usage</div></div>
+                <div className="stat"><div className="stat-top"><span className="stat-label">Ad Management</span><span className="stat-icon">📢</span></div><div className="stat-value">$300<span style={{ fontSize: 14, color: "#94a3b8" }}>/mo</span></div><div className="stat-sub">your service fee</div></div>
+                <div className="stat"><div className="stat-top"><span className="stat-label">Ad Spend</span><span className="stat-icon">💸</span></div><div className="stat-value">$500<span style={{ fontSize: 14, color: "#94a3b8" }}>/mo</span></div><div className="stat-sub">reimbursed budget</div></div>
+              </div>
+              <div className="card">
+                <h3 className="card-title">Invoices</h3>
+                {invoices === null ? (
+                  <div className="empty" style={{ padding: 20 }}>Loading invoices…</div>
+                ) : (
+                  <table className="rtable">
+                    <thead><tr><th>Month</th><th>Items</th><th className="num">Total</th><th>Status</th></tr></thead>
+                    <tbody>
+                      {invoices.map((inv) => (
+                        <tr key={inv.id}>
+                          <td style={{ fontWeight: 700 }}>{inv.month}</td>
+                          <td style={{ color: "#64748b", fontSize: 12.5 }}>
+                            {inv.items.map((it) => `${it.label} ($${it.amount})`).join(" · ")}
+                          </td>
+                          <td className="num">${inv.total}</td>
+                          <td>
+                            <span className={`status-pill ${inv.status === "paid" ? "connected" : "disconnected"}`} style={{ marginLeft: 0 }}>
+                              {inv.generated ? "auto-draft" : inv.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+                {invoices?.some((i) => i.generated) && (
+                  <p style={{ fontSize: 12, color: "#94a3b8", marginTop: 12, marginBottom: 0 }}>
+                    Auto-draft is generated from the standard fee structure — run the database schema and insert
+                    real invoices to replace it.
+                  </p>
+                )}
+              </div>
+            </>
           )}
 
           {/* -------- SETTINGS -------- */}
