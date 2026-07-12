@@ -44,14 +44,14 @@ export async function GET() {
       if (!error && data && data.length > 0) {
         const invoices = data.map((inv) => ({
           id: inv.id,
-          month: inv.invoice_month || inv.created_at?.slice(0, 7) || "—",
+          month: inv.invoice_date || inv.created_at?.slice(0, 7) || "—",
           items: [
             inv.website_fee ? { label: "Website delivery", amount: inv.website_fee } : null,
             inv.maintenance_fee ? { label: "Maintenance & API usage", amount: inv.maintenance_fee } : null,
             inv.management_fee ? { label: "Ad management service", amount: inv.management_fee } : null,
             inv.ad_spend ? { label: "Ad spend reimbursement", amount: inv.ad_spend } : null,
           ].filter(Boolean),
-          total: inv.total || 0,
+          total: inv.total_amount || 0,
           status: inv.status || "pending",
           generated: false,
         }));

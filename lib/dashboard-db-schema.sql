@@ -50,6 +50,18 @@ CREATE TABLE dashboard_clients (
   created_by UUID REFERENCES dashboard_users(id)
 );
 
+INSERT INTO dashboard_clients (
+  id, client_name, business_email, status, monthly_fee, ad_spend_budget, api_key
+) VALUES (
+  '00000000-0000-4000-8000-000000000001',
+  'Tires SOS Rescue',
+  'tiressosrescue@gmail.com',
+  'active',
+  450.00,
+  500.00,
+  'internal-clerk-only'
+);
+
 -- =========================================
 -- 3. PLATFORM ACCOUNTS (Google, Meta, Yelp)
 -- =========================================
@@ -184,7 +196,7 @@ CREATE TABLE alerts (
   resolved_at TIMESTAMP
 );
 
-CREATE INDEX idx_alerts_client_unresolved ON alerts(client_id, is_resolved);
+CREATE INDEX idx_alerts_client_unresolved ON alerts(client_id, created_at DESC) WHERE is_resolved = false;
 
 -- =========================================
 -- 8. MANUAL INTERVENTIONS LOG
@@ -218,6 +230,7 @@ CREATE TABLE invoices (
   due_date DATE NOT NULL,
   website_fee DECIMAL(10,2),
   maintenance_fee DECIMAL(10,2),
+  management_fee DECIMAL(10,2),
   ad_spend DECIMAL(10,2),
   total_amount DECIMAL(12,2),
   status VARCHAR(50) DEFAULT 'draft', -- draft, sent, paid, overdue
@@ -306,6 +319,14 @@ CREATE TABLE keyword_performance (
   UNIQUE(keyword_id, date)
 );
 
+-- Server-side ad-platform credentials. Values are only read with the
+-- service-role key through Clerk-protected dashboard API routes.
+CREATE TABLE ad_connections (
+  id INTEGER PRIMARY KEY,
+  connections JSONB NOT NULL DEFAULT '{}'::jsonb,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- =========================================
 -- INDEXES FOR PERFORMANCE
 -- =========================================
@@ -316,28 +337,29 @@ CREATE INDEX idx_ad_variations_client ON ad_variations(client_id);
 CREATE INDEX idx_keywords_client ON keywords(client_id);
 CREATE INDEX idx_manual_actions_client ON manual_actions(client_id, created_at);
 CREATE INDEX idx_invoices_client ON invoices(client_id);
+CREATE INDEX idx_dashboard_sessions_user ON dashboard_sessions(user_id);
+CREATE INDEX idx_variation_performance_variation ON variation_performance(variation_id);
+CREATE INDEX idx_invoice_items_invoice ON invoice_items(invoice_id);
+CREATE INDEX idx_client_settings_client ON client_settings(client_id);
+CREATE INDEX idx_keyword_performance_keyword ON keyword_performance(keyword_id);
 
 -- =========================================
 -- VIEWS FOR COMMON QUERIES
 -- =========================================
 
-CREATE VIEW client_summary AS
+CREATE VIEW client_summary WITH (security_invoker = true) AS
 SELECT
   c.id,
   c.client_name,
   c.status,
-  COUNT(DISTINCT pa.id) as platform_count,
-  COUNT(DISTINCT cam.id) as campaign_count,
-  SUM(dm.spend) as total_spend_30d,
-  AVG(dm.roas) as avg_roas,
-  MAX(dm.metric_date) as last_metric_date
-FROM dashboard_clients c
-LEFT JOIN platform_accounts pa ON c.id = pa.client_id
-LEFT JOIN campaigns cam ON c.id = cam.client_id
-LEFT JOIN daily_metrics dm ON c.id = dm.client_id AND dm.metric_date >= CURRENT_DATE - 30
-GROUP BY c.id, c.client_name, c.status;
+  (SELECT COUNT(*) FROM platform_accounts pa WHERE pa.client_id = c.id) AS platform_count,
+  (SELECT COUNT(*) FROM campaigns cam WHERE cam.client_id = c.id) AS campaign_count,
+  (SELECT COALESCE(SUM(dm.spend), 0) FROM daily_metrics dm WHERE dm.client_id = c.id AND dm.metric_date >= CURRENT_DATE - 30) AS total_spend_30d,
+  (SELECT AVG(dm.roas) FROM daily_metrics dm WHERE dm.client_id = c.id AND dm.metric_date >= CURRENT_DATE - 30) AS avg_roas,
+  (SELECT MAX(dm.metric_date) FROM daily_metrics dm WHERE dm.client_id = c.id) AS last_metric_date
+FROM dashboard_clients c;
 
-CREATE VIEW alert_summary AS
+CREATE VIEW alert_summary WITH (security_invoker = true) AS
 SELECT
   client_id,
   severity,
@@ -345,3 +367,41 @@ SELECT
 FROM alerts
 WHERE is_resolved = false
 GROUP BY client_id, severity;
+
+-- Clerk authenticates dashboard users at the Next.js boundary. Supabase is
+-- accessed only from server routes with the service-role key, so browser Data
+-- API roles receive no table access and no permissive RLS policies.
+ALTER TABLE dashboard_users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE dashboard_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE dashboard_clients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE platform_accounts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE campaigns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE daily_metrics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ad_variations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE variation_performance ENABLE ROW LEVEL SECURITY;
+ALTER TABLE optimization_runs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE alerts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE manual_actions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE invoice_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE client_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE api_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE keywords ENABLE ROW LEVEL SECURITY;
+ALTER TABLE keyword_performance ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ad_connections ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL ON dashboard_users, dashboard_sessions, dashboard_clients,
+  platform_accounts, campaigns, daily_metrics, ad_variations,
+  variation_performance, optimization_runs, alerts, manual_actions,
+  invoices, invoice_items, client_settings, api_logs, keywords,
+  keyword_performance, ad_connections, client_summary, alert_summary
+FROM anon, authenticated;
+GRANT USAGE ON SCHEMA public TO service_role;
+GRANT ALL ON dashboard_users, dashboard_sessions, dashboard_clients,
+  platform_accounts, campaigns, daily_metrics, ad_variations,
+  variation_performance, optimization_runs, alerts, manual_actions,
+  invoices, invoice_items, client_settings, api_logs, keywords,
+  keyword_performance, ad_connections
+TO service_role;
+GRANT SELECT ON client_summary, alert_summary TO service_role;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO service_role;

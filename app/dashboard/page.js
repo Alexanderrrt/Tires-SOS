@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import SimplifiedDashboard from "../components/dashboard/SimplifiedDashboard";
+import { isDashboardUserAllowed } from "../../lib/dashboard-auth";
 
 export const metadata = {
   title: "Dashboard - AI Ads Manager",
@@ -13,6 +14,8 @@ export default async function DashboardPage() {
   if (!userId) {
     redirect("/sign-in?redirect_url=/dashboard");
   }
+
+  if (!isDashboardUserAllowed(userId)) redirect("/");
 
   return <SimplifiedDashboard />;
 }

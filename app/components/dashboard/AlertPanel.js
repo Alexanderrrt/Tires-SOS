@@ -1,18 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function AlertPanel({ clientId }) {
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchAlerts();
-    const interval = setInterval(fetchAlerts, 10000); // Refresh every 10s
-    return () => clearInterval(interval);
-  }, [clientId]);
-
-  async function fetchAlerts() {
+  const fetchAlerts = useCallback(async () => {
     try {
       const response = await fetch(
         `/api/dashboard/clients/${clientId}/alerts`
@@ -23,7 +17,13 @@ export default function AlertPanel({ clientId }) {
     } catch (error) {
       console.error("Error fetching alerts:", error);
     }
-  }
+  }, [clientId]);
+
+  useEffect(() => {
+    fetchAlerts();
+    const interval = setInterval(fetchAlerts, 10000); // Refresh every 10s
+    return () => clearInterval(interval);
+  }, [fetchAlerts]);
 
   async function resolveAlert(alertId) {
     try {
