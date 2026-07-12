@@ -10,8 +10,10 @@
     "lint": "eslint . --ext .js,.jsx"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.0",
     "@supabase/supabase-js": "^2.110.0",
     "next": "^14.2.5",
+    "nodemailer": "^6.9.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import SimplifiedDashboard from "@/components/dashboard/SimplifiedDashboard";
+import SimplifiedDashboard from "../components/dashboard/SimplifiedDashboard";
 
 export const metadata = {
   title: "Dashboard - AI Ads Manager",
