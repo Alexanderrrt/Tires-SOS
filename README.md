@@ -282,9 +282,18 @@ Push to GitHub → Vercel auto-deploys. No manual steps.
 | `AUTH_SECRET` | Random 32-byte base64 string for cookie signing |
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-only) |
+| `AD_CONNECTIONS_ENCRYPTION_KEY` | Dedicated server-only key used to encrypt ad-platform credentials |
+| `DASHBOARD_DEFAULT_CLIENT_ID` | Stable UUID used by dashboard cron jobs |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk browser key for `/dashboard` authentication |
+| `CLERK_SECRET_KEY` | Clerk server key for protected dashboard routes |
+| `DASHBOARD_ALLOWED_USER_IDS` | Comma-separated Clerk user IDs allowed into `/dashboard` |
 
 Without Supabase vars, the quote calculator works on default prices and admin
 edits are session-only. See `.env.example`.
+
+For an existing dashboard database, run `lib/dashboard-db-repair.sql` once in
+the Supabase SQL editor. It aligns the dashboard columns, creates encrypted
+connection storage, adds indexes, enables RLS, and reloads the API schema cache.
 
 ---
 

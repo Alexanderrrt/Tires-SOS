@@ -1,9 +1,5 @@
-import { SignUp } from "@clerk/nextjs";
+import { notFound } from "next/navigation";
 
 export default function SignUpPage() {
-  return (
-    <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
-      <SignUp />
-    </div>
-  );
+  notFound();
 }

@@ -1,9 +1,27 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+function cleanEnv(value) {
+  return typeof value === "string" ? value.replace(/^\uFEFF/, "").trim() : value;
+}
+
+function emptySummary() {
+  return {
+    totalSpend: 0,
+    totalClicks: 0,
+    totalConversions: 0,
+    totalImpressions: 0,
+    avgROAS: 0,
+    avgCTR: 0,
+    avgCPC: 0,
+    byPlatform: {
+      google_ads: { spend: 0, conversions: 0, clicks: 0, roas: 0 },
+      meta_ads: { spend: 0, conversions: 0, clicks: 0, roas: 0 },
+      yelp: { spend: 0, conversions: 0, clicks: 0, roas: 0 },
+    },
+    daily: [],
+    trend: "stable",
+  };
+}
 
 /**
  * Get real-time metrics for a client
@@ -20,6 +38,11 @@ export async function GET(request, { params }) {
       .toISOString()
       .split("T")[0];
 
+    const url = cleanEnv(process.env.SUPABASE_URL);
+    const key = cleanEnv(process.env.SUPABASE_SERVICE_ROLE_KEY);
+    if (!url || !key) return Response.json(emptySummary());
+
+    const supabase = createClient(url, key, { auth: { persistSession: false } });
     const { data: metrics, error } = await supabase
       .from("daily_metrics")
       .select(
@@ -35,49 +58,19 @@ export async function GET(request, { params }) {
     if (error) throw error;
 
     // Aggregate metrics
-    const summary = {
-      totalSpend: 0,
-      totalClicks: 0,
-      totalConversions: 0,
-      totalImpressions: 0,
-      avgROAS: 0,
-      avgCTR: 0,
-      avgCPC: 0,
-      byPlatform: {
-        google_ads: {
-          spend: 0,
-          conversions: 0,
-          clicks: 0,
-          roas: 0,
-        },
-        meta_ads: {
-          spend: 0,
-          conversions: 0,
-          clicks: 0,
-          roas: 0,
-        },
-        yelp: {
-          spend: 0,
-          conversions: 0,
-          clicks: 0,
-          roas: 0,
-        },
-      },
-      daily: [],
-      trend: "stable", // improving, declining, stable
-    };
+    const summary = emptySummary();
 
     // Process metrics
     metrics.forEach((m) => {
-      summary.totalSpend += m.spend || 0;
-      summary.totalClicks += m.clicks || 0;
-      summary.totalConversions += m.conversions || 0;
-      summary.totalImpressions += m.impressions || 0;
+      summary.totalSpend += Number(m.spend) || 0;
+      summary.totalClicks += Number(m.clicks) || 0;
+      summary.totalConversions += Number(m.conversions) || 0;
+      summary.totalImpressions += Number(m.impressions) || 0;
 
       if (summary.byPlatform[m.platform]) {
-        summary.byPlatform[m.platform].spend += m.spend || 0;
-        summary.byPlatform[m.platform].conversions += m.conversions || 0;
-        summary.byPlatform[m.platform].clicks += m.clicks || 0;
+        summary.byPlatform[m.platform].spend += Number(m.spend) || 0;
+        summary.byPlatform[m.platform].conversions += Number(m.conversions) || 0;
+        summary.byPlatform[m.platform].clicks += Number(m.clicks) || 0;
       }
     });
 
@@ -114,12 +107,15 @@ export async function GET(request, { params }) {
           roas: 0,
         };
       }
-      dailyMap[m.metric_date].spend += m.spend || 0;
-      dailyMap[m.metric_date].conversions += m.conversions || 0;
-      dailyMap[m.metric_date].clicks += m.clicks || 0;
+      dailyMap[m.metric_date].spend += Number(m.spend) || 0;
+      dailyMap[m.metric_date].conversions += Number(m.conversions) || 0;
+      dailyMap[m.metric_date].clicks += Number(m.clicks) || 0;
     });
 
-    summary.daily = Object.values(dailyMap);
+    summary.daily = Object.values(dailyMap).map((day) => ({
+      ...day,
+      roas: day.spend > 0 ? day.conversions / day.spend : 0,
+    }));
 
     // Detect trend
     if (summary.daily.length > 3) {
