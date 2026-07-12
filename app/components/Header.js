@@ -3,14 +3,17 @@
 import { useEffect, useState } from "react";
 import { useLanguage, useT } from "../i18n/LanguageContext";
 import { useOpenStatus } from "../hooks/useOpenStatus";
+import { useSecretAdminTap } from "../hooks/useSecretAdminTap";
 import { COPY, SITE } from "../site.config";
 import Icon from "./Icons";
+import PirelliBadge from "./PirelliBadge";
 
 export default function Header() {
   const { lang, toggleLang } = useLanguage();
   const t = useT();
   const isOpen = useOpenStatus();
   const [scrolled, setScrolled] = useState(false);
+  const onSecretAdminTap = useSecretAdminTap();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -23,9 +26,20 @@ export default function Header() {
     <header className={`header ${scrolled ? "header--scrolled" : ""}`}>
       <div className="header__inner">
         <a href="/" className="header__brand">
-          <img className="header__logo" src="/logo-mark.png" alt="" />
-          <span className="header__brand-name">{SITE.name}</span>
+          <span className="header__logo-hit" role="presentation" onClick={onSecretAdminTap}>
+            <img className="header__logo" src="/logo-mark.png" alt="" draggable={false} />
+          </span>
+          <span className="header__brand-copy">
+            <span className="header__brand-name">{SITE.nameShort}</span>
+            <span className="header__brand-flag" aria-hidden="true">
+              <span className="header__brand-tire header__brand-tire--yellow" />
+              <span className="header__brand-tire header__brand-tire--blue" />
+              <span className="header__brand-tire header__brand-tire--red" />
+            </span>
+          </span>
         </a>
+
+        <PirelliBadge compact className="header__pirelli" />
 
         <nav className="header__nav">
           <a href="/#services">{t(COPY.nav.services)}</a>
@@ -52,8 +66,8 @@ export default function Header() {
             {lang === "en" ? "ES" : "EN"}
           </button>
 
-          <a href={SITE.phoneHref} className="btn btn--primary btn--small">
-            <Icon name="phone" /> {t(COPY.nav.callNow)}
+          <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noreferrer" className="btn btn--primary btn--small">
+            <Icon name="chat" /> {t(COPY.nav.callNow)}
           </a>
         </div>
       </div>

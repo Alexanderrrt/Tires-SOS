@@ -5,6 +5,7 @@ import { useT } from "../i18n/LanguageContext";
 import { COPY, SERVICES } from "../site.config";
 import Icon from "./Icons";
 import Reveal from "./Reveal";
+import PirelliBadge from "./PirelliBadge";
 
 export default function Services() {
   const t = useT();
@@ -16,6 +17,7 @@ export default function Services() {
         <Reveal>
           <h2 className="section__heading">{t(COPY.services.heading)}</h2>
           <p className="section__sub">{t(COPY.services.sub)}</p>
+          <PirelliBadge compact className="section__pirelli" />
         </Reveal>
 
         <Reveal className="services-grid">
@@ -31,9 +33,16 @@ export default function Services() {
                 aria-expanded={isActive}
               >
                 <span className="service-card__icon">
-                  <Icon name={service.icon} />
+                  {service.image ? (
+                    <img src={service.image} alt={t(service.title)} loading="lazy" />
+                  ) : (
+                    <Icon name={service.icon} />
+                  )}
                 </span>
-                <span className="service-card__title">{t(service.title)}</span>
+                <span className="service-card__title">
+                  {t(service.title)}
+                  <span className={`service-card__indicator ${isActive ? "service-card__indicator--open" : ""}`}>+</span>
+                </span>
                 <span className={`service-card__reveal ${isActive ? "service-card__reveal--open" : ""}`}>
                   <span className="service-card__desc">{t(service.desc)}</span>
                 </span>

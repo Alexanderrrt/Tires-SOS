@@ -3,6 +3,8 @@
 import { useT } from "../i18n/LanguageContext";
 import { COPY, SITE } from "../site.config";
 import Reveal from "./Reveal";
+import PirelliBadge from "./PirelliBadge";
+import Icon from "./Icons";
 
 export default function Promos() {
   const t = useT();
@@ -11,16 +13,11 @@ export default function Promos() {
     return `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(text)}`;
   }
 
-  const driverWa = waMsg(
-    t({
-      en: "Hi, I'm interested in the Driver Program — 4 tires for $340!",
-      es: "Hola, me interesa el Programa del Conductor — 4 llantas por $340!",
-    })
-  );
+  const pirelliWa = waMsg("Hola, me interesa la oferta Pirelli de 4 llantas por $499.");
   const financeWa = waMsg(
     t({
-      en: "Hi, I'd like to know more about Snap Finance!",
-      es: "Hola, me gustaría saber más sobre Snap Finance!",
+      en: "Hi, I'd like to know more about Snap Finance and Afterpay!",
+      es: "Hola, me gustaría saber más sobre Snap Finance y Afterpay!",
     })
   );
   const loyaltyWa = waMsg(
@@ -29,8 +26,6 @@ export default function Promos() {
       es: "Hola, quiero una tarjeta de fidelidad!",
     })
   );
-
-  const includes = t(COPY.promos.driverIncludes);
 
   return (
     <section id="promos" className="section section--tread">
@@ -41,30 +36,40 @@ export default function Promos() {
         </Reveal>
 
         {/* Driver Program — hero-style featured banner */}
-        <Reveal className="driver-banner">
-          <div className="driver-banner__flag" aria-hidden="true" />
-          <div className="driver-banner__content">
-            <p className="driver-banner__kicker">
-              {t(COPY.promos.driverTitle)}
-            </p>
-            <div className="driver-banner__price">
-              {COPY.promos.driverPrice}
+        <Reveal className="promo-collab">
+          <div className="promo-collab__inner">
+            <div className="promo-collab__visual" aria-hidden="true">
+              <img src="/services/new-tires.jpg" alt="" />
+              <span className="promo-collab__number">01</span>
             </div>
-            <p className="driver-banner__desc">{t(COPY.promos.driverSub)}</p>
-            <ul className="driver-banner__list">
-              {includes.map((item) => (
-                <li key={item}>✓ {item}</li>
-              ))}
-            </ul>
-            <a
-              href={driverWa}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn--primary"
-            >
-              {t(COPY.promos.driverCta)}
-            </a>
+            <div className="promo-collab__content">
+              <div className="promo-collab__logos" aria-label="Pirelli">
+                <PirelliBadge />
+              </div>
+              <p className="promo-collab__kicker">{t(COPY.promos.collabTitle)}</p>
+              <p className="promo-collab__body">{t(COPY.promos.collabBody)}</p>
+              <div className="promo-collab__rule" aria-hidden="true" />
+              <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noopener noreferrer" className="btn btn--small promo-collab__cta">
+                <Icon name="chat" /> {t(COPY.promos.collabCta)}
+              </a>
+            </div>
           </div>
+        </Reveal>
+
+        <Reveal className="driver-banner-wrapper">
+          <a
+            href={pirelliWa}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="promo-flyer"
+            aria-label="Ask about the Pirelli four-tire $499 promotion on WhatsApp"
+          >
+            <img
+              src="/pirelli-499-flyer.png"
+              alt="Pirelli P4 Persist AS Plus special: four 195/65R15 tires for $499 with installation, balancing, alignment, and 85,000-mile warranty"
+            />
+            <span className="promo-flyer__cta"><Icon name="chat" /> Ask on WhatsApp</span>
+          </a>
         </Reveal>
 
         <Reveal className="promos-grid">

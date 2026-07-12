@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" role="img" aria-label="Nokian logo">
+  <rect width="420" height="120" fill="none"/>
+  <path d="M28 84c14-28 35-44 62-52" fill="none" stroke="#1f7a3e" stroke-width="8" stroke-linecap="round"/>
+  <g font-family="Arial, Helvetica, sans-serif" font-weight="900" font-style="italic">
+    <text x="98" y="76" font-size="52" fill="#151515" stroke="#fff" stroke-width="6" paint-order="stroke">NOKIAN</text>
+    <text x="98" y="76" font-size="52" fill="#1f7a3e">NOKIAN</text>
+  </g>
+</svg>

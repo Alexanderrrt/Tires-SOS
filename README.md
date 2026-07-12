@@ -1,93 +1,308 @@
 # Tires SOS Rescue — website
 
 Next.js (App Router) marketing site for Tires SOS Rescue, a tire & auto shop
-in San José, CA (tires, brakes, oil changes, batteries, rims, alignment).
+in San José, CA. Fully bilingual (English/Spanish). Static marketing pages +
+dynamic quote estimator + admin pricing editor.
 
-**Stack:** Next.js 14 · React · plain CSS · Vercel (hosting) · Supabase
-(stores editable quote pricing). The marketing pages are static; the quote
-estimator (`/quote`) and admin panel (`/admin`) are the only dynamic parts.
+**Stack:** Next.js 14 · React 18 · plain CSS · Vercel (hosting) · Supabase (pricing)
 
-## Run it
+---
+
+## AI — Read this first
+
+This file is the single source of truth for understanding this project. Every
+section below is relevant to AI agents working with this codebase.
+
+---
+
+## Quick start
 
 ```bash
 npm install
-npm run dev   # http://localhost:3000
+npm run dev     # → http://localhost:3000
+npm run build   # production build
+npm run lint    # ESLint (config: eslint-config-next)
 ```
 
-## Edit site content in ONE place
+Node >= 18.17 required (`.nvmrc` locks to 20).
 
-Open **`app/site.config.js`**:
+---
 
-- `SITE` — name, phone, address, map links, hours (per weekday, used to
-  compute the live "Open now / Closed" badge), social links
-- `SERVICES` — the service cards shown in the "What We Do" section
-- `TESTIMONIALS` — the review quotes shown in "What Customers Say"
-- `COPY` — every other bilingual (English/Spanish) UI string
+## File map — what lives where
 
-Every text field that needs both languages is a `{ en: "...", es: "..." }`
-object — the site's language toggle reads whichever one is active.
+```
+.
+├── app/                          # Next.js App Router pages & components
+│   ├── layout.js                 # Root layout: fonts, metadata, LanguageProvider
+│   ├── page.js                   # Homepage — assembles all section components
+│   ├── globals.css               # THE ONLY CSS FILE (2905 lines, no Tailwind)
+│   ├── site.config.js            # ALL bilingual content + business data
+│   ├── robots.js / sitemap.js    # /robots.txt + /sitemap.xml generators
+│   ├── components/
+│   │   ├── Header.js             # Sticky nav + Open/Closed badge + lang toggle
+│   │   ├── Hero.js               # Hero + alignment machine spotlight
+│   │   ├── Marquee.js            # Infinite scrolling bilingual banner
+│   │   ├── Services.js           # "What We Do" / "Lo Que Hacemos" card grid
+│   │   ├── Gallery.js            # Instagram reels embed section
+│   │   ├── Promos.js             # Deals: financing, loyalty card, driver program
+│   │   ├── OwnersRide.js         # BMW M3 "Owner's Ride" section
+│   │   ├── Location.js           # Google Maps + hours table + both addresses
+│   │   ├── Reviews.js            # Testimonial cards
+│   │   ├── Footer.js             # Logo + social links + rights
+│   │   ├── BrandPopups.js        # Tire brand logos carousel overlay
+│   │   ├── Icons.js              # 15 custom SVG icons (24×24, automotive)
+│   │   ├── JsonLd.js             # schema.org structured data (TireShop)
+│   │   └── Reveal.js             # IntersectionObserver scroll-reveal wrapper
+│   ├── i18n/
+│   │   └── LanguageContext.js    # LanguageProvider + useT() hook (EN/ES)
+│   ├── hooks/
+│   │   ├── useOpenStatus.js      # Computes "Open now" / "Closed" from hours
+│   │   └── useSecretAdminTap.js  # 5-tap easter egg → /admin
+│   ├── admin/
+│   │   ├── page.js               # Server component — admin panel
+│   │   └── PricingEditor.js      # Client component — pricing CRUD UI
+│   ├── quote/
+│   │   ├── page.js               # /quote route page
+│   │   ├── QuoteCalculator.js    # Interactive price estimator
+│   │   └── QuoteIntro.js         # /quote intro text
+│   └── api/
+│       ├── pricing/
+│       │   └── route.js          # GET /api/pricing — public pricing data
+│       └── admin/
+│           ├── login/
+│           │   └── route.js      # POST /api/admin/login — session auth
+│           ├── logout/
+│           │   └── route.js      # POST /api/admin/logout — destroy session
+│           └── pricing/
+│               └── route.js      # PUT /api/admin/pricing — save edited prices
+├── lib/                          # Shared logic (server-only, pure functions)
+│   ├── auth.js                   # HMAC-signed session cookies
+│   ├── quote.js                  # Quote calculation engine
+│   ├── pricing.default.js        # Default/seed pricing data
+│   ├── pricing-store.js          # Supabase read/write with dev fallback
+│   ├── pricing-validate.js       # Server-side payload sanitization
+│   └── vehicles.js               # 60+ vehicle makes/models DB
+├── db/
+│   └── pricing-schema.sql        # Supabase table DDL + seed data
+├── public/                       # Static assets
+│   ├── brands/                   # Tire brand logos
+│   ├── services/                 # Service card images
+│   ├── vehicles/                 # Vehicle photos
+│   ├── logo.jpg / logo-mark.png  # Logo variants
+│   ├── og.png                    # Open Graph share image
+│   ├── storefront.jpg            # Shop exterior
+│   ├── owner.jpg / owners-m3.jpg # Owner & car photos
+│   ├── snap-finance.jpg / loyalty-card.jpg  # Promo images
+│   └── favicon.svg / manifest.json / apple-touch-icon*.png
+├── package.json                  # Dependencies & scripts
+├── next.config.js                # { reactStrictMode: true }
+├── .env.example                  # All required env vars documented
+├── .nvmrc                        # Node 20
+├── .gitignore
+└── README.md                     # ← This file
+```
 
-## Design system
+---
 
-Brand colors are the shop's real ones — **orange & black** (`--color-accent:
-#f86000` in `app/globals.css`). Headings use Archivo Black, body uses Inter,
-both self-hosted at build time via `next/font` (no runtime font requests).
-All scroll/hover animations are pure CSS + a small IntersectionObserver
-`Reveal` component (`app/components/Reveal.js`) and are fully disabled for
-users with `prefers-reduced-motion`.
+## Architecture decisions
 
-## Photos & Instagram
+### Client vs Server components
 
-- **Owner's BMW M3 Competition** — `/public/owners-m3.jpg`, shown in the
-  "Owner's Ride" section. Replace the file to update the photo.
-- **Logo** — `/public/logo.jpg`, used in the header, footer and the social
-  share image (`/public/og.png`).
-- **Instagram reels** — the "From the Shop" section embeds the reels listed
-  in `REELS` in `app/site.config.js`. Paste new reel permalinks there to
-  rotate the featured content.
+| Convention | Used for |
+|---|---|
+| `"use client"` | Any component with state, effects, event handlers, or browser APIs |
+| Default (server) | Static sections, layout, metadata config, API routes |
 
-## Quote estimator + admin pricing
+The homepage (`app/page.js`) is a server component that imports client leaf
+components. This keeps the rendering surface small.
 
-Customers get an instant estimate at **`/quote`**: they pick a vehicle type and
-services and see a price range, then send it to the shop pre-filled over
-WhatsApp. Prices "vary by model" via a per-vehicle-class multiplier and by
-labor hours × rate — see the model in `lib/pricing.default.js` and the engine
-in `lib/quote.js`.
+### CSS — plain, no frameworks
 
-The owner edits prices at **`/admin`** (no code):
+All styles are in a single `app/globals.css` (2905 lines). No CSS Modules,
+Tailwind, CSS-in-JS, or preprocessors. Pattern:
 
-1. In Supabase, run `db/pricing-schema.sql` once (creates + seeds the `pricing`
-   table).
-2. Set these env vars locally (`.env.local`) and in Vercel — see `.env.example`:
-   - `ADMIN_PASSWORD` — the login password
-   - `AUTH_SECRET` — random string (`openssl rand -base64 32`)
-   - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` — server-only (not NEXT_PUBLIC)
-3. Confirm `SITE.whatsapp` in `app/site.config.js` is the shop's WhatsApp number.
+- **Custom properties** for colors, radii, fonts (`:root` block)
+- **BEM naming** for components: `.service-card`, `.service-card__icon`,
+  `.service-card--active`
+- **Global utility** classes: `.icon`, `.btn`, `.btn--primary`, `.section`,
+  `.reveal`, `.reveal-item`
+- **Breakpoint** at 768px (single mobile breakpoint, near end of file)
+- **`prefers-reduced-motion`** respected — all animations disabled
 
-Until Supabase is connected, the estimator runs on the built-in default prices
-and the admin editor saves for the current session only. The default prices in
-`lib/pricing.default.js` are starting points — the owner should set real numbers
-in `/admin` (or you can edit that file).
+### Fonts — self-hosted via `next/font`
+
+- **Barlow Condensed** (600/700/800) — headings, display (`--font-display`)
+- **Barlow** (400/500/600) — body text (`--font-body`)
+- **Caveat** (600) — signature/accent (`--font-signature`)
+
+Zero runtime font requests — built into CSS at build time.
+
+### Color system
+
+`--ink: #14100c` (near-black), `--paper: #f3ede3` (warm off-white),
+`--orange: #f86000` (brand accent), `--surface` / `--surface-2` / `--line`
+for card/surface hierarchy. Brown-orange bias throughout.
+
+---
+
+## i18n system
+
+The site is fully bilingual (English/Spanish) with a runtime toggle.
+
+**How it works:**
+
+1. `app/i18n/LanguageContext.js` provides `<LanguageProvider>` wrapping the
+   entire app in `layout.js`.
+2. `useT()` hook returns a function: `t({ en: "...", es: "..." })` → active
+   string. Auto-picks browser language on first visit; persists to
+   `localStorage` key `tsr-lang`.
+3. `lang` and `toggleLang` are also available via `useLanguage()`.
+4. `<html lang>` is kept in sync for SEO/screen readers.
+
+**Every UI string** is a `{ en, es }` object defined in `app/site.config.js`
+inside the `COPY` object. Content-only entries (service descriptions,
+testimonials, marquee items) are also `{ en, es }`.
+
+---
+
+## Data flow
+
+### Static content (most of the site)
+
+All content is defined in `app/site.config.js`:
+- `SITE` — business info, locations, hours, social links
+- `SERVICES` — 7 service cards for "What We Do"
+- `TESTIMONIALS` — 3 review cards
+- `MARQUEE_ITEMS` — scrolling bilingual banner items
+- `REELS` — Instagram reel URLs
+- `OWNERS_RIDE` — BMW M3 section text
+- `COPY` — every other UI string (nav, hero, quote, footer, status, admin)
+
+All component files import from `site.config.js` directly (no API calls for
+content). **To change site content, edit `site.config.js` only.**
+
+### Dynamic data — Quote pricing
+
+The quote estimator uses a pricing model in `lib/`:
+- `lib/pricing.default.js` — default/seed prices
+- `lib/pricing-store.js` — tries Supabase first, falls back to defaults
+- `lib/quote.js` — pure calculation: (base × vehicle multiplier × qty) + labor
+
+Prices are edited at `/admin` (password-protected):
+- With Supabase env vars → persisted to Supabase `pricing` table
+- Without Supabase → in-memory for the session only
+
+### API routes
+
+| Route | Method | Purpose | Auth |
+|---|---|---|---|
+| `/api/pricing` | GET | Public pricing data for the quote calculator | None |
+| `/api/admin/login` | POST | Validate password, set session cookie | None |
+| `/api/admin/logout` | POST | Destroy session cookie | None |
+| `/api/admin/pricing` | PUT | Save edited pricing | Session cookie |
+
+Auth uses HMAC-signed cookies (`lib/auth.js`) — no JWT, no Supabase Auth.
+
+---
+
+## Component tree (homepage)
+
+```
+<RootLayout>                 ← layout.js (fonts, metadata, LanguageProvider)
+  <JsonLd />                 ← schema.org structured data
+  <LanguageProvider>
+    <HomePage>               ← page.js (server component)
+      <Header />             ← client: sticky nav, open/closed badge, lang toggle
+      <main>
+        <Hero />             ← client: hero + alignment spotlight
+        <Marquee />          ← client: infinite scrolling banner
+        <Services />         ← client: "What We Do" cards (toggle reveal)
+        <Gallery />          ← client: Instagram reels
+        <Promos />           ← client: financing + loyalty + driver program
+        <OwnersRide />       ← client: BMW M3 section
+        <Location />         ← client: maps + hours + addresses
+        <Reviews />          ← client: testimonial cards
+      </main>
+      <Footer />             ← client: social links + copyright
+      <BrandPopups />        ← client: brand logos carousel
+    </HomePage>
+  </LanguageProvider>
+</RootLayout>
+```
+
+---
+
+## Common tasks for AI
+
+### Add/edit a service in "What We Do"
+1. Edit `SERVICES` array in `app/site.config.js` (add/remove/modify objects).
+2. Each service needs: `id`, `icon` (name from `Icons.js`), `image` (path in
+   `/public/services/` or null), `title` and `desc` (both `{ en, es }`).
+3. If you need a new icon, add its SVG path to the `GLYPHS` map in
+   `app/components/Icons.js`.
+
+### Add a new section to the homepage
+1. Create a component in `app/components/`.
+2. Import it in `app/page.js` and add it to the `<main>` element.
+3. Add its bilingual copy to `COPY` in `app/site.config.js`.
+4. Add its CSS to `app/globals.css`.
+5. Add a nav link in `Header.js` if needed.
+
+### Add a new route/page
+1. Create a folder under `app/` with a `page.js`.
+2. If the page needs data at request time, add an API route under `app/api/`.
+3. Add nav links in `Header.js`.
+
+### Add/rotate Instagram reels
+Edit the `REELS` array in `app/site.config.js` — paste new Instagram reel
+permalinks.
+
+### Update prices
+- **Via admin UI** (recommended): Go to `/admin`, log in with `ADMIN_PASSWORD`,
+  edit prices. If Supabase env vars are set, changes persist.
+- **Via code**: Edit `lib/pricing.default.js` for new defaults.
+
+### Change hours
+Edit `SITE.hours` in `app/site.config.js`. The `useOpenStatus.js` hook
+computes "Open now / Closed" automatically.
+
+### Update location / phone / social
+Edit the relevant field in `SITE` in `app/site.config.js`.
+
+### Deploy
+Push to GitHub → Vercel auto-deploys. No manual steps.
+
+---
+
+## Environment variables (`.env.local`)
+
+| Variable | Purpose |
+|---|---|
+| `ADMIN_PASSWORD` | Login password for `/admin` |
+| `AUTH_SECRET` | Random 32-byte base64 string for cookie signing |
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-only) |
+
+Without Supabase vars, the quote calculator works on default prices and admin
+edits are session-only. See `.env.example`.
+
+---
 
 ## SEO
 
-- `app/components/JsonLd.js` — schema.org `TireShop`/`AutoRepair` structured
-  data (name, address, phone, hours, payment methods incl. Afterpay, social
-  profiles) for Google local results.
-- `app/robots.js` / `app/sitemap.js` — served at `/robots.txt` and
-  `/sitemap.xml` automatically.
-- `app/layout.js` — canonical URL, bilingual keywords, Open Graph + Twitter
-  cards using `/public/og.png`.
-- **IMPORTANT:** `SITE.url` in `app/site.config.js` is set to the default
-  Vercel URL. Update it when a custom domain is attached, then also submit
-  the sitemap in [Google Search Console](https://search.google.com/search-console)
-  and create/claim the free **Google Business Profile** — for a local shop
-  that matters more than anything on the site itself.
+- `JsonLd.js` — schema.org `TireShop`/`AutoRepair` (name, address, phone,
+  hours, payment methods: Afterpay, social profiles)
+- `layout.js` — canonical URL, bilingual keywords, OG + Twitter cards
+- `sitemap.js` / `robots.js` — auto-generated
+- **Critical:** `SITE.url` in `site.config.js` must be updated when a custom
+  domain is attached. Then submit sitemap to Google Search Console and
+  create/claim a Google Business Profile.
 
-## Deploying to Vercel
+---
 
-1. Go to [vercel.com/new](https://vercel.com/new) and import the
-   `alexanderrrt/tires-sos` GitHub repo.
-2. Framework preset: Next.js (auto-detected). No environment variables are
-   required.
-3. Deploy. Every push to the connected branch will auto-deploy.
+## Deploying
+
+1. Import `alexanderrrt/tires-sos` repo at [vercel.com/new](https://vercel.com/new).
+2. Framework preset: Next.js (auto-detected).
+3. Set environment variables in Vercel dashboard.
+4. Deploy — every push auto-deploys.

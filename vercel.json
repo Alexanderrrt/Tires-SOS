@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/super-smart-optimize",
+      "schedule": "0 16 * * *"
+    }
+  ]
+}

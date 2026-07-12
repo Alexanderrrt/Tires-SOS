@@ -1,0 +1,9 @@
+
+> tires-sos-rescue@1.0.0 start
+> next start -p 3003
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3003
+
+ ✓ Starting...
+ ✓ Ready in 736ms

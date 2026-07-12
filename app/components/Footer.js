@@ -2,20 +2,44 @@
 
 import { useT } from "../i18n/LanguageContext";
 import { COPY, SITE } from "../site.config";
+import Reveal from "./Reveal";
+import PirelliBadge from "./PirelliBadge";
 
 export default function Footer() {
   const t = useT();
   const year = new Date().getFullYear();
+  const legalLinks = [
+    { href: "/privacy", label: { en: "Privacy Policy", es: "Política de Privacidad" } },
+    { href: "/terms", label: { en: "Terms of Use", es: "Términos de Uso" } },
+    { href: "/disclaimer", label: { en: "Disclaimer", es: "Aviso Legal" } },
+  ];
 
   return (
     <footer className="footer">
-      <div className="footer__inner">
+      <Reveal className="footer__inner">
         <div>
-          <img className="footer__logo" src="/logo-mark.png" alt={SITE.name} />
-          <p>{SITE.address.full}</p>
-          <a href={SITE.phoneHref}>{SITE.phone}</a>
+          <div className="footer__brand">
+            <img className="footer__logo" src="/logo-mark.png" alt={SITE.name} />
+            <div className="footer__brand-copy">
+              <span className="footer__brand-name">{SITE.nameShort}</span>
+              <span className="footer__brand-flag" aria-hidden="true">
+                <span className="footer__brand-tire footer__brand-tire--yellow" />
+                <span className="footer__brand-tire footer__brand-tire--blue" />
+                <span className="footer__brand-tire footer__brand-tire--red" />
+              </span>
+            </div>
+          </div>
+          <PirelliBadge compact className="footer__pirelli" />
+          {SITE.locations.map((loc) => (
+            <p key={loc.id}>{loc.full}</p>
+          ))}
+          <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noreferrer">
+            WhatsApp
+          </a>
           <p className="footer__payments">
-            <span className="afterpay-chip">Snap Finance</span> · Visa · Mastercard · Cash
+            <span className="afterpay-chip">Snap Finance</span>
+            <span className="afterpay-chip afterpay-chip--mint">Afterpay</span>
+            · Visa · Mastercard · Cash
           </p>
         </div>
 
@@ -32,8 +56,16 @@ export default function Footer() {
               Facebook
             </a>
           </div>
+          <p className="footer__label footer__label--legal">Legal</p>
+          <div className="footer__legal">
+            {legalLinks.map((link) => (
+              <a key={link.href} href={link.href}>
+                {t(link.label)}
+              </a>
+            ))}
+          </div>
         </div>
-      </div>
+      </Reveal>
 
       <p className="footer__copyright">
         © {year} {SITE.name}. {t(COPY.footer.rights)}

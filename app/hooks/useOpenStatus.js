@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { SITE } from "../site.config";
+import { getShopDateTime } from "../../lib/shop-time";
 
 function computeIsOpen(now) {
-  const today = SITE.hours.find((h) => h.day === now.getDay());
+  const shopNow = getShopDateTime(now);
+  const today = SITE.hours.find((h) => h.day === shopNow.dayOfWeek);
   if (!today || !today.open || !today.close) return false;
 
   const [openH, openM] = today.open.split(":").map(Number);
   const [closeH, closeM] = today.close.split(":").map(Number);
   const openMinutes = openH * 60 + openM;
   const closeMinutes = closeH * 60 + closeM;
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const nowMinutes = shopNow.hour * 60 + shopNow.minute;
 
   return nowMinutes >= openMinutes && nowMinutes < closeMinutes;
 }

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" role="img" aria-label="Laufenn logo">
+  <rect width="420" height="120" fill="none"/>
+  <path d="M24 90h72l18-48h-72z" fill="#ff7a00" opacity=".9"/>
+  <g font-family="Arial, Helvetica, sans-serif" font-weight="900" font-style="italic">
+    <text x="102" y="76" font-size="52" fill="#141414" stroke="#fff" stroke-width="6" paint-order="stroke">LAUFENN</text>
+    <text x="102" y="76" font-size="52" fill="#141414">LAUFENN</text>
+  </g>
+</svg>

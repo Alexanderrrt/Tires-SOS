@@ -1,14 +1,35 @@
 "use client";
 
-import { useT } from "../i18n/LanguageContext";
-import { COPY } from "../site.config";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function QuoteIntro() {
-  const t = useT();
+  const { lang } = useLanguage();
+  const copy =
+    lang === "es"
+      ? {
+          heading: "Cotiza con Tires SOS",
+          sub: "Escribe lo que necesitas y el equipo del taller recibe los detalles para ayudarte con precio, horario y proximos pasos.",
+        }
+      : {
+          heading: "Quote With Tires SOS",
+          sub: "Tell us what you need and the shop team receives the details to help with price, timing, and next steps.",
+        };
+
   return (
-    <>
-      <h1 className="section__heading">{t(COPY.quote.heading)}</h1>
-      <p className="section__sub">{t(COPY.quote.sub)}</p>
-    </>
+    <h1
+      style={{
+        position: "absolute",
+        width: 1,
+        height: 1,
+        padding: 0,
+        margin: -1,
+        overflow: "hidden",
+        clip: "rect(0, 0, 0, 0)",
+        whiteSpace: "nowrap",
+        border: 0,
+      }}
+    >
+      {copy.heading}
+    </h1>
   );
 }

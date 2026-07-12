@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" role="img" aria-label="Ironman logo">
+  <rect width="420" height="120" fill="none"/>
+  <path d="M20 82c26-31 64-48 108-50 39-2 74 5 118 0 39-4 87-1 142-2" fill="none" stroke="#ff6a00" stroke-width="8" stroke-linecap="round" opacity=".95"/>
+  <g font-family="Arial, Helvetica, sans-serif" font-weight="900" font-style="italic">
+    <text x="22" y="76" font-size="52" fill="#141414" stroke="#fff" stroke-width="6" paint-order="stroke">IRONMAN</text>
+    <text x="22" y="76" font-size="52" fill="#141414">IRONMAN</text>
+  </g>
+</svg>

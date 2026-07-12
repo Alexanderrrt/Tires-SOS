@@ -15,7 +15,7 @@ export default function OwnersRide() {
           <img
             className="owners-ride__img"
             src="/owners-m3.jpg"
-            alt="The owner's orange BMW M3 Competition at Tires SOS Rescue in San José"
+            alt="We specialize in taking care of all vehicles at Tires SOS Rescue in San José"
             loading="lazy"
           />
         </div>
