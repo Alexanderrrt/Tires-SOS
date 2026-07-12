@@ -38,7 +38,7 @@ const NAV_SECTIONS = [
   {
     title: "Business",
     items: [
-      { id: "automation", icon: "⚡", label: "Automation", requires: "soon" },
+      { id: "automation", icon: "⚡", label: "Automation", requires: null },
       { id: "billing", icon: "💳", label: "Billing", requires: "soon" },
       { id: "settings", icon: "⚙️", label: "Settings", requires: null },
     ],
@@ -51,7 +51,7 @@ const QUICK_ACTIONS = [
   { icon: "➕", label: "New Ad", requires: "any" },
   { icon: "🔑", label: "Keywords", requires: "google_ads" },
   { icon: "📊", label: "Full Report", requires: "soon" },
-  { icon: "📧", label: "Email Client", requires: "soon" },
+  { icon: "📧", label: "Email Client", requires: "any", action: "email" },
 ];
 
 const AI_FEATURES = [
@@ -71,6 +71,8 @@ export default function SimplifiedDashboard() {
   const [connections, setConnections] = useState(null);
   const [forms, setForms] = useState({});
   const [busyPlatform, setBusyPlatform] = useState(null);
+  const [busyAction, setBusyAction] = useState(null);
+  const [lastRun, setLastRun] = useState(null);
   const [toast, setToast] = useState(null);
 
   const showToast = useCallback((message, tone = "ok") => {
@@ -191,6 +193,49 @@ export default function SimplifiedDashboard() {
       showToast("Network error — try again.", "error");
     } finally {
       setBusyPlatform(null);
+    }
+  }
+
+  async function runOptimization() {
+    setBusyAction("optimize");
+    try {
+      const res = await fetch("/api/dashboard/run-optimization", { method: "POST" });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setLastRun(new Date().toISOString());
+        showToast("Optimization run complete — report emailed ✓", "ok");
+      } else {
+        showToast(data.error || "Optimization run failed.", "error");
+      }
+    } catch {
+      showToast("Network error — try again.", "error");
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
+  async function emailClientReport() {
+    if (!metrics) {
+      showToast("No metrics loaded yet to report on.", "warn");
+      return;
+    }
+    setBusyAction("email");
+    try {
+      const res = await fetch("/api/dashboard/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ metrics, adBudget: selectedClient?.ad_budget || 500 }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast("Performance summary emailed ✓", "ok");
+      } else {
+        showToast(data.error || "Email failed to send.", "error");
+      }
+    } catch {
+      showToast("Network error — try again.", "error");
+    } finally {
+      setBusyAction(null);
     }
   }
 
@@ -537,11 +582,15 @@ export default function SimplifiedDashboard() {
                         className={`action ${unlocked ? "" : "locked"}`}
                         title={unlocked ? a.label : lockReason(a.requires)}
                         onClick={() => {
-                          if (!unlocked) showToast(lockReason(a.requires), "warn");
+                          if (!unlocked) {
+                            showToast(lockReason(a.requires), "warn");
+                          } else if (a.action === "email") {
+                            emailClientReport();
+                          }
                         }}
                       >
                         {!unlocked && <span className="action-badge">{a.requires === "soon" ? "SOON" : "🔒"}</span>}
-                        <span className="action-icon">{a.icon}</span>
+                        <span className="action-icon">{busyAction === a.action ? "⏳" : a.icon}</span>
                         <span>{a.label}</span>
                       </button>
                     );
@@ -563,8 +612,13 @@ export default function SimplifiedDashboard() {
                   {connectedCount === 0 && " Connect at least one platform in Settings to activate it."}
                 </p>
                 <div style={{ marginTop: 16, display: "flex", gap: 10 }}>
-                  <button className="btn btn-primary" disabled={connectedCount === 0} title={connectedCount === 0 ? "Connect a platform first" : "Trigger an optimization run"}>
-                    ▶ Run Optimization Now
+                  <button
+                    className="btn btn-primary"
+                    disabled={connectedCount === 0 || busyAction === "optimize"}
+                    title={connectedCount === 0 ? "Connect a platform first" : "Trigger an optimization run"}
+                    onClick={runOptimization}
+                  >
+                    {busyAction === "optimize" ? "⏳ Running…" : "▶ Run Optimization Now"}
                   </button>
                   {connectedCount === 0 && (
                     <button className="btn btn-ghost" onClick={() => setView("settings")}>Connect a platform</button>
@@ -579,6 +633,47 @@ export default function SimplifiedDashboard() {
                     <p>{f.desc}</p>
                   </div>
                 ))}
+              </div>
+            </>
+          )}
+
+          {/* -------- AUTOMATION -------- */}
+          {!viewLocked && view === "automation" && (
+            <>
+              <div className="card">
+                <h3 className="card-title">⚡ Daily Optimization Schedule</h3>
+                <div className="platform-rows">
+                  <div className="platform-row"><span className="k">Schedule</span><span className="v">Every day, 9:00 AM (Pacific)</span></div>
+                  <div className="platform-row"><span className="k">Job</span><span className="v">Super-Smart Optimize (all 10 AI features)</span></div>
+                  <div className="platform-row"><span className="k">Report delivery</span><span className="v">Email, after each run</span></div>
+                  <div className="platform-row">
+                    <span className="k">Last manual run</span>
+                    <span className="v">{lastRun ? new Date(lastRun).toLocaleTimeString() : "—"}</span>
+                  </div>
+                </div>
+                <div style={{ marginTop: 16, display: "flex", gap: 10, alignItems: "center" }}>
+                  <button
+                    className="btn btn-primary"
+                    disabled={connectedCount === 0 || busyAction === "optimize"}
+                    title={connectedCount === 0 ? "Connect a platform first" : "Run optimization now"}
+                    onClick={runOptimization}
+                  >
+                    {busyAction === "optimize" ? "⏳ Running…" : "▶ Run Now"}
+                  </button>
+                  {connectedCount === 0 && (
+                    <span style={{ fontSize: 12.5, color: "#94a3b8" }}>Connect a platform in Settings to enable runs.</span>
+                  )}
+                </div>
+              </div>
+              <div className="card">
+                <h3 className="card-title">What each run does</h3>
+                <p style={{ margin: 0, fontSize: 13.5, color: "#475569", lineHeight: 1.8 }}>
+                  1. Pulls fresh metrics from every connected platform<br />
+                  2. Rebalances budget toward the highest-ROAS platform<br />
+                  3. Generates 5 new ad variations to test<br />
+                  4. Flags underperforming campaigns to pause<br />
+                  5. Emails you the full report with recommended actions
+                </p>
               </div>
             </>
           )}
