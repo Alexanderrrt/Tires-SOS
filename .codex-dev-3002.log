@@ -214,3 +214,9 @@ https://nextjs.org/docs/messages/module-not-found
  ✓ Compiled in 4.2s (901 modules)
  ✓ Compiled in 359ms (901 modules)
 <w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\Alexander\Documents\Projects\Tires-SOS\.next\cache\webpack\client-development\0.pack.gz'
+ ✓ Compiled in 256ms (901 modules)
+ ✓ Compiled in 288ms (901 modules)
+ ✓ Compiled in 245ms (901 modules)
+ ✓ Compiled in 312ms (901 modules)
+ ✓ Compiled in 243ms (901 modules)
+ ✓ Compiled in 221ms (901 modules)
