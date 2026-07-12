@@ -476,15 +476,100 @@ export default function SimplifiedDashboard() {
           .actions, .soon-toggles { grid-template-columns: repeat(2, 1fr); }
           .stats { grid-template-columns: 1fr; }
         }
+
+        /* ===== TIRES SOS GARAGE THEME (matches the public site) ===== */
+        .dash { background: var(--ink) var(--tread); color: var(--paper); }
+        .side { background: var(--ink-2); border-right: 1px solid var(--line-soft); }
+        .side-brand { border-bottom: 1px solid var(--line-soft); }
+        .side-brand-icon { background: var(--surface); padding: 5px; }
+        .side-brand-icon img { width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 6px; }
+        .side-brand-name { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.5px; color: var(--paper); font-size: 17px; }
+        .side-brand-sub { color: var(--orange); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 9.5px; }
+        .side-section { color: #6b5d4d; }
+        .nav-item { color: var(--paper-dim); }
+        .nav-item:hover { background: var(--surface); color: var(--paper); }
+        .nav-item.active { background: linear-gradient(135deg, var(--orange), var(--orange-deep)); color: #fff; box-shadow: 0 4px 14px rgba(248,96,0,0.35); }
+        .nav-item.locked { color: #6b5d4d; }
+        .nav-item.locked:hover { background: var(--surface); }
+        .nav-lock { background: var(--surface); border-color: var(--line); color: var(--paper-dim); }
+        .nav-item.active .nav-lock { background: rgba(255,255,255,0.18); color: #fff; }
+        .side-footer { border-top: 1px solid var(--line-soft); color: #6b5d4d; }
+        .conn-dot { background: var(--line); }
+        .conn-dot.on { background: var(--good); box-shadow: 0 0 6px rgba(76,175,109,0.7); }
+        .side-brands { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; padding: 14px 10px 4px; opacity: 0.4; }
+        .side-brands img { height: 10px; width: auto; display: block; }
+
+        .topbar { background: var(--ink-2); border-bottom: 1px solid var(--line-soft); }
+        .topbar-title { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.8px; color: var(--paper); font-size: 19px; }
+        .client-select { background: var(--surface); border-color: var(--line); color: var(--paper); }
+        .pill { background: var(--surface); border-color: var(--line); color: var(--paper-dim); }
+        .pill.on { background: rgba(76,175,109,0.12); border-color: rgba(76,175,109,0.4); color: var(--good); }
+
+        .card, .stat, .platform, .conn-card, .action, .insight, .locked-panel, .alert-row { background: var(--surface); border-color: var(--line-soft); border-radius: var(--r); }
+        .card-title { color: var(--paper-dim); font-family: var(--display); letter-spacing: 1.4px; }
+        .stat-label { color: var(--paper-dim); }
+        .stat-icon { background: rgba(248,96,0,0.12); }
+        .stat-value { color: var(--paper); font-family: var(--display); letter-spacing: 0; }
+        .stat-sub { color: #8a7c6a; }
+        .platform-logo { background: var(--ink); }
+        .platform-name { color: var(--paper); }
+        .status-pill.connected { background: rgba(76,175,109,0.12); color: var(--good); border-color: rgba(76,175,109,0.35); }
+        .status-pill.disconnected { background: rgba(224,82,82,0.1); color: #e08585; border-color: rgba(224,82,82,0.3); }
+        .platform-row { border-bottom-color: var(--line-soft); }
+        .platform-row .k { color: var(--paper-dim); }
+        .platform-row .v { color: var(--paper); }
+
+        .btn-primary { background: linear-gradient(135deg, var(--orange), var(--orange-deep)); box-shadow: 0 4px 12px rgba(248,96,0,0.3); }
+        .btn-ghost { background: var(--surface-2); color: var(--paper); }
+        .btn-danger { background: rgba(224,82,82,0.12); color: #e08585; border: 1px solid rgba(224,82,82,0.3); }
+
+        .action { color: var(--paper); }
+        .action:hover:not(.locked) { border-color: var(--orange); background: var(--surface-2); }
+        .action.locked { background: var(--ink-2); color: #6b5d4d; }
+        .action-badge { background: var(--ink); border-color: var(--line); color: var(--paper-dim); }
+
+        .locked-panel h2 { color: var(--paper); font-family: var(--display); text-transform: uppercase; letter-spacing: 0.8px; }
+        .locked-panel p { color: var(--paper-dim); }
+
+        .field label { color: var(--paper-dim); }
+        .field input { background: var(--ink); border-color: var(--line); color: var(--paper); }
+        .field input:focus { border-color: var(--orange); background: var(--ink-2); }
+        .field input::placeholder { color: #6b5d4d; }
+        .conn-note { color: #6b5d4d; }
+        .soon-toggle { background: var(--ink-2); border-color: var(--line-soft); color: #6b5d4d; }
+        .soon-switch { background: var(--line); }
+        .soon-switch::after { background: var(--paper-dim); }
+
+        .insight h4 { color: var(--paper); }
+        .insight p { color: var(--paper-dim); }
+
+        .rtable th { color: var(--paper-dim); border-bottom-color: var(--line); }
+        .rtable td { border-bottom-color: var(--line-soft); color: var(--paper); }
+        .range-btn { background: var(--surface); border-color: var(--line); color: var(--paper-dim); }
+        .range-btn.active { background: var(--orange); border-color: var(--orange); color: #fff; }
+
+        .alert-row.CRITICAL { background: rgba(224,82,82,0.08); border-color: rgba(224,82,82,0.35); }
+        .alert-row.WARNING { background: rgba(248,96,0,0.07); border-color: rgba(248,96,0,0.3); }
+        .alert-row.INFO { background: rgba(125,136,148,0.08); border-color: rgba(125,136,148,0.3); }
+        .alert-title { color: var(--paper); }
+        .alert-detail { color: var(--paper-dim); }
+        .alert-sev.WARNING { background: var(--orange); }
+
+        .empty { color: #8a7c6a; }
+
+        .content-brands { display: flex; justify-content: center; align-items: center; gap: 28px; flex-wrap: wrap; padding: 22px 0 0; opacity: 0.3; }
+        .content-brands img { height: 13px; width: auto; display: block; }
       `}</style>
 
       {/* ============ SIDEBAR ============ */}
       <aside className="side">
         <div className="side-brand">
-          <div className="side-brand-icon">🎛️</div>
+          <div className="side-brand-icon">
+            <img src="/logo-mark.png" alt="Tires SOS Rescue" />
+          </div>
           <div>
-            <div className="side-brand-name">Ads Manager</div>
-            <div className="side-brand-sub">Internal Operations</div>
+            <div className="side-brand-name">Tires SOS</div>
+            <div className="side-brand-sub">Ads Command Center</div>
           </div>
         </div>
 
@@ -511,6 +596,11 @@ export default function SimplifiedDashboard() {
           </div>
         ))}
 
+        <div className="side-brands">
+          {["continental", "hankook", "falken", "kumho", "nexen", "gt-radial"].map((b) => (
+            <img key={b} src={`/brands/${b}.svg`} alt={b} />
+          ))}
+        </div>
         <div className="side-footer">
           <div className="side-conn">
             {Object.keys(PLATFORM_META).map((p) => (
@@ -620,7 +710,7 @@ export default function SimplifiedDashboard() {
                           </div>
                         ) : (
                           <>
-                            <p style={{ fontSize: 13, color: "#94a3b8", margin: "4px 0 8px" }}>
+                            <p style={{ fontSize: 13, color: "var(--paper-dim)", margin: "4px 0 8px" }}>
                               Connect this account to start pulling live metrics and let the AI optimize it.
                             </p>
                             <button className="btn btn-primary" onClick={() => setView("settings")}>
@@ -670,7 +760,7 @@ export default function SimplifiedDashboard() {
             <>
               <div className="card">
                 <h3 className="card-title">🤖 AI Optimization Engine</h3>
-                <p style={{ margin: 0, fontSize: 14, color: "#475569", lineHeight: 1.6 }}>
+                <p style={{ margin: 0, fontSize: 14, color: "var(--paper-dim)", lineHeight: 1.6 }}>
                   Runs automatically every day at <strong>9:00 AM</strong>. It analyzes all connected platforms,
                   rebalances the ${selectedClient?.ad_budget || 500}/month budget toward whatever is converting best,
                   and emails you a report with recommended actions.
@@ -726,13 +816,13 @@ export default function SimplifiedDashboard() {
                     {busyAction === "optimize" ? "⏳ Running…" : "▶ Run Now"}
                   </button>
                   {connectedCount === 0 && (
-                    <span style={{ fontSize: 12.5, color: "#94a3b8" }}>Connect a platform in Settings to enable runs.</span>
+                    <span style={{ fontSize: 12.5, color: "var(--paper-dim)" }}>Connect a platform in Settings to enable runs.</span>
                   )}
                 </div>
               </div>
               <div className="card">
                 <h3 className="card-title">What each run does</h3>
-                <p style={{ margin: 0, fontSize: 13.5, color: "#475569", lineHeight: 1.8 }}>
+                <p style={{ margin: 0, fontSize: 13.5, color: "var(--paper-dim)", lineHeight: 1.8 }}>
                   1. Pulls fresh metrics from every connected platform<br />
                   2. Rebalances budget toward the highest-ROAS platform<br />
                   3. Generates 5 new ad variations to test<br />
@@ -747,7 +837,7 @@ export default function SimplifiedDashboard() {
           {!viewLocked && ["campaigns", "creatives", "keywords", "audiences"].includes(view) && (
             <div className="empty card">
               <div className="empty-icon">📭</div>
-              <p style={{ fontWeight: 700, color: "#475569", marginBottom: 6 }}>No {activeNavItem.label.toLowerCase()} synced yet</p>
+              <p style={{ fontWeight: 700, color: "var(--paper-dim)", marginBottom: 6 }}>No {activeNavItem.label.toLowerCase()} synced yet</p>
               <p style={{ margin: 0 }}>
                 Data syncs automatically after the first daily optimization run pulls from your connected accounts.
               </p>
@@ -823,7 +913,7 @@ export default function SimplifiedDashboard() {
           {!viewLocked && view === "alerts" && (
             <>
               <div className="card" style={{ padding: "14px 22px" }}>
-                <p style={{ margin: 0, fontSize: 13.5, color: "#475569" }}>
+                <p style={{ margin: 0, fontSize: 13.5, color: "var(--paper-dim)" }}>
                   🔔 Checks run against the last 7 days of metrics: budget usage, declining ROAS, wasted spend,
                   ad fatigue, and the AI engine&apos;s anomaly detection.
                 </p>
@@ -833,7 +923,7 @@ export default function SimplifiedDashboard() {
               ) : alerts.length === 0 ? (
                 <div className="empty card">
                   <div className="empty-icon">✅</div>
-                  <p style={{ fontWeight: 700, color: "#15803d", marginBottom: 4 }}>All clear</p>
+                  <p style={{ fontWeight: 700, color: "var(--good)", marginBottom: 4 }}>All clear</p>
                   <p style={{ margin: 0 }}>No budget, performance, or anomaly issues detected right now.</p>
                 </div>
               ) : (
@@ -857,9 +947,9 @@ export default function SimplifiedDashboard() {
           {view === "billing" && (
             <>
               <div className="stats" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
-                <div className="stat"><div className="stat-top"><span className="stat-label">Maintenance</span><span className="stat-icon">🔧</span></div><div className="stat-value">$150<span style={{ fontSize: 14, color: "#94a3b8" }}>/mo</span></div><div className="stat-sub">website + API usage</div></div>
-                <div className="stat"><div className="stat-top"><span className="stat-label">Ad Management</span><span className="stat-icon">📢</span></div><div className="stat-value">$300<span style={{ fontSize: 14, color: "#94a3b8" }}>/mo</span></div><div className="stat-sub">your service fee</div></div>
-                <div className="stat"><div className="stat-top"><span className="stat-label">Ad Spend</span><span className="stat-icon">💸</span></div><div className="stat-value">$500<span style={{ fontSize: 14, color: "#94a3b8" }}>/mo</span></div><div className="stat-sub">reimbursed budget</div></div>
+                <div className="stat"><div className="stat-top"><span className="stat-label">Maintenance</span><span className="stat-icon">🔧</span></div><div className="stat-value">$150<span style={{ fontSize: 14, color: "var(--paper-dim)" }}>/mo</span></div><div className="stat-sub">website + API usage</div></div>
+                <div className="stat"><div className="stat-top"><span className="stat-label">Ad Management</span><span className="stat-icon">📢</span></div><div className="stat-value">$300<span style={{ fontSize: 14, color: "var(--paper-dim)" }}>/mo</span></div><div className="stat-sub">your service fee</div></div>
+                <div className="stat"><div className="stat-top"><span className="stat-label">Ad Spend</span><span className="stat-icon">💸</span></div><div className="stat-value">$500<span style={{ fontSize: 14, color: "var(--paper-dim)" }}>/mo</span></div><div className="stat-sub">reimbursed budget</div></div>
               </div>
               <div className="card">
                 <h3 className="card-title">Invoices</h3>
@@ -872,7 +962,7 @@ export default function SimplifiedDashboard() {
                       {invoices.map((inv) => (
                         <tr key={inv.id}>
                           <td style={{ fontWeight: 700 }}>{inv.month}</td>
-                          <td style={{ color: "#64748b", fontSize: 12.5 }}>
+                          <td style={{ color: "var(--paper-dim)", fontSize: 12.5 }}>
                             {inv.items.map((it) => `${it.label} ($${it.amount})`).join(" · ")}
                           </td>
                           <td className="num">${inv.total}</td>
@@ -887,7 +977,7 @@ export default function SimplifiedDashboard() {
                   </table>
                 )}
                 {invoices?.some((i) => i.generated) && (
-                  <p style={{ fontSize: 12, color: "#94a3b8", marginTop: 12, marginBottom: 0 }}>
+                  <p style={{ fontSize: 12, color: "var(--paper-dim)", marginTop: 12, marginBottom: 0 }}>
                     Auto-draft is generated from the standard fee structure — run the database schema and insert
                     real invoices to replace it.
                   </p>
@@ -900,7 +990,7 @@ export default function SimplifiedDashboard() {
           {view === "settings" && (
             <div className="settings-grid">
               <div className="card" style={{ padding: "16px 22px" }}>
-                <p style={{ margin: 0, fontSize: 13.5, color: "#475569", lineHeight: 1.6 }}>
+                <p style={{ margin: 0, fontSize: 13.5, color: "var(--paper-dim)", lineHeight: 1.6 }}>
                   🔐 Connect the client&apos;s ad accounts here. Credentials are stored server-side and never shown
                   again in full — only the last 4 characters. Connecting a platform unlocks its features across the dashboard.
                 </p>
@@ -916,7 +1006,7 @@ export default function SimplifiedDashboard() {
                         <div>
                           <div className="platform-name">{meta.label}</div>
                           {conn.connected && conn.connectedAt && (
-                            <div style={{ fontSize: 11.5, color: "#94a3b8" }}>
+                            <div style={{ fontSize: 11.5, color: "var(--paper-dim)" }}>
                               Connected {new Date(conn.connectedAt).toLocaleDateString()}
                             </div>
                           )}
@@ -979,6 +1069,11 @@ export default function SimplifiedDashboard() {
               </div>
             </div>
           )}
+          <div className="content-brands">
+            {["dunlop", "general", "ironman", "laufenn", "cooper", "firestone", "bridgestone", "goodyear"].map((b) => (
+              <img key={b} src={`/brands/${b}.svg`} alt={b} />
+            ))}
+          </div>
         </div>
       </div>
 
