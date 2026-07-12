@@ -5,19 +5,23 @@ import { getPricing } from "../../../lib/pricing-store";
 import { buildPriceEstimateTool, runPriceEstimateTool } from "../../../lib/chat-price-tool";
 import { computeAvailableDays } from "../../../lib/availability";
 import { createManualAppointment } from "../../../lib/chat-records-store";
+import { verifyAccessToken } from "../../../lib/mcp-oauth";
 import { SITE, SERVICES } from "../../site.config";
 
 export const dynamic = "force-dynamic";
 
 // Voice/MCP callers (e.g. Grok's Voice Agent) have no browser session, so this
-// endpoint is authenticated with a static bearer token instead of the chat
-// cookie/turnstile flow the web chat uses.
-function isAuthorized(request) {
+// endpoint accepts either the static MCP_API_KEY directly, or an OAuth access
+// token minted by /api/mcp/token (for clients whose UI requires an OAuth flow
+// rather than a plain header) — both ultimately gate on the same shared key.
+async function isAuthorized(request) {
   const expected = process.env.MCP_API_KEY;
   if (!expected) return false;
   const header = request.headers.get("authorization") || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : "";
-  return token === expected;
+  if (!token) return false;
+  if (token === expected) return true;
+  return verifyAccessToken(token);
 }
 
 async function buildServer() {
@@ -118,8 +122,17 @@ async function buildServer() {
 }
 
 async function handle(request) {
-  if (!isAuthorized(request)) {
-    return Response.json({ error: "unauthorized" }, { status: 401 });
+  if (!(await isAuthorized(request))) {
+    const origin = new URL(request.url).origin;
+    return Response.json(
+      { error: "unauthorized" },
+      {
+        status: 401,
+        headers: {
+          "WWW-Authenticate": `Bearer resource_metadata="${origin}/.well-known/oauth-authorization-server"`,
+        },
+      },
+    );
   }
 
   const server = await buildServer();
