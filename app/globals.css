@@ -544,8 +544,7 @@ h3 {
   height: 100%;
   aspect-ratio: 24 / 7;
   object-fit: cover;
-  object-position: center center;
-  transform: scale(1.01) translateX(-6px) translateY(-30px);
+  object-position: center 75%;
 }
 
 .alignment-spotlight__media::after {
@@ -2569,6 +2568,34 @@ h3 {
   .promo-card__media img {
     aspect-ratio: 3 / 4;
     max-height: 360px;
+  }
+}
+
+/* Landscape source image (e.g. loyalty card) — stack full-width instead of cropping into a portrait box */
+.promo-card--landscape {
+  grid-template-columns: 1fr;
+}
+
+.promo-card--landscape .promo-card__media img {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  min-height: 0;
+  object-fit: cover;
+}
+
+@media (min-width: 700px) {
+  .promo-card--landscape .promo-card__media img {
+    aspect-ratio: 16 / 9;
+    min-height: 0;
+  }
+}
+
+@media (min-width: 1000px) {
+  .promo-card--landscape .promo-card__media img {
+    aspect-ratio: 16 / 9;
+    max-height: none;
   }
 }
 

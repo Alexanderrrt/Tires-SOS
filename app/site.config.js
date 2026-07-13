@@ -73,96 +73,96 @@ export const BRAND_SHOWCASE = [
     name: "Continental",
     logo: "/brands/continental.svg",
     tagline: {
-      en: "Continental tires â€” premium driving feel, stocked for the Bay Area.",
-      es: "Llantas Continental â€” manejo premium, disponibles para el Bay Area.",
+      en: "Continental tires — premium driving feel, stocked for the Bay Area.",
+      es: "Llantas Continental — manejo premium, disponibles para el Bay Area.",
     },
   },
   {
     name: "Dunlop",
     logo: "/brands/dunlop.svg",
     tagline: {
-      en: "Dunlop tires â€” performance-minded grip and everyday reliability.",
-      es: "Llantas Dunlop â€” agarre para rendimiento y confiabilidad diaria.",
+      en: "Dunlop tires — performance-minded grip and everyday reliability.",
+      es: "Llantas Dunlop — agarre para rendimiento y confiabilidad diaria.",
     },
   },
   {
     name: "Falken",
     logo: "/brands/falken.svg",
     tagline: {
-      en: "Falken tires â€” high performance with a street-ready price.",
-      es: "Llantas Falken â€” alto rendimiento con precio amigable.",
+      en: "Falken tires — high performance with a street-ready price.",
+      es: "Llantas Falken — alto rendimiento con precio amigable.",
     },
   },
   {
     name: "General",
     logo: "/brands/general.svg",
     tagline: {
-      en: "General tires â€” dependable traction for the daily grind.",
-      es: "Llantas General â€” tracciÃ³n confiable para el dÃ­a a dÃ­a.",
+      en: "General tires — dependable traction for the daily grind.",
+      es: "Llantas General — tracción confiable para el día a día.",
     },
   },
   {
     name: "GT Radial",
     logo: "/brands/gt-radial.svg",
     tagline: {
-      en: "GT Radial tires â€” balanced value, comfort, and road control.",
-      es: "Llantas GT Radial â€” balance entre valor, comodidad y control.",
+      en: "GT Radial tires — balanced value, comfort, and road control.",
+      es: "Llantas GT Radial — balance entre valor, comodidad y control.",
     },
   },
   {
     name: "Hankook",
     logo: "/brands/hankook.svg",
     tagline: {
-      en: "Hankook tires â€” smart value with strong everyday performance.",
-      es: "Llantas Hankook â€” gran valor y rendimiento diario.",
+      en: "Hankook tires — smart value with strong everyday performance.",
+      es: "Llantas Hankook — gran valor y rendimiento diario.",
     },
   },
   {
     name: "Ironman",
     logo: "/brands/ironman.svg",
     tagline: {
-      en: "Ironman tires â€” our bold value line for drivers who want savings.",
-      es: "Llantas Ironman â€” nuestra lÃ­nea de valor para ahorrar mÃ¡s.",
+      en: "Ironman tires — our bold value line for drivers who want savings.",
+      es: "Llantas Ironman — nuestra línea de valor para ahorrar más.",
     },
   },
   {
     name: "Kumho",
     logo: "/brands/kumho.svg",
     tagline: {
-      en: "Kumho tires â€” practical performance for real-world roads.",
-      es: "Llantas Kumho â€” rendimiento prÃ¡ctico para calles reales.",
+      en: "Kumho tires — practical performance for real-world roads.",
+      es: "Llantas Kumho — rendimiento práctico para calles reales.",
     },
   },
   {
     name: "Laufenn",
     logo: "/brands/laufenn.svg",
     tagline: {
-      en: "Laufenn tires â€” clean handling and everyday dependability.",
-      es: "Llantas Laufenn â€” manejo limpio y confianza diaria.",
+      en: "Laufenn tires — clean handling and everyday dependability.",
+      es: "Llantas Laufenn — manejo limpio y confianza diaria.",
     },
   },
   {
     name: "Nexen",
     logo: "/brands/nexen.svg",
     tagline: {
-      en: "Nexen tires â€” modern comfort and value on the road.",
-      es: "Llantas Nexen â€” comodidad moderna y buen valor.",
+      en: "Nexen tires — modern comfort and value on the road.",
+      es: "Llantas Nexen — comodidad moderna y buen valor.",
     },
   },
   {
     name: "Nokian",
     logo: "/brands/nokian.svg",
     tagline: {
-      en: "Nokian tires â€” trusted performance in changing conditions.",
-      es: "Llantas Nokian â€” confianza en condiciones cambiantes.",
+      en: "Nokian tires — trusted performance in changing conditions.",
+      es: "Llantas Nokian — confianza en condiciones cambiantes.",
     },
   },
   {
     name: "Toyo",
     logo: "/brands/toyo.svg",
     tagline: {
-      en: "Toyo tires â€” a favorite for dependable performance and value.",
-      es: "Llantas Toyo â€” favoritas por su rendimiento y valor.",
+      en: "Toyo tires — a favorite for dependable performance and value.",
+      es: "Llantas Toyo — favoritas por su rendimiento y valor.",
     },
   },
 ];

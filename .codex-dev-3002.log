@@ -220,3 +220,23 @@ https://nextjs.org/docs/messages/module-not-found
  ✓ Compiled in 312ms (901 modules)
  ✓ Compiled in 243ms (901 modules)
  ✓ Compiled in 221ms (901 modules)
+ ✓ Compiled in 312ms (901 modules)
+ ✓ Compiled in 238ms (901 modules)
+TypeError: Cannot read properties of undefined (reading 'baseUrl')
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:461:92
+    at Array.forEach (<anonymous>)
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:452:174
+    at Array.forEach (<anonymous>)
+    at Watchpack.<anonymous> (C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:445:141)
+ ⨯ unhandledRejection: TypeError: Cannot read properties of undefined (reading 'baseUrl')
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:461:92
+    at Array.forEach (<anonymous>)
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:452:174
+    at Array.forEach (<anonymous>)
+    at Watchpack.<anonymous> (C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:445:141)
+ ⨯ unhandledRejection: TypeError: Cannot read properties of undefined (reading 'baseUrl')
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:461:92
+    at Array.forEach (<anonymous>)
+    at C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:452:174
+    at Array.forEach (<anonymous>)
+    at Watchpack.<anonymous> (C:\Users\Alexander\Documents\Projects\Tires-SOS\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js:445:141)

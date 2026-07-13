@@ -101,7 +101,7 @@ export default function QuoteCalculator({ pricing }) {
           <label className="quote__field">
             <span className="quote__label">{t(COPY.quote.vehicleMakeLabel)}</span>
             <select className="quote__select" value={vehicleMake} onChange={(e) => onMakeChange(e.target.value)}>
-              <option value="">â€” {t({ en: "Select brand", es: "Selecciona marca" })} â€”</option>
+              <option value="">— {t({ en: "Select brand", es: "Selecciona marca" })} —</option>
               {MAKES.map((m) => (
                 <option key={m.id} value={m.id}>
                   {t(m.name)}
@@ -121,7 +121,7 @@ export default function QuoteCalculator({ pricing }) {
               }}
               disabled={!vehicleMake}
             >
-              <option value="">â€” {t({ en: "Select model", es: "Selecciona modelo" })} â€”</option>
+              <option value="">— {t({ en: "Select model", es: "Selecciona modelo" })} —</option>
               {models.map((m) => (
                 <option key={m.id} value={m.id}>
                   {t(m.label)}
@@ -141,7 +141,7 @@ export default function QuoteCalculator({ pricing }) {
               }}
               disabled={!vehicleModel}
             >
-              <option value="">â€” {t({ en: "Select year", es: "Selecciona aÃ±o" })} â€”</option>
+              <option value="">— {t({ en: "Select year", es: "Selecciona año" })} —</option>
               {VEHICLE_YEARS.map((y) => (
                 <option key={y} value={y}>
                   {y}

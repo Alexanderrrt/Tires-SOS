@@ -73,7 +73,7 @@ export default function Promos() {
         </Reveal>
 
         <Reveal className="promos-grid">
-          <div className="promo-card reveal-item" style={{ "--d": "0ms" }}>
+          <div className="promo-card promo-card--landscape reveal-item" style={{ "--d": "0ms" }}>
             <div className="promo-card__media">
               <img
                 src="/snap-finance.jpg"
@@ -90,7 +90,7 @@ export default function Promos() {
             </div>
           </div>
 
-          <div className="promo-card reveal-item" style={{ "--d": "120ms" }}>
+          <div className="promo-card promo-card--landscape reveal-item" style={{ "--d": "120ms" }}>
             <div className="promo-card__media">
               <img
                 src="/loyalty-card.jpg"
