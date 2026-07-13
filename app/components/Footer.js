@@ -16,6 +16,21 @@ export default function Footer() {
 
   return (
     <footer className="footer">
+      <Reveal className="footer__flyer-wrapper">
+        <a
+          href={SITE.whatsappHref || SITE.phoneHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="footer__flyer"
+          aria-label="Contact Tires SOS Rescue on WhatsApp for tires and auto services"
+        >
+          <img
+            src="/M3Servicecard.png"
+            alt="Tires SOS Rescue — tires and auto services: llantas, cambio de aceite, frenos, alineación, balanceo, diagnóstico básico. 408-332-8962, @tiressosrescue, 623 E Taylor St, San José, CA"
+          />
+        </a>
+      </Reveal>
+
       <Reveal className="footer__inner">
         <div>
           <div className="footer__brand">
