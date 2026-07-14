@@ -25,6 +25,7 @@ function TrustIcon({ type }) {
 
 export default function Hero() {
   const t = useT();
+  const openChat = () => window.dispatchEvent(new CustomEvent("tires-sos:open-chat"));
   return (
     <section id="top" className="hero">
       <div className="hero__inner">
@@ -49,7 +50,7 @@ export default function Hero() {
             <img className="hero__portrait" src="/owner.jpg" alt="Owner of Tires SOS Rescue" />
             <div className="hero__portrait-caption"><strong>TIRES SOS</strong><span>RESCUE</span><small>TIRE SHOP · SAN JOSÉ, CA</small></div>
           </div>
-          <a className="hero__live-chat" href={SITE.whatsappHref} target="_blank" rel="noreferrer"><Icon name="chat" /><span><strong>CHAT EN VIVO</strong><small>Pregunta al taller</small></span><i /></a>
+          <button type="button" className="hero__live-chat" onClick={openChat}><Icon name="chat" /><span><strong>CHAT EN VIVO</strong><small>Pregunta al taller</small></span><i /></button>
         </div>
       </div>
       <div className="trust-bar">

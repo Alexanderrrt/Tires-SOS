@@ -414,6 +414,13 @@ export default function ChatBot({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [embedded]);
 
+  useEffect(() => {
+    if (embedded) return;
+    const openFromSite = () => setOpen(true);
+    window.addEventListener("tires-sos:open-chat", openFromSite);
+    return () => window.removeEventListener("tires-sos:open-chat", openFromSite);
+  }, [embedded]);
+
   const startNewChat = async () => {
     setMessages(initialMessages(copy.intro));
     setChatCompleted(false);
@@ -581,19 +588,6 @@ export default function ChatBot({
 
   return (
     <>
-      {!embedded && (
-        <button className="chat-fab" onClick={() => setOpen(true)} aria-label={t(copy.launcher)}>
-          <span className="chat-fab__glow" aria-hidden="true" />
-          <span className="chat-fab__icon chat-fab__icon--logo" aria-hidden="true">
-            <img src="/logo-mark.png" alt="" />
-          </span>
-          <span className="chat-fab__copy">
-            <strong>{t(copy.launcher)}</strong>
-            <small>{t(copy.launcherSub)}</small>
-          </span>
-        </button>
-      )}
-
       {visible && (
         <div className={`chat-shell ${embedded ? "chat-shell--embedded" : ""}`} role={embedded ? undefined : "dialog"} aria-modal={embedded ? undefined : true} aria-label={t(copy.title)}>
           {!embedded && <div className="chat-shell__backdrop" onClick={() => setOpen(false)} />}

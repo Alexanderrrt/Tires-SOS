@@ -27,6 +27,9 @@ export default function Header() {
           <span className="header__logo-hit" role="presentation" onClick={onSecretAdminTap}>
             <img className="header__logo" src="/logo-mark.png" alt="" draggable={false} />
           </span>
+          <span className="header__wordmark" aria-label="Tires SOS">
+            <span>TIRES</span> <strong>SOS</strong>
+          </span>
         </a>
 
         <PirelliBadge compact className="header__pirelli" />

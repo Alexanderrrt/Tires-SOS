@@ -1558,23 +1558,25 @@ h3 {
   --r: 10px;
   --r-sm: 6px;
   --r-lg: 14px;
-  --tread: none;
+  --tread: linear-gradient(135deg, rgba(5, 5, 5, 0.82), rgba(5, 5, 5, 0.94)), url("/Background.png");
 }
 
 body { background: #050505; color: var(--paper); }
-.header { height: 112px; background: rgba(3,3,3,.96); border-bottom: 1px solid rgba(255,90,0,.7); }
-.header__inner { width: min(1440px, calc(100% - 7.5rem)); height: 100%; gap: 2rem; }
-.header__brand { width: 220px; flex: 0 0 220px; }
-.header__logo { width: 210px; height: 82px; object-fit: contain; mix-blend-mode: screen; }
-.header__pirelli { margin-left: auto; }
-.header__nav { gap: 2.2rem; }
+.header { height: 88px; background: rgba(3,3,3,.96); border-bottom: 1px solid rgba(255,90,0,.7); }
+.header__inner { width: min(1440px, calc(100% - 4rem)); height: 100%; gap: 1.25rem; flex-wrap: nowrap; }
+.header__brand { width: 178px; flex: 0 0 178px; gap: .45rem; }
+.header__logo { width: 112px; height: 58px; object-fit: contain; mix-blend-mode: screen; }
+.header__wordmark { display: inline-flex; align-items: baseline; gap: .18rem; white-space: nowrap; color: #f3f3f3; font: italic 800 1.12rem/.9 var(--display); letter-spacing: -.04em; }
+.header__wordmark strong { color: var(--orange); }
+.header__pirelli { margin-left: .25rem; flex-shrink: 0; }
+.header__nav { gap: 1.65rem; flex-shrink: 0; }
 .header__nav a, .header__actions, .header__hours, .btn, .hero__title, .trust-bar__item strong { font-family: var(--display); font-weight: 800; text-transform: uppercase; letter-spacing: .03em; }
 .header__nav a { color: #f5f5f5; font-size: .93rem; }
 .header__nav a:hover { color: var(--orange); }
-.header__actions { gap: .75rem; }
-.header__hours { display: inline-flex; align-items: center; gap: .55rem; white-space: nowrap; border: 1px solid #4b4b4b; border-radius: 7px; padding: .75rem 1rem; font-size: .8rem; color: #f2f2f2; }
+.header__actions { gap: .75rem; flex-shrink: 0; }
+.header__hours { display: inline-flex; align-items: center; gap: .55rem; white-space: nowrap; border: 1px solid #4b4b4b; border-radius: 7px; padding: .6rem .75rem; font-size: .72rem; color: #f2f2f2; }
 .header__hours .icon { width: 18px; height: 18px; color: #fff; }
-.lang-toggle { border: 1px solid #3b3b3b; border-radius: 7px; background: transparent; color: #fff; padding: .78rem .9rem; font-weight: 800; }
+.lang-toggle { border: 1px solid #3b3b3b; border-radius: 7px; background: transparent; color: #fff; padding: .62rem .75rem; font-weight: 800; }
 .btn { border-radius: 7px; min-height: 46px; padding: .75rem 1.15rem; font-size: .9rem; }
 .btn--primary { background: linear-gradient(180deg, #ff6a14, #ed4b00); border-color: #ff6a14; box-shadow: 0 8px 24px rgba(255,90,0,.22); }
 .btn--ghost { background: rgba(0,0,0,.62); border-color: #777; color: #fff; }
@@ -1621,12 +1623,21 @@ body { background: #050505; color: var(--paper); }
 .trust-bar__item small { color: #bdbdbd; font-size: .72rem; line-height: 1.25; }
 
 .section, .owners-ride, .footer { background: #080808; }
-.section--muted, .section--tread { background: #0c0c0c; background-image: linear-gradient(135deg, rgba(255,90,0,.035), transparent 35%); }
+.section--muted, .section--tread { background-color: #0c0c0c; background-image: var(--tread), linear-gradient(135deg, rgba(255,90,0,.035), transparent 35%); }
 .section__heading, .owners-ride__title { font-family: var(--display); font-style: italic; text-transform: uppercase; letter-spacing: .025em; }
 .section__heading { font-size: clamp(2.5rem, 5vw, 4.6rem); }
 .section__sub { color: #aaa; }
 .service-card, .review-card, .location-card, .promo-card, .promo-collab__inner { background: #111; border-color: #333; }
 .footer { border-top-color: var(--orange); }
+.marquee { top: 0; }
+.owners-ride__img {
+  display: block;
+  height: auto;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: center;
+  background: #050505;
+}
 
 @media (max-width: 1100px) {
   .header__inner, .hero__inner, .trust-bar { width: min(100% - 3rem, 900px); }
@@ -1641,7 +1652,8 @@ body { background: #050505; color: var(--paper); }
   .header { height: 76px; }
   .header__inner { width: calc(100% - 2rem); gap: .5rem; }
   .header__brand { width: 145px; flex-basis: 145px; }
-  .header__logo { width: 145px; height: 62px; }
+  .header__logo { width: 125px; height: 58px; }
+  .header__wordmark { display: none; }
   .header__pirelli, .header__nav, .lang-toggle { display: none; }
   .header__actions { margin-left: auto; }
   .header__actions .btn { padding-inline: .75rem; }
