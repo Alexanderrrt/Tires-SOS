@@ -1,3 +1,4 @@
+import Anthropic from "@anthropic-ai/sdk";
 import { optimizeBudget, getDailyPerformanceSummary, identifyUnderperformers } from "@/lib/budget-optimizer";
 import { generateAdVariations } from "@/lib/ai-ad-generator";
 import {
@@ -13,6 +14,11 @@ import {
 } from "@/lib/advanced-ai-engine";
 import { sendOptimizationReport } from "@/lib/send-report";
 import { saveOptimizationRun, getMetricsForDateRange } from "@/lib/supabase-client";
+import { getAdConnections } from "@/lib/ad-connections-store";
+import { getDeviceBreakdown as getGoogleDeviceBreakdown, getHourBreakdown, getTopKeywords } from "@/lib/google-ads-api";
+import { getDeviceBreakdown as getMetaDeviceBreakdown } from "@/lib/meta-ads-api";
+
+const anthropicClient = new Anthropic();
 
 /**
  * SUPER SMART DAILY OPTIMIZATION
@@ -53,6 +59,7 @@ export async function GET(request) {
     // ============================================
     console.log("📊 Step 1: Gathering metrics...");
 
+    const connections = await getAdConnections();
     const dailySummary = await getDailyPerformanceSummary();
     const last30Days = await getMetricsForDateRange(
       null,
@@ -116,23 +123,40 @@ export async function GET(request) {
     // ============================================
     console.log("💰 Step 5: Calculating smart bid adjustments...");
 
-    const bidAdjustments = await smartBidAdjustment({
-      byTime: [
-        { segment: "6am-10am", clicks: 150, conversions: 25, cost: 250 },
-        { segment: "10am-2pm", clicks: 200, conversions: 22, cost: 300 },
-        { segment: "2pm-6pm", clicks: 180, conversions: 28, cost: 280 },
-        { segment: "6pm-10pm", clicks: 120, conversions: 15, cost: 200 },
-      ],
-      byDevice: [
-        { device: "mobile", clicks: 400, conversions: 55, cost: 600 },
-        { device: "desktop", clicks: 250, conversions: 35, cost: 430 },
-      ],
-      byAudience: [
-        { audience: "local_searchers", clicks: 300, conversions: 50, cost: 500 },
-        { audience: "past_visitors", clicks: 150, conversions: 30, cost: 400 },
-      ],
-      baseBid: 2.5,
-    });
+    // Real segment data from Google (hour + device) and Meta (device).
+    // There is no reliable cross-platform "audience" breakdown API without
+    // a configured remarketing/audience list, so that segment is omitted
+    // rather than filled with invented numbers.
+    const [googleHourly, googleDevice, metaDevice] = await Promise.all([
+      getHourBreakdown(connections.google_ads),
+      getGoogleDeviceBreakdown(connections.google_ads),
+      getMetaDeviceBreakdown(connections.meta_ads),
+    ]);
+
+    const byTime = googleHourly.map((h) => ({
+      segment: `${h.hour}:00-${(h.hour + 1) % 24}:00`,
+      clicks: h.clicks,
+      conversions: h.conversions,
+      cost: h.cost,
+    }));
+
+    const byDevice = [...googleDevice, ...metaDevice].reduce((acc, d) => {
+      const key = String(d.device).toLowerCase();
+      const bucket = (acc[key] ||= { device: key, clicks: 0, conversions: 0, cost: 0 });
+      bucket.clicks += d.clicks;
+      bucket.conversions += d.conversions;
+      bucket.cost += d.cost;
+      return acc;
+    }, {});
+
+    const bidAdjustments = byTime.length || Object.keys(byDevice).length
+      ? await smartBidAdjustment({
+          byTime,
+          byDevice: Object.values(byDevice),
+          byAudience: [],
+          baseBid: 2.5,
+        })
+      : { adjustments: { by_time: [], by_device: [], by_audience: [] }, note: "No connected ad platform has segment data yet." };
 
     // ============================================
     // 6. CROSS-PLATFORM LEARNING
@@ -148,12 +172,17 @@ export async function GET(request) {
     // ============================================
     console.log("🔍 Step 7: Discovering keyword opportunities...");
 
+    // Real keywords currently bid on (Google Ads keyword_view). There's no
+    // wired third-party search-volume/CPC-estimate API, so the "search
+    // data" side stays a small illustrative sample the AI can compare
+    // against — flagged in the prompt as an estimate, not live data.
+    const realKeywords = await getTopKeywords(connections.google_ads, 10);
     const keywordOpportunities = await discoverKeywordOpportunities(
-      ["tire repair", "new tires", "wheel alignment"],
+      realKeywords.length ? realKeywords.map((k) => k.keyword).filter(Boolean) : ["tire repair", "new tires", "wheel alignment"],
       [
-        { keyword: "tire replacement near me", volume: 1200, cpc: 2.1 },
-        { keyword: "flat tire repair", volume: 800, cpc: 1.8 },
-        { keyword: "tire sale san jose", volume: 600, cpc: 3.2 },
+        { keyword: "tire replacement near me", volume: 1200, cpc: 2.1, note: "illustrative estimate, not from a live keyword-volume API" },
+        { keyword: "flat tire repair", volume: 800, cpc: 1.8, note: "illustrative estimate, not from a live keyword-volume API" },
+        { keyword: "tire sale san jose", volume: 600, cpc: 3.2, note: "illustrative estimate, not from a live keyword-volume API" },
       ]
     );
 
@@ -162,16 +191,17 @@ export async function GET(request) {
     // ============================================
     console.log("📍 Step 8: Analyzing conversion paths...");
 
+    // Real click/conversion counts from the platforms that expose them.
+    // Yelp has no clicks/conversions API (see lib/yelp-api.js), so it's
+    // omitted here rather than filled with an invented number.
     const conversionPaths = await analyzeConversionPath(
       {
-        google_search: 450,
-        meta_feed: 300,
-        yelp: 250,
+        google_search: dailySummary.google.clicks ?? 0,
+        meta_feed: dailySummary.meta.clicks ?? 0,
       },
       {
-        google_search: 65,
-        meta_feed: 35,
-        yelp: 28,
+        google_search: dailySummary.google.conversions ?? 0,
+        meta_feed: dailySummary.meta.conversions ?? 0,
       }
     );
 
@@ -305,10 +335,7 @@ export async function GET(request) {
  */
 async function synthesizeRecommendations(allInsights) {
   try {
-    const client = require("@anthropic-ai/sdk").default;
-    const apiClient = new client();
-
-    const message = await apiClient.messages.create({
+    const message = await anthropicClient.messages.create({
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 2048,
       messages: [

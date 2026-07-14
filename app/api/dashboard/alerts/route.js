@@ -56,13 +56,13 @@ export async function POST(request) {
       const cpcOf = (d) => (d.clicks > 0 ? d.spend / d.clicks : 0);
       const current = { avgCpc: cpcOf(latest), conversions: latest.conversions, ctr: 1 };
       const historical = { avgCpc: avg(history, cpcOf), conversions: avg(history, (d) => d.conversions), ctr: 1 };
-      const anomalies = await detectAnomalies(current, historical);
-      for (const a of anomalies || []) {
+      const result = await detectAnomalies(current, historical);
+      for (const a of result?.anomalies || []) {
         alerts.push({
           severity: a.severity || "WARNING",
           icon: "🤖",
           title: a.type || "Anomaly detected",
-          detail: a.description || a.suggestion || JSON.stringify(a),
+          detail: a.action ? `${a.cause || ""} ${a.action}`.trim() : a.cause || JSON.stringify(a),
         });
       }
     }

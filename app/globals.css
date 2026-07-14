@@ -758,7 +758,20 @@ h3 {
   position: relative;
   overflow: hidden;
   border-bottom: 1px solid var(--line-soft);
-  background: linear-gradient(180deg, var(--ink-2), var(--ink));
+  background-color: var(--ink);
+  background-image:
+    linear-gradient(
+      100deg,
+      rgba(10, 8, 6, 0.94) 0%,
+      rgba(10, 8, 6, 0.82) 42%,
+      rgba(10, 8, 6, 0.55) 72%,
+      rgba(10, 8, 6, 0.45) 100%
+    ),
+    linear-gradient(180deg, rgba(10, 8, 6, 0.35), rgba(10, 8, 6, 0.7)),
+    url("/Hero.png");
+  background-size: cover, cover, cover;
+  background-position: center, center, center right;
+  background-repeat: no-repeat;
 }
 
 .hero__inner {

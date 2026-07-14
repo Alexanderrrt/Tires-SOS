@@ -1,6 +1,6 @@
 import { optimizeBudget, getDailyPerformanceSummary, identifyUnderperformers } from "@/lib/budget-optimizer";
 import { generateAdVariations } from "@/lib/ai-ad-generator";
-import { sendOptimizationReport, sendDailySummary, sendBudgetAlert } from "@/lib/send-report";
+import { sendOptimizationReport, sendDailySummary, sendBudgetAlert, sendErrorAlert } from "@/lib/send-report";
 import { saveOptimizationRun } from "@/lib/supabase-client";
 
 /**
@@ -111,29 +111,7 @@ export async function GET(request) {
     console.error("Error in ad optimization cron:", error);
 
     // Send error alert
-    try {
-      const transporter = require("nodemailer").createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASSWORD,
-        },
-      });
-
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: process.env.NOTIFY_EMAIL_RECIPIENT,
-        subject: "❌ Ad Optimization Error",
-        html: `
-          <h2>Error in Daily Ad Optimization</h2>
-          <p><strong>Error:</strong> ${error.message}</p>
-          <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-          <p>Check the logs for more details.</p>
-        `,
-      });
-    } catch (emailError) {
-      console.error("Could not send error email:", emailError);
-    }
+    await sendErrorAlert("❌ Ad Optimization Error", error);
 
     return new Response(
       JSON.stringify({
