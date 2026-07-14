@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useLanguage, useT } from "../i18n/LanguageContext";
-import { useOpenStatus } from "../hooks/useOpenStatus";
 import { useSecretAdminTap } from "../hooks/useSecretAdminTap";
 import { COPY, SITE } from "../site.config";
 import Icon from "./Icons";
@@ -11,7 +10,6 @@ import PirelliBadge from "./PirelliBadge";
 export default function Header() {
   const { lang, toggleLang } = useLanguage();
   const t = useT();
-  const isOpen = useOpenStatus();
   const [scrolled, setScrolled] = useState(false);
   const onSecretAdminTap = useSecretAdminTap();
 
@@ -29,14 +27,6 @@ export default function Header() {
           <span className="header__logo-hit" role="presentation" onClick={onSecretAdminTap}>
             <img className="header__logo" src="/logo-mark.png" alt="" draggable={false} />
           </span>
-          <span className="header__brand-copy">
-            <span className="header__brand-name">{SITE.nameShort}</span>
-            <span className="header__brand-flag" aria-hidden="true">
-              <span className="header__brand-tire header__brand-tire--yellow" />
-              <span className="header__brand-tire header__brand-tire--blue" />
-              <span className="header__brand-tire header__brand-tire--red" />
-            </span>
-          </span>
         </a>
 
         <PirelliBadge compact className="header__pirelli" />
@@ -50,12 +40,7 @@ export default function Header() {
         </nav>
 
         <div className="header__actions">
-          {isOpen !== null && (
-            <span className={`status-badge ${isOpen ? "status-badge--open" : "status-badge--closed"}`}>
-              <span className="status-badge__dot" />
-              {isOpen ? t(COPY.status.open) : t(COPY.status.closed)}
-            </span>
-          )}
+          <span className="header__hours"><Icon name="clock" /> LUN - SÁB 8AM - 6PM</span>
 
           <button
             type="button"
