@@ -1561,6 +1561,7 @@ h3 {
   --tread: linear-gradient(135deg, rgba(5, 5, 5, 0.82), rgba(5, 5, 5, 0.94)), url("/Background.png");
 }
 
+html, body { overflow-x: hidden; }
 body { background: #050505; color: var(--paper); }
 .header { height: 88px; background: rgba(3,3,3,.96); border-bottom: 1px solid rgba(255,90,0,.7); }
 .header__inner { width: min(1440px, calc(100% - 4rem)); height: 100%; gap: 1.25rem; flex-wrap: nowrap; }
@@ -1585,7 +1586,7 @@ body { background: #050505; color: var(--paper); }
 .hero { min-height: 846px; position: relative; overflow: hidden; padding: 0 0 0; background: #050505; }
 .hero::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(3,3,3,.98) 0%, rgba(3,3,3,.9) 28%, rgba(3,3,3,.38) 62%, rgba(3,3,3,.72) 100%), linear-gradient(0deg, rgba(3,3,3,.9), transparent 38%), url("/Hero.png") center 39% / cover no-repeat; opacity: .92; }
 .hero::after { content: ""; position: absolute; inset: auto 0 98px; height: 1px; background: linear-gradient(90deg, transparent, var(--orange), transparent); opacity: .7; }
-.hero__inner { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(430px, .82fr) minmax(460px, 1.18fr); align-items: center; gap: 3rem; width: min(1440px, calc(100% - 7.5rem)); min-height: 735px; margin: 0 auto; padding: 3.4rem 0 2rem; }
+.hero__inner { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); align-items: center; gap: 2.5rem; width: min(1440px, calc(100% - 4rem)); min-height: 735px; margin: 0 auto; padding: 3.4rem 0 2rem; }
 .hero__text { max-width: 650px; }
 .hero__kicker { display: flex; align-items: center; gap: .55rem; margin: 0 0 1.2rem; color: #ddd; font-size: .86rem; letter-spacing: .08em; text-transform: uppercase; }
 .hero__kicker .icon { color: var(--orange); width: 18px; }
@@ -1647,6 +1648,19 @@ body { background: #050505; color: var(--paper); }
   .hero__title { font-size: clamp(4rem, 8vw, 6rem); }
   .trust-bar__item { padding: .75rem; }
   .trust-bar__icon { flex-basis: 34px; width: 34px; }
+}
+@media (max-width: 1240px) and (min-width: 761px) {
+  .header__inner { width: calc(100% - 2rem); gap: .75rem; }
+  .header__brand { width: 155px; flex-basis: 155px; }
+  .header__logo { width: 96px; }
+  .header__wordmark { font-size: .95rem; }
+  .header__nav { gap: .9rem; }
+  .header__nav a { font-size: .78rem; }
+  .header__actions { gap: .4rem; }
+  .header__hours { padding-inline: .5rem; font-size: .64rem; }
+  .hero__inner { width: calc(100% - 2rem); gap: 1.25rem; }
+  .hero__actions .btn--primary { min-width: 0; }
+  .hero__title { font-size: clamp(3.8rem, 7vw, 5.6rem); }
 }
 @media (max-width: 760px) {
   .header { height: 76px; }
