@@ -478,7 +478,7 @@ export default function SimplifiedDashboard() {
         }
 
         /* ===== TIRES SOS GARAGE THEME (matches the public site) ===== */
-        .dash { background: var(--ink) var(--tread); color: var(--paper); }
+        .dash { background-color: var(--ink); background-image: var(--tread); color: var(--paper); }
         .side { background: var(--ink-2); border-right: 1px solid var(--line-soft); }
         .side-brand { border-bottom: 1px solid var(--line-soft); }
         .side-brand-icon { background: var(--surface); padding: 5px; }

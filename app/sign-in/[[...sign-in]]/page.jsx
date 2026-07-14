@@ -8,7 +8,8 @@ export default function SignInPage() {
         minHeight: "100vh",
         alignItems: "center",
         justifyContent: "center",
-        background: "var(--ink) var(--tread)",
+        backgroundColor: "var(--ink)",
+        backgroundImage: "var(--tread)",
       }}
     >
       <SignIn />
