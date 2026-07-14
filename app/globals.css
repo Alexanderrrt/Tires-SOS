@@ -1604,7 +1604,7 @@ body { background: #050505; color: var(--paper); }
 .hero__flyer-cta { position: absolute; right: 1rem; bottom: .7rem; display: inline-flex; align-items: center; gap: .4rem; padding: .45rem .75rem; border: 1px solid var(--orange); border-radius: 20px; background: #090909; color: #fff; font: 800 .68rem var(--display); text-transform: uppercase; }
 .hero__visual { position: relative; min-height: 510px; display: grid; place-items: center; }
 .hero__portrait-card { position: relative; width: min(560px, 100%); border: 2px solid rgba(255,90,0,.6); border-radius: 18px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.65); transform: translateY(15px); }
-.hero__portrait { display: block; width: 100%; aspect-ratio: 1.42; object-fit: cover; object-position: center; }
+.hero__portrait { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: contain; object-position: center; background: #050505; }
 .hero__portrait-caption { position: absolute; left: 1.2rem; bottom: 1rem; display: flex; flex-direction: column; font: italic 800 2rem/.8 var(--display); text-shadow: 0 2px 8px #000; }
 .hero__portrait-caption strong { color: var(--orange); }
 .hero__portrait-caption span { color: #fff; }
