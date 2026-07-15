@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import { generateWeeklyAnalyticsReport } from "../../../../lib/posthog-weekly-report";
+import { runWeeklyAnalyticsReport } from "../../../../lib/weekly-analytics-runner";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,26 +18,12 @@ function authorized(request) {
 export async function GET(request) {
   if (!authorized(request)) return Response.json({ error: "Unauthorized." }, { status: 401 });
   try {
-    const report = await generateWeeklyAnalyticsReport();
     const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
     const publishOrigin = productionHost
       ? `https://${productionHost}`
       : process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://tires-sos.vercel.app";
-    const publishUrl = new URL("/api/admin/analytics-reports", publishOrigin);
-    const publishResponse = await fetch(publishUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.ANALYTICS_REPORTS_API_KEY?.trim() || ""}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(report),
-      cache: "no-store",
-    });
-    const published = await publishResponse.json().catch(() => ({}));
-    if (!publishResponse.ok || published.ok !== true) {
-      throw new Error(`Report publisher rejected the report (${publishResponse.status}).`);
-    }
-    return Response.json({ ok: true, reportId: published.report?.id, period: report.periodLabel });
+    const result = await runWeeklyAnalyticsReport(publishOrigin);
+    return Response.json({ ok: true, reportId: result.published?.id, period: result.report.periodLabel });
   } catch (error) {
     console.error("Weekly analytics report failed:", error);
     return Response.json({ ok: false, error: error.message || "Weekly analytics report failed." }, { status: 500 });

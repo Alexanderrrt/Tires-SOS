@@ -238,10 +238,9 @@ export default function SimplifiedDashboard() {
       .catch(() => setInvoices([]));
   }, [view, invoices]);
 
-  useEffect(() => {
-    if (view !== "site-reports") return;
+  const loadSiteReports = useCallback(() => {
     setSiteReports(null);
-    fetch("/api/admin/analytics-reports", { cache: "no-store" })
+    return fetch("/api/admin/analytics-reports", { cache: "no-store" })
       .then(async (response) => {
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.error || "Could not load weekly reports.");
@@ -255,7 +254,28 @@ export default function SimplifiedDashboard() {
         setSiteReports([]);
         showToast(error.message, "error");
       });
-  }, [view, showToast]);
+  }, [showToast]);
+
+  useEffect(() => {
+    if (view !== "site-reports") return;
+    loadSiteReports();
+  }, [view, loadSiteReports]);
+
+  async function runSiteReport() {
+    setBusyAction("site-report");
+    try {
+      const response = await fetch("/api/dashboard/run-weekly-analytics", { method: "POST" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.ok !== true) throw new Error(data.error || "Could not generate the report.");
+      showToast(`Website analytics report published — ${data.period}`, "ok");
+      setSelectedSiteReportId(data.reportId || "");
+      await loadSiteReports();
+    } catch (error) {
+      showToast(error.message || "Could not generate the report.", "error");
+    } finally {
+      setBusyAction(null);
+    }
+  }
 
   async function runOptimization() {
     setBusyAction("optimize");
@@ -876,16 +896,26 @@ export default function SimplifiedDashboard() {
                     <h3 className="card-title" style={{ marginBottom: 5 }}>PostHog weekly website analytics</h3>
                     <p style={{ margin: 0, color: "var(--paper-dim)", fontSize: 13 }}>Seven-day traffic, contacts, quotes, appointments, and chat funnel compared with the prior week.</p>
                   </div>
-                  {siteReports?.length > 0 && (
-                    <select
-                      className="client-select"
-                      value={selectedSiteReport?.id || ""}
-                      onChange={(event) => setSelectedSiteReportId(event.target.value)}
-                      aria-label="Select weekly analytics report"
+                  <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                    {siteReports?.length > 0 && (
+                      <select
+                        className="client-select"
+                        value={selectedSiteReport?.id || ""}
+                        onChange={(event) => setSelectedSiteReportId(event.target.value)}
+                        aria-label="Select weekly analytics report"
+                      >
+                        {siteReports.map((report) => <option key={report.id} value={report.id}>{report.period_label}</option>)}
+                      </select>
+                    )}
+                    <button
+                      type="button"
+                      className="btn-primary"
+                      onClick={runSiteReport}
+                      disabled={busyAction === "site-report"}
                     >
-                      {siteReports.map((report) => <option key={report.id} value={report.id}>{report.period_label}</option>)}
-                    </select>
-                  )}
+                      {busyAction === "site-report" ? "Generating…" : "Run report now"}
+                    </button>
+                  </div>
                 </div>
               </div>
               {siteReports === null ? (
