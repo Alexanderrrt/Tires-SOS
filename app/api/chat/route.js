@@ -302,6 +302,39 @@ function folded(value) {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
+function conversationLanguage(messages, fallback = "en") {
+  const recentUserMessages = messages
+    .filter((message) => message.role === "user")
+    .slice(-4)
+    .reverse();
+  const latestRaw = recentUserMessages[0]?.content.toLowerCase() || "";
+  const latestText = folded(latestRaw);
+  const latestSpanishCues = (latestText.match(/\b(necesito|quiero|tengo|puedo|cita|agendar|precio|cuanto|llantas|carro|vehiculo|nombre|telefono|horario|direccion|ayuda|gracias)\b/g) || []).length
+    + (/\b(es un|es una|mi nombre|mi numero|soy|para mi|por favor)\b/.test(latestText) ? 2 : 0)
+    + (/[áéíóúñ¿¡]/i.test(latestRaw) ? 2 : 0);
+  const latestEnglishCues = (latestText.match(/\b(need|want|have|can|appointment|book|schedule|price|tires|car|vehicle|name|phone|hours|address|help|thanks)\b/g) || []).length
+    + (/\b(it is|it's a|my name|my number|i am|for my|please)\b/.test(latestText) ? 2 : 0);
+
+  if (latestSpanishCues >= 2 && latestSpanishCues > latestEnglishCues) return "es";
+  if (latestEnglishCues >= 2 && latestEnglishCues > latestSpanishCues) return "en";
+  let spanishScore = 0;
+  let englishScore = 0;
+
+  recentUserMessages.forEach((message, index) => {
+    const raw = message.content.toLowerCase();
+    const text = folded(raw);
+    const weight = Math.max(1, 4 - index);
+    const spanishMatches = text.match(/\b(hola|gracias|necesito|quiero|busco|tengo|puedo|cita|agendar|precio|cuanto|llanta|llantas|freno|frenos|aceite|alineacion|bateria|carro|vehiculo|nombre|telefono|numero|horario|direccion|hoy|manana|ayuda|por favor|si)\b/g) || [];
+    const englishMatches = text.match(/\b(hello|hi|thanks|thank|need|want|looking|have|can|appointment|book|schedule|price|much|tire|tires|brake|brakes|oil|alignment|battery|car|vehicle|name|phone|number|hours|address|today|tomorrow|help|please|yes)\b/g) || [];
+    spanishScore += spanishMatches.length * weight;
+    englishScore += englishMatches.length * weight;
+    if (/[áéíóúñ¿¡]/i.test(raw)) spanishScore += 2 * weight;
+  });
+
+  if (spanishScore === englishScore) return fallback === "es" ? "es" : "en";
+  return spanishScore > englishScore ? "es" : "en";
+}
+
 function contactState(messages) {
   const fields = extractChatFields(messages);
   const userText = messages
@@ -718,11 +751,12 @@ export async function POST(request) {
   }
 
   const { lang, context, messages } = validated;
+  const responseLang = conversationLanguage(messages, lang);
   const preCapture = await captureSafely(
     {
       sessionId: session.id,
       context,
-      lang,
+      lang: responseLang,
       messages,
       assistantMessage: "",
     },
@@ -735,7 +769,7 @@ export async function POST(request) {
   // replies that are completely determined by the four required fields.
   if (isBookingConversation(messages)) {
     const content = enforceBookingSequence({
-      lang,
+      lang: responseLang,
       messages,
       content: "",
       isAppointmentFlow: true,
@@ -744,7 +778,7 @@ export async function POST(request) {
       {
         sessionId: session.id,
         context,
-        lang,
+        lang: responseLang,
         messages,
         assistantMessage: content,
       },
@@ -761,7 +795,7 @@ export async function POST(request) {
     );
   }
 
-  const serviceInfo = serviceAvailabilityReply(lang, messages);
+  const serviceInfo = serviceAvailabilityReply(responseLang, messages);
   if (serviceInfo) {
     return json(
       {
@@ -779,7 +813,7 @@ export async function POST(request) {
   const estimatesDisabled = chatSettings?.disableEstimates === true;
 
   if (estimatesDisabled && isPriceQuestion(messages)) {
-    const content = lang === "es"
+    const content = responseLang === "es"
       ? "Por ahora no damos precios por chat. El taller confirmará el precio exacto después de revisar tu vehículo."
       : "Pricing is not available in chat right now. The shop will confirm the exact price after checking your vehicle.";
     return json(
@@ -811,7 +845,7 @@ export async function POST(request) {
       : "Authoritative pricing is currently unavailable. Do not provide a numeric price; ask the shop to confirm.";
   }
 
-  const directPriceReply = !estimatesDisabled ? deterministicPriceReply(pricing, messages, lang) : null;
+  const directPriceReply = !estimatesDisabled ? deterministicPriceReply(pricing, messages, responseLang) : null;
   if (directPriceReply) {
     return json(
       {
@@ -838,7 +872,7 @@ ${pricingContext}${adminGuidance}
 
 The strict collection order, safety rules, business facts, and authoritative pricing rules take precedence over conflicting guidance.
 
-Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly switches languages.`;
+Respond in ${responseLang === "es" ? "Spanish" : "English"}. Follow the language used in the customer's latest meaningful message.`;
 
   const tools = pricing ? [buildPriceEstimateTool(pricing)] : undefined;
   const baseMessages = [
@@ -889,13 +923,13 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
   const first = await callGroq(baseMessages, { withTools: true });
   if (first.error) {
     const content = fallbackReply({
-      lang,
+      lang: responseLang,
       context,
       messages,
       pricingUnavailable: !pricing || estimatesDisabled,
     });
     const enforced = enforceBookingSequence({
-      lang,
+      lang: responseLang,
       messages,
       content,
       isAppointmentFlow: isBookingConversation(messages),
@@ -904,7 +938,7 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
       {
         sessionId: session.id,
         context,
-        lang,
+        lang: responseLang,
         messages,
         assistantMessage: enforced,
       },
@@ -945,7 +979,7 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
   const unresolvedKnownPriceRequest = hasPriceQuestion(messages) && Boolean(detectService(messages));
   if (!toolCalls.length && pricing && (looksLikePrice.test(content) || asksToPickOption || unresolvedKnownPriceRequest)) {
     const retryMessages = [
-      { role: "system", content: buildForcedRetrySystemPrompt({ pricingContext, estimatesRule, lang }) },
+      { role: "system", content: buildForcedRetrySystemPrompt({ pricingContext, estimatesRule, lang: responseLang }) },
       ...messages.slice(-PROVIDER_MESSAGES),
     ];
     const forced = await callGroq(retryMessages, { withTools: true, forceTool: true });
@@ -959,13 +993,13 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
       // Still no tool call — refuse to relay an unverified number rather than
       // risk a wrong price.
       content = fallbackReply({
-        lang,
+        lang: responseLang,
         context,
         messages,
         pricingUnavailable: !pricing || estimatesDisabled,
       });
       content = enforceBookingSequence({
-        lang,
+        lang: responseLang,
         messages,
         content,
         isAppointmentFlow: isBookingConversation(messages),
@@ -990,7 +1024,7 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
     );
 
     if (needsVehicle && !extractVehicle(messages)) {
-      content = lang === "es"
+      content = responseLang === "es"
         ? "Para darte un estimado correcto, ¿cuál es el año, la marca y el modelo de tu vehículo?"
         : "To give you an accurate estimate, what is the year, make, and model of your vehicle?";
     } else {
@@ -1001,7 +1035,7 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
 
       const followUp = await callGroq(
         [
-          { role: "system", content: buildFollowUpSystemPrompt(lang) },
+          { role: "system", content: buildFollowUpSystemPrompt(responseLang) },
           { role: "user", content: JSON.stringify(resultForReply) },
         ],
         { withTools: false, maxTokens: 150, temperature: 0.2 },
@@ -1016,13 +1050,13 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
       // templated message built straight from the computed result, so a mangled
       // or dropped tool result never reaches the customer as a wrong price.
       if (result.ok && !replyMatchesComputedRange(content, result)) {
-        content = renderDeterministicEstimate(result, lang);
+        content = renderDeterministicEstimate(result, responseLang);
       }
     }
   }
 
   content = enforceBookingSequence({
-    lang,
+    lang: responseLang,
     messages,
     content,
     isAppointmentFlow: isBookingConversation(messages),
@@ -1040,7 +1074,7 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
     {
       sessionId: session.id,
       context,
-      lang,
+      lang: responseLang,
       messages,
       assistantMessage: content,
     },

@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/super-smart-optimize",
       "schedule": "0 16 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-analytics-report",
+      "schedule": "0 16 * * 1"
     }
   ]
 }

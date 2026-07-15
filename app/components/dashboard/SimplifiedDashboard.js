@@ -31,6 +31,7 @@ const NAV_SECTIONS = [
   {
     title: "Analytics",
     items: [
+      { id: "site-reports", icon: "📊", label: "Website Analytics", requires: null },
       { id: "reports", icon: "📈", label: "Reports", requires: "any" },
       { id: "alerts", icon: "🔔", label: "Alerts", requires: "any" },
     ],
@@ -78,6 +79,8 @@ export default function SimplifiedDashboard() {
   const [reportData, setReportData] = useState(null);
   const [alerts, setAlerts] = useState(null);
   const [invoices, setInvoices] = useState(null);
+  const [siteReports, setSiteReports] = useState(null);
+  const [selectedSiteReportId, setSelectedSiteReportId] = useState("");
 
   const showToast = useCallback((message, tone = "ok") => {
     setToast({ message, tone });
@@ -235,6 +238,25 @@ export default function SimplifiedDashboard() {
       .catch(() => setInvoices([]));
   }, [view, invoices]);
 
+  useEffect(() => {
+    if (view !== "site-reports") return;
+    setSiteReports(null);
+    fetch("/api/admin/analytics-reports", { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || "Could not load weekly reports.");
+        return data.reports || [];
+      })
+      .then((reports) => {
+        setSiteReports(reports);
+        setSelectedSiteReportId((current) => current || reports[0]?.id || "");
+      })
+      .catch((error) => {
+        setSiteReports([]);
+        showToast(error.message, "error");
+      });
+  }, [view, showToast]);
+
   async function runOptimization() {
     setBusyAction("optimize");
     try {
@@ -280,6 +302,7 @@ export default function SimplifiedDashboard() {
 
   const activeNavItem = NAV_SECTIONS.flatMap((s) => s.items).find((i) => i.id === view);
   const viewLocked = activeNavItem && !isUnlocked(activeNavItem.requires) && view !== "settings";
+  const selectedSiteReport = siteReports?.find((report) => report.id === selectedSiteReportId) || siteReports?.[0];
 
   return (
     <div className="dash">
@@ -844,7 +867,49 @@ export default function SimplifiedDashboard() {
             </div>
           )}
 
-          {/* -------- REPORTS -------- */}
+          {/* -------- WEBSITE ANALYTICS REPORTS -------- */}
+          {!viewLocked && view === "site-reports" && (
+            <>
+              <div className="card" style={{ padding: "18px 22px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                  <div>
+                    <h3 className="card-title" style={{ marginBottom: 5 }}>PostHog weekly website analytics</h3>
+                    <p style={{ margin: 0, color: "var(--paper-dim)", fontSize: 13 }}>Seven-day traffic, contacts, quotes, appointments, and chat funnel compared with the prior week.</p>
+                  </div>
+                  {siteReports?.length > 0 && (
+                    <select
+                      className="client-select"
+                      value={selectedSiteReport?.id || ""}
+                      onChange={(event) => setSelectedSiteReportId(event.target.value)}
+                      aria-label="Select weekly analytics report"
+                    >
+                      {siteReports.map((report) => <option key={report.id} value={report.id}>{report.period_label}</option>)}
+                    </select>
+                  )}
+                </div>
+              </div>
+              {siteReports === null ? (
+                <div className="empty card">Loading weekly reports…</div>
+              ) : siteReports.length === 0 ? (
+                <div className="empty card">
+                  <div className="empty-icon">📭</div>
+                  <p style={{ fontWeight: 700, color: "var(--paper-dim)", marginBottom: 5 }}>No weekly report has been published yet</p>
+                  <p style={{ margin: 0 }}>The scheduled report will appear here after its first successful Monday run.</p>
+                </div>
+              ) : (
+                <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+                  <iframe
+                    title={selectedSiteReport.title}
+                    srcDoc={selectedSiteReport.html}
+                    sandbox=""
+                    style={{ width: "100%", minHeight: 1120, border: 0, display: "block", background: "#120f0c" }}
+                  />
+                </div>
+              )}
+            </>
+          )}
+
+          {/* -------- AD PERFORMANCE REPORTS -------- */}
           {!viewLocked && view === "reports" && (
             <>
               <div className="card" style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 22px" }}>

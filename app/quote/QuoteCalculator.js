@@ -7,6 +7,7 @@ import { COPY, SITE } from "../site.config";
 import Icon from "../components/Icons";
 import { estimateTotal, formatMoney, buildWhatsAppMessage, clampQty } from "../../lib/quote";
 import { MAKES, VEHICLE_YEARS, vehicleImagePath, vehicleImageExts } from "../../lib/vehicles";
+import { captureAnalytics } from "../components/PostHogAnalytics";
 
 const IMG_EXTS = vehicleImageExts();
 
@@ -247,7 +248,19 @@ export default function QuoteCalculator({ pricing }) {
                   </li>
                 ))}
               </ul>
-              <a className="btn btn--primary quote__send" href={waHref} target="_blank" rel="noopener noreferrer">
+              <a
+                className="btn btn--primary quote__send"
+                href={waHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-analytics-location="quote_calculator"
+                onClick={() => captureAnalytics("quote_sent_whatsapp", {
+                  vehicle_class: vehicleClass,
+                  estimate_low: result.low,
+                  estimate_high: result.high,
+                  services: result.lines.map((line) => line.id),
+                })}
+              >
                 <Icon name="phone" /> {t(COPY.quote.send)}
               </a>
             </>

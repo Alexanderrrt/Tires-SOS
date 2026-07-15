@@ -2,6 +2,7 @@ import {ClerkProvider} from "@clerk/nextjs";
 import { Barlow, Barlow_Condensed, Caveat } from "next/font/google";
 import "./globals.css";
 import JsonLd from "./components/JsonLd";
+import PostHogAnalytics from "./components/PostHogAnalytics";
 import { LanguageProvider } from "./i18n/LanguageContext";
 import { SITE } from "./site.config";
 
@@ -96,7 +97,10 @@ export default function RootLayout({ children }) {
       <body>
         <ClerkProvider>
           <JsonLd />
-          <LanguageProvider>{children}</LanguageProvider>
+          <LanguageProvider>
+            <PostHogAnalytics />
+            {children}
+          </LanguageProvider>
         </ClerkProvider>
       </body>
     </html>

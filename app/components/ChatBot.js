@@ -5,6 +5,7 @@ import { useLanguage, useT } from "../i18n/LanguageContext";
 import { CHAT, SITE } from "../site.config";
 import { formatShopSlot, getShopDateTime } from "../../lib/shop-time";
 import TurnstileChallenge from "./TurnstileChallenge";
+import { captureAnalytics } from "./PostHogAnalytics";
 
 const QUOTE_CHAT = {
   title: { en: "Service Desk", es: "Servicio y Citas" },
@@ -275,10 +276,18 @@ export default function ChatBot({
   const listRef = useRef(null);
   const textareaRef = useRef(null);
   const busyRef = useRef(false);
+  const wasVisibleRef = useRef(false);
 
   const visible = embedded || open;
   const canInteract = session.ready && privacyConsent && !loading && !reservationLoading && !chatCompleted;
   const canSend = input.trim().length > 0 && canInteract;
+
+  useEffect(() => {
+    if (visible && !wasVisibleRef.current) {
+      captureAnalytics("chat_opened", { chat_mode: mode });
+    }
+    wasVisibleRef.current = visible;
+  }, [mode, visible]);
   const showPicker = nextAction === "show_availability" && !pickerUsed && !chatCompleted && !loading;
 
   const quickPrompts = useMemo(
@@ -441,6 +450,7 @@ export default function ChatBot({
     busyRef.current = true;
 
     const nextMessages = [...messages, { role: "user", content, createdAt: Date.now() }];
+    captureAnalytics("chat_message_sent", { chat_mode: mode, lang });
     const requestMessages = nextMessages.slice(-24).map((message) => ({
       role: message.role,
       content: typeof message.content === "string" ? message.content : t(message.content),
@@ -552,6 +562,13 @@ export default function ChatBot({
 
       const notificationStatus = data?.notification?.status || "pending";
       const persisted = data?.persisted === true;
+      captureAnalytics("appointment_requested", {
+        chat_mode: mode,
+        persisted,
+        notification_status: notificationStatus,
+        scheduled_date: selection.date,
+        scheduled_time: selection.time,
+      });
       const confirmation = persisted
         ? notificationStatus === "provider_accepted" || notificationStatus === "sent"
           ? t({
