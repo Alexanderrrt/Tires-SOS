@@ -617,8 +617,8 @@ export default function ChatBot({
               </div>
               <div>
                 <span>{t(copy.callUs)}</span>
-                <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noreferrer">
-                  {t(copy.whatsapp)}
+                <a href={SITE.smsHref}>
+                  {t(copy.sms)}
                 </a>
               </div>
               <div>

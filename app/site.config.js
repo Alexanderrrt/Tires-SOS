@@ -14,6 +14,7 @@ export const SITE = {
   phone: "(408) 332-8962",
   phoneHref: "https://wa.me/14083328962",
   whatsappHref: "https://wa.me/14083328962",
+  smsHref: "sms:+14083328962",
   // WhatsApp number in international format, digits only (used by wa.me).
   // Confirm this line is WhatsApp-enabled, or replace with the shop's WhatsApp.
   whatsapp: "14083328962",
@@ -295,7 +296,8 @@ export const CHAT = {
   },
   fastAnswers: { en: "Fast answers", es: "Respuestas rápidas" },
   liveChat: { en: "Live chat", es: "Chat en vivo" },
-  callUs: { en: "WhatsApp", es: "WhatsApp" },
+  callUs: { en: "SMS", es: "SMS" },
+  sms: { en: "Text us", es: "Envíanos un SMS" },
   whatsapp: { en: "WhatsApp", es: "WhatsApp" },
   openChat: { en: "Open chat", es: "Abrir chat" },
   close: { en: "Close chat", es: "Cerrar chat" },
