@@ -19,6 +19,7 @@ import { checkChatRateLimits, getClientIp } from "../../../lib/chat-rate-limit";
 import { recordGroqResponse, recordGroqError } from "../../../lib/groq-status";
 import { MAKES } from "../../../lib/vehicles";
 import { formatMoney } from "../../../lib/quote";
+import { deliverLeadNotification } from "../../../lib/lead-notification-service";
 
 const GROQ_API_BASE = "https://api.groq.com/openai/v1/chat/completions";
 const DEFAULT_MODEL = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
@@ -631,6 +632,15 @@ async function captureSafely(args, label) {
   }
 }
 
+async function notifyCapturedLead(sessionId, captureResult) {
+  if (!captureResult?.captured) return;
+  try {
+    await deliverLeadNotification({ sessionId });
+  } catch {
+    console.error("Chat lead notification failed.");
+  }
+}
+
 async function withTimeout(promise, fallback, timeoutMs) {
   let timer;
   try {
@@ -884,6 +894,7 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
       },
       "fallback-provider",
     );
+    await notifyCapturedLead(session.id, postCapture || preCapture);
     const conversation = buildConversationResult(messages, postCapture || preCapture);
     return json(
       {
@@ -1019,6 +1030,7 @@ Respond in ${lang === "es" ? "Spanish" : "English"} unless the user clearly swit
     },
     "post-provider",
   );
+  await notifyCapturedLead(session.id, postCapture || preCapture);
   const conversation = buildConversationResult(messages, postCapture || preCapture);
 
   return json(
