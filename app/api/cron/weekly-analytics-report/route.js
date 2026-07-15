@@ -19,7 +19,11 @@ export async function GET(request) {
   if (!authorized(request)) return Response.json({ error: "Unauthorized." }, { status: 401 });
   try {
     const report = await generateWeeklyAnalyticsReport();
-    const publishUrl = new URL("/api/admin/analytics-reports", request.url);
+    const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+    const publishOrigin = productionHost
+      ? `https://${productionHost}`
+      : process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://tires-sos.vercel.app";
+    const publishUrl = new URL("/api/admin/analytics-reports", publishOrigin);
     const publishResponse = await fetch(publishUrl, {
       method: "POST",
       headers: {
