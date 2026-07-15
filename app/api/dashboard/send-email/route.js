@@ -4,9 +4,9 @@ import { sendDailySummary } from "../../../../lib/send-report";
 // middleware — only signed-in dashboard users can trigger it.
 
 export async function POST(request) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+  if (!process.env.RESEND_API_KEY || !process.env.NOTIFY_EMAIL_RECIPIENT) {
     return Response.json(
-      { error: "Email is not configured (set EMAIL_USER and EMAIL_PASSWORD)." },
+      { error: "Email is not configured (set RESEND_API_KEY and NOTIFY_EMAIL_RECIPIENT)." },
       { status: 503 }
     );
   }

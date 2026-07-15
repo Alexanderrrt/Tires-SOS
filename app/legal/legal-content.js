@@ -42,14 +42,14 @@ export const LEGAL_PAGES = {
           en: [
             "We do not sell personal information.",
             "We may use service providers for hosting, messaging, embeds, maps, and AI chat.",
-            "Chat and quote details may be processed by Groq to generate responses and by EmailJS, an email service, and the mobile carrier's email-to-SMS gateway to alert the shop team.",
-            "Instagram, Google Maps, WhatsApp, Groq, EmailJS, email providers, and mobile carriers may process information under their own privacy policies.",
+            "Chat and quote details may be processed by Groq to generate responses and by Resend, an email service, and the mobile carrier's email-to-SMS gateway to alert the shop team.",
+            "Instagram, Google Maps, WhatsApp, Groq, Resend, email providers, and mobile carriers may process information under their own privacy policies.",
           ],
           es: [
             "No vendemos información personal.",
             "Podemos usar proveedores para alojamiento, mensajería, contenido integrado, mapas y chat con IA.",
-            "Los datos del chat y de las cotizaciones pueden ser procesados por Groq para generar respuestas y por EmailJS, un servicio de correo, y la pasarela de correo a SMS del operador móvil para avisar al equipo del taller.",
-            "Instagram, Google Maps, WhatsApp, Groq, EmailJS, proveedores de correo y operadores móviles pueden procesar información según sus propias políticas de privacidad.",
+            "Los datos del chat y de las cotizaciones pueden ser procesados por Groq para generar respuestas y por Resend, un servicio de correo, y la pasarela de correo a SMS del operador móvil para avisar al equipo del taller.",
+            "Instagram, Google Maps, WhatsApp, Groq, Resend, proveedores de correo y operadores móviles pueden procesar información según sus propias políticas de privacidad.",
           ],
         },
       },
@@ -131,11 +131,11 @@ export const LEGAL_PAGES = {
         heading: { en: "Third-party services", es: "Servicios de terceros" },
         items: {
           en: [
-            "Instagram, Google Maps, WhatsApp, Groq, EmailJS, email providers, and mobile carriers are separate services with their own policies and terms.",
+            "Instagram, Google Maps, WhatsApp, Groq, Resend, email providers, and mobile carriers are separate services with their own policies and terms.",
             "We are not responsible for outages, policy changes, or content on third-party services.",
           ],
           es: [
-            "Instagram, Google Maps, WhatsApp, Groq, EmailJS, proveedores de correo y operadores móviles son servicios separados con sus propias políticas y términos.",
+            "Instagram, Google Maps, WhatsApp, Groq, Resend, proveedores de correo y operadores móviles son servicios separados con sus propias políticas y términos.",
             "No somos responsables de caídas, cambios de política o contenido en servicios de terceros.",
           ],
         },
