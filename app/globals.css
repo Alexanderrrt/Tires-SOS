@@ -4010,6 +4010,18 @@ body { background: #050505; color: var(--paper); }
   color: var(--orange);
 }
 
+.record-card__flag--pending {
+  color: var(--orange);
+}
+
+.record-card__flag--replied {
+  color: #3fb950;
+}
+
+.record-card__flag--failed {
+  color: #f85149;
+}
+
 .record-card__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));

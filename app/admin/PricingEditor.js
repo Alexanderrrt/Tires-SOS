@@ -8,6 +8,7 @@ import { COPY } from "../site.config";
 import AdminLoader from "./AdminLoader";
 import AppointmentCalendar from "./AppointmentCalendar";
 import ApiStatus from "./ApiStatus";
+import YelpLeads from "./YelpLeads";
 
 const E = COPY.admin.editor;
 
@@ -15,11 +16,13 @@ const CHAT_ADMIN = {
   adminTitle: { en: "Admin", es: "Admin" },
   leadsTab: { en: "Leads", es: "Clientes" },
   appointmentsTab: { en: "Appointments", es: "Citas" },
+  yelpTab: { en: "Yelp", es: "Yelp" },
   chatTab: { en: "Chat", es: "Chat" },
   pricingTab: { en: "Pricing", es: "Precios" },
   apiTab: { en: "API", es: "API" },
   leadsTitle: { en: "Chat Leads", es: "Clientes del chat" },
   appointmentsTitle: { en: "Appointments", es: "Citas" },
+  yelpTitle: { en: "Yelp Leads", es: "Clientes de Yelp" },
   chatTitle: { en: "Chat Settings", es: "Configuracion del chat" },
   recordsStorageWarn: {
     en: "Lead storage is not connected - records only apply for this session.",
@@ -297,6 +300,8 @@ export default function PricingEditor({
   initialPricing,
   initialChatSettings,
   initialRecords,
+  initialYelpLeads,
+  yelpConfigured,
   persistent,
   chatPersistent,
   recordsPersistent,
@@ -313,6 +318,9 @@ export default function PricingEditor({
     appointments: initialRecords?.appointments || [],
     blockedSlots: initialRecords?.blockedSlots || [],
   });
+  const [yelpLeads, setYelpLeads] = useState(initialYelpLeads || []);
+  const [runningYelp, setRunningYelp] = useState(false);
+  const [lastYelpResult, setLastYelpResult] = useState(null);
   const [status, setStatus] = useState(null); // {ok, msg: {en, es}}
   const [saving, setSaving] = useState(false);
   const [updatingId, setUpdatingId] = useState("");
@@ -399,6 +407,27 @@ export default function PricingEditor({
       router.refresh();
     } else {
       const detail = body.error ? ` (${body.error})` : "";
+      setStatus({
+        ok: false,
+        msg: { en: CHAT_ADMIN.updateFailed.en + detail, es: CHAT_ADMIN.updateFailed.es + detail },
+      });
+    }
+  }
+
+  async function runYelpNow() {
+    setRunningYelp(true);
+    setLastYelpResult(null);
+    const runRes = await fetch("/api/admin/yelp-leads", { method: "POST" });
+    const runBody = await runRes.json().catch(() => ({}));
+    if (runRes.ok) {
+      setLastYelpResult({ checked: runBody.checked ?? 0 });
+    }
+    const listRes = await fetch("/api/admin/yelp-leads");
+    const listBody = await listRes.json().catch(() => ({}));
+    if (listRes.ok) setYelpLeads(listBody.leads || []);
+    setRunningYelp(false);
+    if (!runRes.ok) {
+      const detail = runBody.error ? ` (${runBody.error})` : "";
       setStatus({
         ok: false,
         msg: { en: CHAT_ADMIN.updateFailed.en + detail, es: CHAT_ADMIN.updateFailed.es + detail },
@@ -615,9 +644,11 @@ export default function PricingEditor({
       ? CHAT_ADMIN.leadsTitle
       : activeTab === "appointments"
         ? CHAT_ADMIN.appointmentsTitle
-        : activeTab === "chat"
-          ? CHAT_ADMIN.chatTitle
-          : E.title;
+        : activeTab === "yelp"
+          ? CHAT_ADMIN.yelpTitle
+          : activeTab === "chat"
+            ? CHAT_ADMIN.chatTitle
+            : E.title;
   const showSave = activeTab === "chat" || activeTab === "pricing";
   const recordsTab = activeTab === "leads" || activeTab === "appointments";
 
@@ -680,6 +711,14 @@ export default function PricingEditor({
           </button>
           <button
             type="button"
+            className={`editor__tab ${activeTab === "yelp" ? "editor__tab--on" : ""}`}
+            onClick={() => setActiveTab("yelp")}
+          >
+            {t(CHAT_ADMIN.yelpTab)}
+            <span>{yelpLeads.length}</span>
+          </button>
+          <button
+            type="button"
             className={`editor__tab ${activeTab === "chat" ? "editor__tab--on" : ""}`}
             onClick={() => setActiveTab("chat")}
           >
@@ -732,6 +771,15 @@ export default function PricingEditor({
             onCreate={createAppointment}
             disabled={saving}
             updatingId={updatingId}
+          />
+        ) : activeTab === "yelp" ? (
+          <YelpLeads
+            leads={yelpLeads}
+            t={t}
+            gmailConfigured={yelpConfigured}
+            running={runningYelp}
+            onRunNow={runYelpNow}
+            lastRunResult={lastYelpResult}
           />
         ) : activeTab === "chat" ? (
           <>
