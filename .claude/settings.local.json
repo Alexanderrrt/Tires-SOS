@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(node \"C:\\\\Users\\\\ALEXAN~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Alexander-Desktop-Tires-SOS\\\\d0bb2ec7-379c-471e-b870-fc5a98bfe95d\\\\scratchpad\\\\test-engine.mjs\")",
+      "Bash(node test-engine.mjs)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\Alexander\\\\Desktop\\\\Tires-SOS\\\\.claude\")",
+      "Bash(npx next *)",
+      "mcp__7c2b39b3-5e33-4d64-bc4e-d923378a654c__exec",
+      "Bash(mkdir -p \"C:\\\\Users\\\\Alexander\\\\Documents\\\\Projects\\\\Tires-SOS\\\\reports\")",
+      "Skill(dataviz)",
+      "Skill(dataviz:*)",
+      "Bash(python3 *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(git ls-tree *)",
+      "Bash(git fetch *)",
+      "Bash(git branch *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(curl *)",
+      "mcp__plugin_vercel_vercel__list_teams",
+      "mcp__plugin_vercel_vercel__list_projects",
+      "mcp__plugin_vercel_vercel__get_project",
+      "mcp__plugin_vercel_vercel__list_deployments",
+      "mcp__plugin_vercel_vercel__get_deployment",
+      "mcp__plugin_vercel_vercel__get_runtime_logs",
+      "mcp__plugin_vercel_vercel__get_runtime_errors",
+      "Skill(weekly-report)",
+      "Skill(weekly-report:*)"
+    ]
+  }
+}

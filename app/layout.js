@@ -1,5 +1,6 @@
 import {ClerkProvider} from "@clerk/nextjs";
 import { Barlow, Barlow_Condensed, Caveat } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import JsonLd from "./components/JsonLd";
 import PostHogAnalytics from "./components/PostHogAnalytics";
@@ -95,6 +96,19 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${displayFont.variable} ${bodyFont.variable} ${signatureFont.variable}`}>
       <body>
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=AW-18328053401"
+          strategy="afterInteractive"
+        />
+        <Script id="google-tag" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-18328053401');
+          `}
+        </Script>
         <ClerkProvider>
           <JsonLd />
           <LanguageProvider>

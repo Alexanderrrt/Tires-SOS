@@ -16,13 +16,11 @@ import {
   verifyChatSession,
 } from "../../../lib/chat-session";
 import { checkChatRateLimits, getClientIp } from "../../../lib/chat-rate-limit";
-import { recordGroqResponse, recordGroqError } from "../../../lib/groq-status";
 import { MAKES } from "../../../lib/vehicles";
 import { formatMoney } from "../../../lib/quote";
 import { deliverLeadNotification } from "../../../lib/lead-notification-service";
+import { callGroqChat } from "../../../lib/groq-client";
 
-const GROQ_API_BASE = "https://api.groq.com/openai/v1/chat/completions";
-const DEFAULT_MODEL = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
 const MAX_BODY_BYTES = 64 * 1024;
 const MAX_MESSAGES = 24;
 const PROVIDER_MESSAGES = 12;
@@ -881,43 +879,15 @@ Respond in ${responseLang === "es" ? "Spanish" : "English"}. Follow the language
   ];
 
   async function callGroq(msgs, { withTools, forceTool, maxTokens, temperature } = {}) {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
-    try {
-      const toolChoice = forceTool
-        ? { type: "function", function: { name: "get_price_estimate" } }
-        : "auto";
-      const response = await fetch(GROQ_API_BASE, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: DEFAULT_MODEL,
-          messages: msgs,
-          temperature: temperature ?? 0.3,
-          max_tokens: maxTokens ?? 500,
-          ...(withTools && tools ? { tools, tool_choice: toolChoice } : {}),
-        }),
-        cache: "no-store",
-        signal: ctrl.signal,
-      });
-      recordGroqResponse(response.headers, {
-        ok: response.ok,
-        status: response.status,
-        message: response.ok ? null : `HTTP ${response.status}`,
-      });
-      if (!response.ok) return { error: "provider_unavailable" };
-      const body = await response.json().catch(() => null);
-      return { body };
-    } catch (error) {
-      const timedOut = error?.name === "AbortError";
-      recordGroqError(timedOut ? "Request timed out." : error?.message || "Network error.");
-      return { error: timedOut ? "provider_timeout" : "provider_unavailable" };
-    } finally {
-      clearTimeout(timer);
-    }
+    return callGroqChat(msgs, {
+      withTools,
+      forceTool,
+      tools,
+      toolChoiceName: "get_price_estimate",
+      maxTokens,
+      temperature,
+      timeoutMs,
+    });
   }
 
   const first = await callGroq(baseMessages, { withTools: true });
