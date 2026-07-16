@@ -2,9 +2,12 @@
 
 Next.js (App Router) marketing site for Tires SOS Rescue, a tire & auto shop
 in San José, CA. Fully bilingual (English/Spanish). Static marketing pages +
-dynamic quote estimator + admin pricing editor.
+dynamic quote estimator + AI chat + admin console (pricing, leads,
+appointments, Yelp lead auto-responder) + an internal ad-ops dashboard.
 
-**Stack:** Next.js 14 · React 18 · plain CSS · Vercel (hosting) · Supabase (pricing)
+**Stack:** Next.js 14 · React 18 · plain CSS · Vercel (hosting) · Supabase (data) ·
+Groq (AI chat + Yelp replies) · Gmail API (Yelp leads + all outbound email) ·
+Clerk (internal `/dashboard` auth)
 
 ---
 
@@ -205,6 +208,38 @@ Auth uses HMAC-signed cookies (`lib/auth.js`) — no JWT, no Supabase Auth.
 
 ---
 
+## Yelp lead auto-responder & email system
+
+A cron job (`app/api/cron/yelp-lead-responder/route.js`, every 5 minutes) reads
+unread Yelp "Request a Quote" / "New Lead" emails from Gmail, drafts a reply
+with Groq, and sends it back through the **same Gmail account** — not a
+third-party email service. This is also now the transport for every other
+outbound email in the app (chat/appointment lead notifications, weekly
+reports, budget alerts, admin test-notify) — **Resend has been fully
+retired**; `lib/gmail-client.js`'s `sendGmailEmail()` is the one email
+primitive the whole app uses.
+
+Key files:
+- `lib/gmail-client.js` — raw-fetch Gmail API client (no `googleapis`
+  dependency): OAuth token refresh, `listUnreadYelpLeadEmails()`,
+  `markProcessed()`, `sendGmailEmail()`.
+- `lib/yelp-lead-parser.js` — extracts the customer's message, name, and
+  reply-to address from Yelp's email format.
+- `lib/yelp-lead-ai-reply.js` — builds the AI reply via Groq.
+- `lib/yelp-lead-responder.js` — orchestrator; run by the cron route and by
+  the admin panel's manual "Check Yelp now" button.
+- `lib/yelp-leads-store.js` — Supabase `yelp_leads` table (history/dedupe)
+  and `yelp_responder_state` (a single-row watermark: only messages received
+  **after the previous run** are ever considered, so an old backlog can never
+  be reprocessed regardless of Gmail read/unread state).
+- `app/admin/YelpLeads.js` + `app/api/admin/yelp-leads/route.js` — the admin
+  console tab (lead history, status, AI replies, manual trigger).
+
+One-time setup (Google Cloud OAuth client + `node scripts/gmail-oauth-setup.js`
+to mint a refresh token) is documented in that script's header comment.
+
+---
+
 ## Component tree (homepage)
 
 ```
@@ -287,6 +322,11 @@ Push to GitHub → Vercel auto-deploys. No manual steps.
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk browser key for `/dashboard` authentication |
 | `CLERK_SECRET_KEY` | Clerk server key for protected dashboard routes |
 | `DASHBOARD_ALLOWED_USER_IDS` | Comma-separated Clerk user IDs allowed into `/dashboard` |
+| `GROQ_API_KEY` / `GROQ_MODEL` | AI chat + Yelp-reply generation (Groq) |
+| `GMAIL_CLIENT_ID` / `GMAIL_CLIENT_SECRET` / `GMAIL_REFRESH_TOKEN` | Gmail API access — reads Yelp leads and sends **every** outbound app email (see below). Generate the refresh token with `node scripts/gmail-oauth-setup.js` |
+| `YELP_REPLY_FROM_EMAIL` / `YELP_REPLY_FROM_NAME` | The Gmail send-from identity for Yelp replies and all owner notifications (must match the Yelp business account's email so Yelp's relay attributes replies correctly) |
+| `NOTIFY_EMAIL_RECIPIENT` | Where every owner-facing notification lands (chat/appointment leads, weekly reports, budget alerts, admin test-notify) |
+| `CRON_SECRET` | Bearer token Vercel Cron uses to call `/api/cron/*` routes |
 
 Without Supabase vars, the quote calculator works on default prices and admin
 edits are session-only. See `.env.example`.
@@ -311,7 +351,19 @@ connection storage, adds indexes, enables RLS, and reloads the API schema cache.
 
 ## Deploying
 
-1. Import `alexanderrrt/tires-sos` repo at [vercel.com/new](https://vercel.com/new).
+Two environments, both auto-deploying from Git pushes:
+
+| Branch | URL | Purpose |
+|---|---|---|
+| `staging` | `dev.tiressosrescue.com` (Vercel login required to view) | Preview changes before they go live. Gmail is intentionally **not** configured here — it shares the same real Gmail inbox/Supabase watermark as production, so testing the Yelp flow on staging would touch real customer data. Everything else (pricing, chat, leads, appointments) works normally for review. |
+| `Pre-Production` (tracks `claude/tires-sos-website-plan-o3sua9`) | `tiressosrescue.com` | Live production. |
+
+**Workflow:** commit → push to `staging` → review at `dev.tiressosrescue.com` →
+merge `staging` into `Pre-Production` → push → live at `tiressosrescue.com`.
+
+Initial setup (already done for this project, listed for reference):
+1. Import the repo at [vercel.com/new](https://vercel.com/new).
 2. Framework preset: Next.js (auto-detected).
-3. Set environment variables in Vercel dashboard.
-4. Deploy — every push auto-deploys.
+3. Set environment variables in Vercel dashboard (Production **and** Preview).
+4. Assign the `staging` branch to the `dev.tiressosrescue.com` domain in
+   Project Settings → Domains.
