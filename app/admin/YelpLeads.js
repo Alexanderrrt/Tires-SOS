@@ -80,7 +80,7 @@ export default function YelpLeads({ leads, t, gmailConfigured, running, onRunNow
     <section className="record-list" aria-label="Yelp">
       {!gmailConfigured && <p className="editor__warn">{t(YELP_COPY.notConfigured)}</p>}
 
-      <div className="record-card__actions" style={{ marginBottom: 16 }}>
+      <div className="yelp-toolbar">
         <button type="button" className="btn btn--primary btn--small" onClick={onRunNow} disabled={running || !gmailConfigured}>
           {running ? t(YELP_COPY.running) : t(YELP_COPY.runNow)}
         </button>

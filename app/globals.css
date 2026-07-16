@@ -4022,6 +4022,13 @@ body { background: #050505; color: var(--paper); }
   color: #f85149;
 }
 
+.yelp-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+
 .record-card__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
