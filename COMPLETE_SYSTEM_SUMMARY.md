@@ -7,7 +7,7 @@ A complete, **turnkey, ready-to-use** system for managing multiple client ad cam
 ---
 
 ## **PART 1: CLIENT WEBSITE** 
-`tires-sos.vercel.app`
+`tiressosrescue.com`
 
 ```
 Public Pages:

@@ -37,7 +37,7 @@ DOCUMENTATION:
 ### **Where Everything Lives**
 
 ```
-├─ tires-sos.vercel.app (Client Website)
+├─ tiressosrescue.com (Client Website)
 │  ├─ /admin              ← Client sees their reports (read-only)
 │  ├─ /quote
 │  └─ /services

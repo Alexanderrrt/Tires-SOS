@@ -6,7 +6,7 @@ export const SITE = {
   nameShort: "Tires SOS",
   // Used for canonical URLs, sitemap, robots and Open Graph.
   // UPDATE this once the real domain is attached in Vercel.
-  url: "https://tires-sos.vercel.app",
+  url: "https://tiressosrescue.com",
   tagline: {
     en: "Tire specialists. Fast service, actual brands, and WhatsApp-first support. We speak your language.",
     es: "Especialistas en llantas. Servicio rápido, marcas reales y atención primero por WhatsApp. Aquí te atendemos como en casa.",

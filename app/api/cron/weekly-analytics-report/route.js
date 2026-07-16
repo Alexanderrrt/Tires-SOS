@@ -21,7 +21,7 @@ export async function GET(request) {
     const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
     const publishOrigin = productionHost
       ? `https://${productionHost}`
-      : process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://tires-sos.vercel.app";
+      : process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://tiressosrescue.com";
     const result = await runWeeklyAnalyticsReport(publishOrigin);
     return Response.json({ ok: true, reportId: result.published?.id, period: result.report.periodLabel });
   } catch (error) {
