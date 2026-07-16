@@ -84,14 +84,12 @@ export default function YelpLeads({ leads, t, gmailConfigured, running, onRunNow
         <button type="button" className="btn btn--primary btn--small" onClick={onRunNow} disabled={running || !gmailConfigured}>
           {running ? t(YELP_COPY.running) : t(YELP_COPY.runNow)}
         </button>
-        <span className="editor__hint">{t(YELP_COPY.runHint)}</span>
+        {lastRunResult ? (
+          <span className="editor__ok">{lastRunResult.checked} {t(YELP_COPY.checked)}</span>
+        ) : (
+          <span className="editor__hint">{t(YELP_COPY.runHint)}</span>
+        )}
       </div>
-
-      {lastRunResult && (
-        <p className="editor__ok">
-          {lastRunResult.checked} {t(YELP_COPY.checked)}
-        </p>
-      )}
 
       {leads.length ? (
         leads.map((lead) => <YelpLeadCard key={lead.id} lead={lead} t={t} />)
