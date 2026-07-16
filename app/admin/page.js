@@ -4,6 +4,8 @@ import { verifySession, authConfigured, SESSION_COOKIE } from "../../lib/auth";
 import { getPricing, storeConfigured } from "../../lib/pricing-store";
 import { getChatSettings, chatStoreConfigured } from "../../lib/chat-settings-store";
 import { getChatRecords, recordsStoreConfigured } from "../../lib/chat-records-store";
+import { listRecentYelpLeads } from "../../lib/yelp-leads-store";
+import { gmailConfigured } from "../../lib/gmail-client";
 import PricingEditor from "./PricingEditor";
 
 export const dynamic = "force-dynamic";
@@ -18,10 +20,11 @@ export default async function AdminPage() {
   const ok = await verifySession(token);
   if (!ok) redirect("/admin/login");
 
-  const [pricing, chatSettings, records] = await Promise.all([
+  const [pricing, chatSettings, records, yelpLeads] = await Promise.all([
     getPricing(),
     getChatSettings(),
     getChatRecords(),
+    listRecentYelpLeads().catch(() => []),
   ]);
 
   return (
@@ -30,6 +33,8 @@ export default async function AdminPage() {
         initialPricing={pricing}
         initialChatSettings={chatSettings}
         initialRecords={records}
+        initialYelpLeads={yelpLeads}
+        yelpConfigured={gmailConfigured()}
         persistent={storeConfigured()}
         chatPersistent={chatStoreConfigured()}
         recordsPersistent={recordsStoreConfigured()}
