@@ -304,6 +304,7 @@ export default function PricingEditor({
   initialYelpLeads,
   yelpConfigured,
   initialWhatsAppConversations,
+  initialWhatsAppGlobalBotEnabled,
   whatsappConfigured,
   persistent,
   chatPersistent,
@@ -789,7 +790,7 @@ export default function PricingEditor({
             lastRunResult={lastYelpResult}
           />
         ) : activeTab === "whatsapp" ? (
-          <WhatsAppInbox initialConversations={initialWhatsAppConversations} configured={whatsappConfigured} />
+          <WhatsAppInbox initialConversations={initialWhatsAppConversations} initialGlobalBotEnabled={initialWhatsAppGlobalBotEnabled} configured={whatsappConfigured} />
         ) : activeTab === "chat" ? (
           <>
             <section className="editor__group">

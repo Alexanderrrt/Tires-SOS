@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { getRecentWhatsAppMessages, saveInboundWhatsAppMessage, saveOutboundWhatsAppMessage, setWhatsAppBookingState } from "../../../../lib/whatsapp-store";
+import { getRecentWhatsAppMessages, getWhatsAppGlobalBotEnabled, saveInboundWhatsAppMessage, saveOutboundWhatsAppMessage, setWhatsAppBookingState } from "../../../../lib/whatsapp-store";
 import { sendWhatsAppText } from "../../../../lib/whatsapp-client";
 import { callGroqChat, groqReplyText } from "../../../../lib/groq-client";
 import { captureChatRecord, getLeadBySession, reserveAppointment } from "../../../../lib/chat-records-store";
@@ -33,6 +33,7 @@ export async function POST(request) {
     return new Response("Invalid signature", { status: 401 });
   }
   const payload = JSON.parse(rawBody);
+  const globalBotEnabled = await getWhatsAppGlobalBotEnabled().catch(() => false);
   for (const entry of payload.entry || []) {
     for (const change of entry.changes || []) {
       const value = change.value || {};
@@ -41,7 +42,7 @@ export async function POST(request) {
         const body = message.text?.body;
         if (message.id && message.from && body) {
           const conversation = await saveInboundWhatsAppMessage({ messageId: message.id, waId: message.from, customerName: names.get(message.from), body });
-          if (conversation.bot_enabled) {
+          if (globalBotEnabled && conversation.bot_enabled) {
             const history = await getRecentWhatsAppMessages(conversation.id, conversation.context_enabled ? 30 : 1);
             const lang = /\b(hola|cita|aceite|carro|vehiculo|gracias|quiero|necesito|solo)\b/i.test(body) ? "es" : "en";
             const offeredSlots = Array.isArray(conversation.offered_slots) ? conversation.offered_slots : [];
@@ -86,6 +87,7 @@ STYLE
             await captureChatRecord({
               sessionId,
               context: "shop",
+              source: "WhatsApp",
               lang,
               messages: [...history, { role: "user", content: `My WhatsApp number is +${message.from}` }],
               assistantMessage: reply,

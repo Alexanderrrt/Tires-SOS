@@ -6,7 +6,7 @@ import { getChatSettings, chatStoreConfigured } from "../../lib/chat-settings-st
 import { getChatRecords, recordsStoreConfigured } from "../../lib/chat-records-store";
 import { listRecentYelpLeads } from "../../lib/yelp-leads-store";
 import { gmailConfigured } from "../../lib/gmail-client";
-import { listWhatsAppConversations } from "../../lib/whatsapp-store";
+import { getWhatsAppGlobalBotEnabled, listWhatsAppConversations } from "../../lib/whatsapp-store";
 import { whatsappConfigured } from "../../lib/whatsapp-client";
 import PricingEditor from "./PricingEditor";
 import "./whatsapp.css";
@@ -24,12 +24,13 @@ export default async function AdminPage() {
   const ok = await verifySession(token);
   if (!ok) redirect("/admin/login");
 
-  const [pricing, chatSettings, records, yelpLeads, whatsappConversations] = await Promise.all([
+  const [pricing, chatSettings, records, yelpLeads, whatsappConversations, whatsappGlobalBotEnabled] = await Promise.all([
     getPricing(),
     getChatSettings(),
     getChatRecords(),
     listRecentYelpLeads().catch(() => []),
     listWhatsAppConversations().catch(() => []),
+    getWhatsAppGlobalBotEnabled().catch(() => false),
   ]);
 
   return (
@@ -41,6 +42,7 @@ export default async function AdminPage() {
         initialYelpLeads={yelpLeads}
         yelpConfigured={gmailConfigured()}
         initialWhatsAppConversations={whatsappConversations}
+        initialWhatsAppGlobalBotEnabled={whatsappGlobalBotEnabled}
         whatsappConfigured={whatsappConfigured()}
         persistent={storeConfigured()}
         chatPersistent={chatStoreConfigured()}

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { verifySession, SESSION_COOKIE } from "../../../../lib/auth";
 import { sendWhatsAppMedia, sendWhatsAppText, uploadWhatsAppMedia, whatsappConfigured } from "../../../../lib/whatsapp-client";
-import { getWhatsAppConversation, listWhatsAppConversations, resetWhatsAppConversation, saveOutboundWhatsAppMessage, setWhatsAppBotEnabled, setWhatsAppContextEnabled } from "../../../../lib/whatsapp-store";
+import { getWhatsAppConversation, getWhatsAppGlobalBotEnabled, listWhatsAppConversations, resetWhatsAppConversation, saveOutboundWhatsAppMessage, setWhatsAppBotEnabled, setWhatsAppContextEnabled, setWhatsAppGlobalBotEnabled } from "../../../../lib/whatsapp-store";
 import { deleteRecord, getLeadBySession } from "../../../../lib/chat-records-store";
 
 async function authorized() {
@@ -10,7 +10,10 @@ async function authorized() {
 
 export async function GET() {
   if (!(await authorized())) return Response.json({ error: "Unauthorized." }, { status: 401 });
-  try { return Response.json({ conversations: await listWhatsAppConversations(), configured: whatsappConfigured() }); }
+  try {
+    const [conversations, globalBotEnabled] = await Promise.all([listWhatsAppConversations(), getWhatsAppGlobalBotEnabled().catch(() => false)]);
+    return Response.json({ conversations, globalBotEnabled, configured: whatsappConfigured() });
+  }
   catch (error) { return Response.json({ error: error.message }, { status: 500 }); }
 }
 
@@ -44,6 +47,11 @@ export async function PATCH(request) {
   if (!(await authorized())) return Response.json({ error: "Unauthorized." }, { status: 401 });
   try {
     const { conversationId, botEnabled, contextEnabled, action } = await request.json();
+    if (action === "global-bot") {
+      const enabled = await setWhatsAppGlobalBotEnabled(botEnabled);
+      return Response.json({ ok: true, globalBotEnabled: enabled });
+    }
+    if (!conversationId) return Response.json({ error: "Conversation is required." }, { status: 400 });
     if (action === "context") await setWhatsAppContextEnabled(conversationId, contextEnabled);
     else await setWhatsAppBotEnabled(conversationId, botEnabled);
     return Response.json({ ok: true });

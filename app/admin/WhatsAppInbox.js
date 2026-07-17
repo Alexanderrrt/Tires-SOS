@@ -4,8 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 function initials(name) { return String(name || "WA").split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase(); }
 function messageTime(value) { return new Date(value).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }); }
 
-export default function WhatsAppInbox({ initialConversations = [], configured }) {
+export default function WhatsAppInbox({ initialConversations = [], initialGlobalBotEnabled = false, configured }) {
   const [conversations, setConversations] = useState(initialConversations);
+  const [globalBotEnabled, setGlobalBotEnabled] = useState(initialGlobalBotEnabled);
   const [selectedId, setSelectedId] = useState(initialConversations[0]?.id || "");
   const [draft, setDraft] = useState("");
   const [query, setQuery] = useState("");
@@ -20,7 +21,7 @@ export default function WhatsAppInbox({ initialConversations = [], configured })
     if (list) list.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
   }, [selectedId, selected?.messages.length]);
 
-  async function refresh() { const res = await fetch("/api/admin/whatsapp", { cache: "no-store" }); const data = await res.json(); if (res.ok) setConversations(data.conversations || []); }
+  async function refresh() { const res = await fetch("/api/admin/whatsapp", { cache: "no-store" }); const data = await res.json(); if (res.ok) { setConversations(data.conversations || []); setGlobalBotEnabled(Boolean(data.globalBotEnabled)); } }
   async function send() {
     if (!selected || !draft.trim()) return; setBusy(true);
     const res = await fetch("/api/admin/whatsapp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ conversationId: selected.id, body: draft }) });
@@ -30,6 +31,13 @@ export default function WhatsAppInbox({ initialConversations = [], configured })
     if (!selected) return; setBusy(true);
     const res = await fetch("/api/admin/whatsapp", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ conversationId: selected.id, botEnabled: !selected.botEnabled }) });
     if (res.ok) await refresh(); else alert((await res.json()).error || "Bot update failed."); setBusy(false);
+  }
+  async function toggleGlobalBot() {
+    setBusy(true);
+    const res = await fetch("/api/admin/whatsapp", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "global-bot", botEnabled: !globalBotEnabled }) });
+    const data = await res.json();
+    if (res.ok) setGlobalBotEnabled(Boolean(data.globalBotEnabled)); else alert(data.error || "Global bot update failed.");
+    setBusy(false);
   }
   async function toggleContext() {
     if (!selected) return; setBusy(true);
@@ -52,6 +60,9 @@ export default function WhatsAppInbox({ initialConversations = [], configured })
   return <section className="whatsapp-inbox">
     <aside className="whatsapp-inbox__sidebar">
       <div className="whatsapp-inbox__sidebar-head"><div><span className="whatsapp-inbox__eyebrow">Customer conversations</span><strong>Inbox</strong></div><button className="whatsapp-icon-btn" onClick={refresh} aria-label="Refresh conversations">↻</button></div>
+      <button type="button" className={`whatsapp-global-bot ${globalBotEnabled ? "is-on" : ""}`} onClick={toggleGlobalBot} disabled={busy} aria-pressed={globalBotEnabled}>
+        <span className="whatsapp-global-bot__icon">AI</span><span><strong>Automatic replies {globalBotEnabled ? "on" : "off"}</strong><small>{globalBotEnabled ? "Master bot is active" : "All bot replies are paused"}</small></span><i />
+      </button>
       <label className="whatsapp-search"><span>⌕</span><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name or number" /></label>
       <div className="whatsapp-inbox__contacts">
         {filtered.map((c) => { const last = c.messages.at(-1); return <button key={c.id} className={`whatsapp-inbox__contact ${c.id === selectedId ? "is-active" : ""}`} onClick={() => setSelectedId(c.id)}>
@@ -62,7 +73,7 @@ export default function WhatsAppInbox({ initialConversations = [], configured })
     </aside>
     <div className="whatsapp-inbox__thread">
       {selected ? <><header className="whatsapp-thread__head"><div className="whatsapp-thread__identity"><span className="whatsapp-avatar whatsapp-avatar--large">{initials(selected.customerName)}</span><div><strong>{selected.customerName || "WhatsApp customer"}</strong><small>+{selected.waId} · WhatsApp</small></div></div>
-        <div className="whatsapp-thread__controls"><button className={`whatsapp-memory-toggle ${selected.contextEnabled ? "is-on" : ""}`} onClick={toggleContext} disabled={busy}>Memory: {selected.contextEnabled ? "Full chat" : "Latest message"}</button><button className="whatsapp-reset" onClick={resetCustomer} disabled={busy}>Reset customer</button><button className={`whatsapp-bot-toggle ${selected.botEnabled ? "is-on" : ""}`} onClick={toggleBot} disabled={busy}><span className="whatsapp-bot-toggle__dot"/><span><strong>AI Bot {selected.botEnabled ? "On" : "Off"}</strong><small>{selected.botEnabled ? "Auto-replying" : "Manual replies"}</small></span></button></div></header>
+        <div className="whatsapp-thread__controls"><button className={`whatsapp-memory-toggle ${selected.contextEnabled ? "is-on" : ""}`} onClick={toggleContext} disabled={busy}>Memory: {selected.contextEnabled ? "Full chat" : "Latest message"}</button><button className="whatsapp-reset" onClick={resetCustomer} disabled={busy}>Reset customer</button><button className={`whatsapp-bot-toggle ${selected.botEnabled ? "is-on" : ""} ${!globalBotEnabled ? "is-paused" : ""}`} onClick={toggleBot} disabled={busy}><span className="whatsapp-bot-toggle__dot"/><span><strong>Chat bot {selected.botEnabled ? "On" : "Off"}</strong><small>{!globalBotEnabled && selected.botEnabled ? "Paused by master" : selected.botEnabled ? "Auto-replying" : "Manual replies"}</small></span></button></div></header>
         <div ref={messageList} className="whatsapp-inbox__messages"><div className="whatsapp-day-pill">Conversation history</div>{selected.messages.map((m) => <div key={m.id} className={`whatsapp-message whatsapp-message--${m.direction}`}><p>{m.body}</p><span>{messageTime(m.createdAt)} {m.direction === "outbound" && "✓✓"}</span></div>)}</div>
         <div className="whatsapp-inbox__composer">{attachment && <div className="whatsapp-attachment-chip"><span>📎 {attachment.name}</span><button onClick={() => setAttachment(null)}>×</button></div>}<input ref={fileInput} className="whatsapp-file-input" type="file" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" onChange={(e) => setAttachment(e.target.files?.[0] || null)}/><button className="whatsapp-attach" onClick={() => fileInput.current?.click()} aria-label="Attach file">📎</button><textarea value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !attachment) { e.preventDefault(); send(); } }} placeholder={attachment ? "Add an optional caption…" : "Type a reply…"} rows={2}/><button className="whatsapp-send" onClick={attachment ? sendAttachment : send} disabled={busy || (!attachment && !draft.trim())}><span>{attachment ? "Send file" : "Send"}</span>➤</button><small>Files up to 16 MB · Enter to send text</small></div></> : <div className="whatsapp-empty"><span>💬</span><strong>Your WhatsApp inbox</strong><p>Select a conversation to view messages and control the AI bot.</p></div>}
     </div>
