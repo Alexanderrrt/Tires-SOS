@@ -11,6 +11,7 @@ import ApiStatus from "./ApiStatus";
 import AdminOverview from "./AdminOverview";
 import YelpLeads from "./YelpLeads";
 import WhatsAppInbox from "./WhatsAppInbox";
+import { adminServiceLabel, adminSourceLabel } from "./admin-display";
 
 const E = COPY.admin.editor;
 
@@ -27,39 +28,39 @@ const CHAT_ADMIN = {
   leadsTitle: { en: "Chat Leads", es: "Clientes del chat" },
   appointmentsTitle: { en: "Appointments", es: "Citas" },
   yelpTitle: { en: "Yelp Leads", es: "Clientes de Yelp" },
-  chatTitle: { en: "Chat Settings", es: "Configuracion del chat" },
+  chatTitle: { en: "Chat Settings", es: "Configuración del chat" },
   recordsStorageWarn: {
     en: "Lead storage is not connected - records only apply for this session.",
-    es: "El almacenamiento de clientes no esta conectado - los registros solo aplican en esta sesion.",
+    es: "El almacenamiento de clientes no está conectado; los registros solo aplican en esta sesión.",
   },
   chatStorageWarn: {
     en: "Chat storage is not connected - changes apply for this session only.",
-    es: "El almacenamiento del chat no esta conectado - los cambios solo aplican en esta sesion.",
+    es: "El almacenamiento del chat no está conectado; los cambios solo aplican en esta sesión.",
   },
-  publicText: { en: "Public chat text", es: "Texto publico del chat" },
+  publicText: { en: "Public chat text", es: "Texto público del chat" },
   publicHint: {
     en: "These fields control the quote chat page customers see.",
-    es: "Estos campos controlan la pagina de chat de cotizacion que ven los clientes.",
+    es: "Estos campos controlan la página de cotización que ven los clientes.",
   },
-  title: { en: "Title", es: "Titulo" },
-  subtitle: { en: "Subtitle", es: "Subtitulo" },
+  title: { en: "Title", es: "Título" },
+  subtitle: { en: "Subtitle", es: "Subtítulo" },
   intro: { en: "First message", es: "Primer mensaje" },
   placeholder: { en: "Input placeholder", es: "Texto del campo" },
-  prompts: { en: "Starter prompts", es: "Preguntas rapidas" },
+  prompts: { en: "Starter prompts", es: "Preguntas rápidas" },
   promptsHint: {
     en: "Keep these short. They should start a quote quickly.",
-    es: "Mantenlas cortas. Deben iniciar una cotizacion rapido.",
+    es: "Mantenlas cortas. Deben iniciar una cotización rápidamente.",
   },
   prompt: { en: "Prompt", es: "Pregunta" },
-  behavior: { en: "Response guidance", es: "Guia de respuesta" },
+  behavior: { en: "Response guidance", es: "Guía de respuesta" },
   behaviorHint: {
     en: "Private guidance for the chat responses. Customers do not see this text.",
-    es: "Guia privada para las respuestas del chat. Los clientes no ven este texto.",
+    es: "Guía privada para las respuestas del chat. Los clientes no ven este texto.",
   },
   disableEstimates: { en: "Disable price estimates", es: "Desactivar estimados de precio" },
   disableEstimatesHint: {
     en: "When on, the chatbot will never give a price or price range. It still collects the service, vehicle, name, phone, and appointment as usual.",
-    es: "Si esta activado, el chatbot nunca dara un precio ni un rango. Sigue recolectando el servicio, vehiculo, nombre, telefono y cita como siempre.",
+    es: "Si está activado, el chatbot nunca dará un precio ni un rango. Seguirá recopilando el servicio, vehículo, nombre, teléfono y cita como siempre.",
   },
   saved: { en: "Chat saved.", es: "Chat guardado." },
   savedSession: {
@@ -72,40 +73,56 @@ const CHAT_ADMIN = {
   updateFailed: { en: "Status update failed.", es: "No se pudo actualizar el estado." },
   deleted: { en: "Record deleted.", es: "Registro eliminado." },
   deleteFailed: { en: "Delete failed.", es: "No se pudo eliminar." },
-  english: { en: "English", es: "Ingles" },
-  spanish: { en: "Spanish", es: "Espanol" },
+  english: { en: "English", es: "Inglés" },
+  spanish: { en: "Spanish", es: "Español" },
+  operations: { en: "Operations", es: "Operaciones" },
+  workspace: { en: "Workspace", es: "Área de trabajo" },
+  channels: { en: "Channels", es: "Canales" },
+  configuration: { en: "Configuration", es: "Configuración" },
+  systemsConnected: { en: "Systems connected", es: "Sistemas conectados" },
+  limitedStorage: { en: "Limited storage", es: "Almacenamiento limitado" },
+  adminWorkspace: { en: "Admin workspace", es: "Área administrativa" },
+  toggleLanguage: { en: "Switch to Spanish", es: "Cambiar a inglés" },
+  home: { en: "Home", es: "Inicio" },
+  search: { en: "Search", es: "Buscar" },
+  leadSearch: { en: "Name, phone, vehicle, source...", es: "Nombre, teléfono, vehículo, origen..." },
+  appointmentSearch: { en: "Name, service, vehicle...", es: "Nombre, servicio, vehículo..." },
+  allStatuses: { en: "All statuses", es: "Todos los estados" },
+  results: { en: "results", es: "resultados" },
+  exportCsv: { en: "Export CSV", es: "Exportar CSV" },
 };
 
 const RECORD_COPY = {
   noLeads: {
     en: "No chat leads yet. New quote or service conversations will appear here.",
-    es: "Todavia no hay clientes del chat. Las conversaciones de cotizacion o servicio apareceran aqui.",
+    es: "Todavía no hay clientes del chat. Las conversaciones de cotización o servicio aparecerán aquí.",
   },
   noAppointments: {
     en: "No appointment requests yet. When someone asks to schedule, it will show here.",
-    es: "Todavia no hay solicitudes de cita. Cuando alguien pida agendar, aparecera aqui.",
+    es: "Todavía no hay solicitudes de cita. Cuando alguien pida agendar, aparecerá aquí.",
   },
   status: { en: "Status", es: "Estado" },
   source: { en: "Source", es: "Origen" },
   name: { en: "Name", es: "Nombre" },
-  phone: { en: "Phone", es: "Telefono" },
-  vehicle: { en: "Vehicle", es: "Vehiculo" },
+  phone: { en: "Phone", es: "Teléfono" },
+  vehicle: { en: "Vehicle", es: "Vehículo" },
   service: { en: "Service", es: "Servicio" },
   summary: { en: "Summary", es: "Resumen" },
   notes: { en: "Notes", es: "Notas" },
-  conversation: { en: "Conversation", es: "Conversacion" },
-  missing: { en: "Not captured yet", es: "No capturado todavia" },
+  conversation: { en: "Conversation", es: "Conversación" },
+  customer: { en: "Customer", es: "Cliente" },
+  missing: { en: "Not captured yet", es: "No capturado todavía" },
   created: { en: "Created", es: "Creado" },
   updated: { en: "Updated", es: "Actualizado" },
   requested: { en: "Appointment requested", es: "Cita solicitada" },
   delete: { en: "Delete", es: "Eliminar" },
   deleteLeadConfirm: {
     en: "Delete this lead? Any appointment created from it will also be removed.",
-    es: "Eliminar este cliente? Tambien se eliminara cualquier cita creada desde este registro.",
+    es: "¿Eliminar este cliente? También se eliminará cualquier cita creada desde este registro.",
   },
   deleteAppointmentConfirm: {
     en: "Delete this appointment request?",
-    es: "Eliminar esta solicitud de cita?",
+    es: "¿Eliminar esta solicitud de cita?",
   },
 };
 
@@ -121,9 +138,16 @@ const APPOINTMENT_STATUSES = [
   { value: "requested", label: { en: "Requested", es: "Solicitada" } },
   { value: "confirmed", label: { en: "Confirmed", es: "Confirmada" } },
   { value: "completed", label: { en: "Completed", es: "Completada" } },
-  { value: "no-show", label: { en: "No-show", es: "No llego" } },
+  { value: "no-show", label: { en: "No-show", es: "No llegó" } },
   { value: "canceled", label: { en: "Canceled", es: "Cancelada" } },
 ];
+
+const MODEL_LABELS = {
+  perUnit: { en: "Per unit", es: "Por unidad" },
+  labor: { en: "Parts and labor", es: "Piezas y mano de obra" },
+  options: { en: "Options", es: "Opciones" },
+  flat: { en: "Fixed price", es: "Precio fijo" },
+};
 
 function BilingualField({ label, value, onChange, multiline = false, languageLabels }) {
   const Control = multiline ? "textarea" : "input";
@@ -142,11 +166,11 @@ function BilingualField({ label, value, onChange, multiline = false, languageLab
   );
 }
 
-function formatDate(value) {
+function formatDate(value, lang = "en") {
   if (!value) return "";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString([], {
+  return date.toLocaleString(lang === "es" ? "es-US" : "en-US", {
     month: "short",
     day: "numeric",
     hour: "numeric",
@@ -179,14 +203,14 @@ function RecordField({ label, value, fallback }) {
   );
 }
 
-function StatusSelect({ value, options, onChange, disabled, label }) {
+function StatusSelect({ value, options, onChange, disabled, label, t }) {
   return (
     <label className="record-card__status">
       <span>{label}</span>
       <select value={value} onChange={(event) => onChange(event.target.value)} disabled={disabled}>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
-            {option.label.en} / {option.label.es}
+            {t(option.label)}
           </option>
         ))}
       </select>
@@ -203,7 +227,7 @@ function Transcript({ record, t }) {
       <div>
         {transcript.map((message, index) => (
           <p key={`${message.role}-${index}`}>
-            <span>{message.role === "assistant" ? "Tires SOS" : "Customer"}:</span> {message.content}
+            <span>{message.role === "assistant" ? "Tires SOS" : t(RECORD_COPY.customer)}:</span> {message.content}
           </p>
         ))}
       </div>
@@ -215,14 +239,17 @@ function EmptyRecords({ children }) {
   return <div className="record-empty">{children}</div>;
 }
 
-function LeadCard({ lead, t, disabled, onStatus, onDelete }) {
+function LeadCard({ lead, t, lang, disabled, onStatus, onDelete }) {
   const fallback = t(RECORD_COPY.missing);
+  const localizedSummary = lang === "es" && (lead.service || lead.vehicle || lead.phone)
+    ? [lead.service && `Servicio: ${adminServiceLabel(lead.service, lang)}`, lead.vehicle && `Vehículo: ${lead.vehicle}`, lead.phone && `Teléfono: ${lead.phone}`].filter(Boolean).join(" | ")
+    : lead.summary;
   return (
     <article className="record-card">
       <div className="record-card__head">
         <div>
-          <p className="record-card__eyebrow">{lead.source || t(RECORD_COPY.source)}</p>
-          <h2>{lead.service || t(CHAT_ADMIN.leadsTitle)}</h2>
+          <p className="record-card__eyebrow">{adminSourceLabel(lead.source, lang) || t(RECORD_COPY.source)}</p>
+          <h2>{adminServiceLabel(lead.service, lang) || t(CHAT_ADMIN.leadsTitle)}</h2>
         </div>
         <StatusSelect
           label={t(RECORD_COPY.status)}
@@ -230,6 +257,7 @@ function LeadCard({ lead, t, disabled, onStatus, onDelete }) {
           options={LEAD_STATUSES}
           onChange={(status) => onStatus("lead", lead.id, status)}
           disabled={disabled}
+          t={t}
         />
       </div>
 
@@ -245,8 +273,8 @@ function LeadCard({ lead, t, disabled, onStatus, onDelete }) {
       </div>
 
       <div className="record-card__meta">
-        <span>{t(RECORD_COPY.created)}: {formatDate(lead.createdAt) || fallback}</span>
-        <span>{t(RECORD_COPY.updated)}: {formatDate(lead.updatedAt) || fallback}</span>
+        <span>{t(RECORD_COPY.created)}: {formatDate(lead.createdAt, lang) || fallback}</span>
+        <span>{t(RECORD_COPY.updated)}: {formatDate(lead.updatedAt, lang) || fallback}</span>
         {lead.appointmentRequested && <span className="record-card__flag">{t(RECORD_COPY.requested)}</span>}
       </div>
 
@@ -254,12 +282,12 @@ function LeadCard({ lead, t, disabled, onStatus, onDelete }) {
         <RecordField label={t(RECORD_COPY.name)} value={lead.customerName} fallback={fallback} />
         <RecordField label={t(RECORD_COPY.phone)} value={lead.phone} fallback={fallback} />
         <RecordField label={t(RECORD_COPY.vehicle)} value={lead.vehicle} fallback={fallback} />
-        <RecordField label={t(RECORD_COPY.source)} value={lead.source} fallback={fallback} />
+        <RecordField label={t(RECORD_COPY.source)} value={adminSourceLabel(lead.source, lang)} fallback={fallback} />
       </div>
 
       <div className="record-card__summary">
         <span>{t(RECORD_COPY.summary)}</span>
-        <p>{lead.summary || lead.lastMessage || fallback}</p>
+        <p>{localizedSummary || lead.lastMessage || fallback}</p>
       </div>
 
       <Transcript record={lead} t={t} />
@@ -267,14 +295,14 @@ function LeadCard({ lead, t, disabled, onStatus, onDelete }) {
   );
 }
 
-function AppointmentCard({ appointment, t, disabled, onStatus, onDelete }) {
+function AppointmentCard({ appointment, t, lang, disabled, onStatus, onDelete }) {
   const fallback = t(RECORD_COPY.missing);
   return (
     <article className="record-card record-card--appointment">
       <div className="record-card__head">
         <div>
           <p className="record-card__eyebrow">{t(CHAT_ADMIN.appointmentsTitle)}</p>
-          <h2>{appointment.service || t(RECORD_COPY.requested)}</h2>
+          <h2>{adminServiceLabel(appointment.service, lang) || t(RECORD_COPY.requested)}</h2>
         </div>
         <StatusSelect
           label={t(RECORD_COPY.status)}
@@ -282,6 +310,7 @@ function AppointmentCard({ appointment, t, disabled, onStatus, onDelete }) {
           options={APPOINTMENT_STATUSES}
           onChange={(status) => onStatus("appointment", appointment.id, status)}
           disabled={disabled}
+          t={t}
         />
       </div>
 
@@ -297,15 +326,15 @@ function AppointmentCard({ appointment, t, disabled, onStatus, onDelete }) {
       </div>
 
       <div className="record-card__meta">
-        <span>{t(RECORD_COPY.created)}: {formatDate(appointment.createdAt) || fallback}</span>
-        <span>{t(RECORD_COPY.updated)}: {formatDate(appointment.updatedAt) || fallback}</span>
+        <span>{t(RECORD_COPY.created)}: {formatDate(appointment.createdAt, lang) || fallback}</span>
+        <span>{t(RECORD_COPY.updated)}: {formatDate(appointment.updatedAt, lang) || fallback}</span>
       </div>
 
       <div className="record-card__grid">
         <RecordField label={t(RECORD_COPY.name)} value={appointment.customerName} fallback={fallback} />
         <RecordField label={t(RECORD_COPY.phone)} value={appointment.phone} fallback={fallback} />
         <RecordField label={t(RECORD_COPY.vehicle)} value={appointment.vehicle} fallback={fallback} />
-        <RecordField label={t(RECORD_COPY.service)} value={appointment.service} fallback={fallback} />
+        <RecordField label={t(RECORD_COPY.service)} value={adminServiceLabel(appointment.service, lang)} fallback={fallback} />
       </div>
 
       <div className="record-card__summary">
@@ -701,16 +730,16 @@ export default function PricingEditor({
   const filteredAppointments = records.appointments.filter((item) => recordMatches(item) && (recordStatus === "all" || item.status === recordStatus));
   const statusOptions = activeTab === "appointments" ? APPOINTMENT_STATUSES : LEAD_STATUSES;
   const navGroups = [
-    { label: "Workspace", items: [
+    { label: CHAT_ADMIN.workspace, items: [
       { id: "overview", label: t(CHAT_ADMIN.overviewTab), mark: "OV" },
       { id: "leads", label: t(CHAT_ADMIN.leadsTab), mark: "LD", count: records.leads.length },
       { id: "appointments", label: t(CHAT_ADMIN.appointmentsTab), mark: "AP", count: records.appointments.length },
     ] },
-    { label: "Channels", items: [
+    { label: CHAT_ADMIN.channels, items: [
       { id: "whatsapp", label: "WhatsApp", mark: "WA", count: initialWhatsAppConversations.length },
       { id: "yelp", label: t(CHAT_ADMIN.yelpTab), mark: "YP", count: yelpLeads.length },
     ] },
-    { label: "Configuration", items: [
+    { label: CHAT_ADMIN.configuration, items: [
       { id: "chat", label: t(CHAT_ADMIN.chatTab), mark: "CH" },
       { id: "pricing", label: t(CHAT_ADMIN.pricingTab), mark: "PR" },
       { id: "api", label: t(CHAT_ADMIN.apiTab), mark: "API" },
@@ -719,13 +748,14 @@ export default function PricingEditor({
 
   function exportCurrentRecords() {
     const source = activeTab === "appointments" ? filteredAppointments : filteredLeads;
-    const rows = source.map((record) => activeTab === "appointments" ? {
-      Name: record.customerName, Phone: record.phone, Service: record.service, Vehicle: record.vehicle,
-      Status: record.status, Date: record.scheduledDate || record.preferredDate, Time: record.scheduledTime || record.preferredTime,
-    } : {
-      Name: record.customerName, Phone: record.phone, Source: record.source, Service: record.service,
-      Vehicle: record.vehicle, Status: record.status, Updated: record.updatedAt,
-    });
+    const exportedStatus = (value) => t(statusOptions.find((option) => option.value === value)?.label || { en: value || "", es: value || "" });
+    const rows = source.map((record) => activeTab === "appointments"
+      ? lang === "es"
+        ? { Nombre: record.customerName, Teléfono: record.phone, Servicio: adminServiceLabel(record.service, lang), Vehículo: record.vehicle, Estado: exportedStatus(record.status), Fecha: record.scheduledDate || record.preferredDate, Hora: record.scheduledTime || record.preferredTime }
+        : { Name: record.customerName, Phone: record.phone, Service: record.service, Vehicle: record.vehicle, Status: record.status, Date: record.scheduledDate || record.preferredDate, Time: record.scheduledTime || record.preferredTime }
+      : lang === "es"
+        ? { Nombre: record.customerName, Teléfono: record.phone, Origen: adminSourceLabel(record.source, lang), Servicio: adminServiceLabel(record.service, lang), Vehículo: record.vehicle, Estado: exportedStatus(record.status), Actualizado: record.updatedAt }
+        : { Name: record.customerName, Phone: record.phone, Source: record.source, Service: record.service, Vehicle: record.vehicle, Status: record.status, Updated: record.updatedAt });
     downloadCsv(`${activeTab}-${new Date().toISOString().slice(0, 10)}.csv`, rows);
   }
 
@@ -734,10 +764,10 @@ export default function PricingEditor({
       {loggingOut && <AdminLoader message={t(E.loggingOut)} />}
       <div className="editor admin-console">
         <aside className="admin-navigation">
-          <div className="admin-navigation__brand"><strong>Tires SOS</strong><span>Operations</span></div>
+          <div className="admin-navigation__brand"><strong>Tires SOS</strong><span>{t(CHAT_ADMIN.operations)}</span></div>
           <nav aria-label={t(CHAT_ADMIN.adminTitle)}>
-            {navGroups.map((group) => <div className="admin-navigation__group" key={group.label}>
-              <span>{group.label}</span>
+            {navGroups.map((group) => <div className="admin-navigation__group" key={group.label.en}>
+              <span>{t(group.label)}</span>
               {group.items.map((item) => <button type="button" key={item.id} className={activeTab === item.id ? "is-active" : ""} onClick={() => navigate(item.id)}>
                 <i>{item.mark}</i><strong>{item.label}</strong>{Number.isFinite(item.count) && <b>{item.count}</b>}
               </button>)}
@@ -745,14 +775,14 @@ export default function PricingEditor({
           </nav>
           <div className="admin-navigation__footer">
             <span className={recordsPersistent ? "is-online" : "is-offline"} />
-            <div><strong>{recordsPersistent ? "Systems connected" : "Limited storage"}</strong><small>Admin workspace</small></div>
+            <div><strong>{t(recordsPersistent ? CHAT_ADMIN.systemsConnected : CHAT_ADMIN.limitedStorage)}</strong><small>{t(CHAT_ADMIN.adminWorkspace)}</small></div>
           </div>
         </aside>
 
         <section className="admin-workspace">
           <header className="editor__bar">
             <div className="admin-page-heading">
-              <span>Admin / {activeTab}</span>
+              <span>{t(CHAT_ADMIN.adminTitle)} / {t(title)}</span>
               <h1>{t(title)}</h1>
             {activeTab === "pricing" && !persistent && <p className="editor__warn">{t(E.storageWarn)}</p>}
             {activeTab === "chat" && !chatPersistent && <p className="editor__warn">{t(CHAT_ADMIN.chatStorageWarn)}</p>}
@@ -760,11 +790,11 @@ export default function PricingEditor({
           </div>
           <div className="editor__actions">
             {status && <span className={status.ok ? "editor__ok" : "editor__err"}>{t(status.msg)}</span>}
-            <button type="button" className="lang-toggle" onClick={toggleLang} aria-label="Toggle language">
+            <button type="button" className="lang-toggle" onClick={toggleLang} aria-label={t(CHAT_ADMIN.toggleLanguage)}>
               {lang === "en" ? "ES" : "EN"}
             </button>
             <Link className="btn btn--ghost btn--small" href="/">
-              Home
+              {t(CHAT_ADMIN.home)}
             </Link>
             <button className="btn btn--ghost btn--small" onClick={logout} disabled={loggingOut || saving}>
               {loggingOut ? t(E.loggingOut) : t(E.logOut)}
@@ -775,7 +805,7 @@ export default function PricingEditor({
                   {saving ? t(E.saving) : t(CHAT_ADMIN.refresh)}
                 </button>
                 <button className="btn btn--ghost btn--small editor__test-notify" onClick={testNotification} disabled={saving}>
-                  {t({ en: "Test notification", es: "Probar notificacion" })}
+                  {t({ en: "Test notification", es: "Probar notificación" })}
                 </button>
               </>
             )}
@@ -788,10 +818,10 @@ export default function PricingEditor({
           </header>
 
           {recordsTab && <div className="admin-commandbar">
-            <label><span>Search</span><input type="search" value={recordQuery} onChange={(event) => setRecordQuery(event.target.value)} placeholder={activeTab === "leads" ? "Name, phone, vehicle, source..." : "Name, service, vehicle..."} /></label>
-            <label><span>Status</span><select value={recordStatus} onChange={(event) => setRecordStatus(event.target.value)}><option value="all">All statuses</option>{statusOptions.map((option) => <option value={option.value} key={option.value}>{t(option.label)}</option>)}</select></label>
-            <span className="admin-commandbar__count">{activeTab === "leads" ? filteredLeads.length : filteredAppointments.length} results</span>
-            <button type="button" onClick={exportCurrentRecords} disabled={!(activeTab === "leads" ? filteredLeads.length : filteredAppointments.length)}>Export CSV</button>
+            <label><span>{t(CHAT_ADMIN.search)}</span><input type="search" value={recordQuery} onChange={(event) => setRecordQuery(event.target.value)} placeholder={t(activeTab === "leads" ? CHAT_ADMIN.leadSearch : CHAT_ADMIN.appointmentSearch)} /></label>
+            <label><span>{t(RECORD_COPY.status)}</span><select value={recordStatus} onChange={(event) => setRecordStatus(event.target.value)}><option value="all">{t(CHAT_ADMIN.allStatuses)}</option>{statusOptions.map((option) => <option value={option.value} key={option.value}>{t(option.label)}</option>)}</select></label>
+            <span className="admin-commandbar__count">{activeTab === "leads" ? filteredLeads.length : filteredAppointments.length} {t(CHAT_ADMIN.results)}</span>
+            <button type="button" onClick={exportCurrentRecords} disabled={!(activeTab === "leads" ? filteredLeads.length : filteredAppointments.length)}>{t(CHAT_ADMIN.exportCsv)}</button>
           </div>}
 
           <main className="admin-content">
@@ -803,6 +833,8 @@ export default function PricingEditor({
             whatsappConversations={initialWhatsAppConversations}
             integrations={{ pricing: persistent, chat: chatPersistent, records: recordsPersistent, whatsapp: whatsappConfigured, yelp: yelpConfigured }}
             onNavigate={navigate}
+            t={t}
+            lang={lang}
           />
         ) : activeTab === "leads" ? (
           <section className="record-list" aria-label={t(CHAT_ADMIN.leadsTitle)}>
@@ -812,6 +844,7 @@ export default function PricingEditor({
                   key={lead.id}
                   lead={lead}
                   t={t}
+                  lang={lang}
                   disabled={updatingId === lead.id}
                   onStatus={updateRecordStatus}
                   onDelete={deleteRecord}
@@ -826,6 +859,7 @@ export default function PricingEditor({
             appointments={filteredAppointments}
             blockedSlots={records.blockedSlots || []}
             t={t}
+            lang={lang}
             onSchedule={scheduleAppointment}
             onUnschedule={unscheduleAppointment}
             onStatus={updateRecordStatus}
@@ -840,13 +874,14 @@ export default function PricingEditor({
           <YelpLeads
             leads={yelpLeads}
             t={t}
+            lang={lang}
             gmailConfigured={yelpConfigured}
             running={runningYelp}
             onRunNow={runYelpNow}
             lastRunResult={lastYelpResult}
           />
         ) : activeTab === "whatsapp" ? (
-          <WhatsAppInbox initialConversations={initialWhatsAppConversations} initialGlobalBotEnabled={initialWhatsAppGlobalBotEnabled} configured={whatsappConfigured} />
+          <WhatsAppInbox initialConversations={initialWhatsAppConversations} initialGlobalBotEnabled={initialWhatsAppGlobalBotEnabled} configured={whatsappConfigured} t={t} lang={lang} />
         ) : activeTab === "chat" ? (
           <>
             <section className="editor__group">
@@ -1067,7 +1102,7 @@ export default function PricingEditor({
                 <div key={svc.id} className="editor__svc">
                   <div className="editor__svc-head">
                     <strong>{t(svc.label)}</strong>
-                    <span className="editor__tag">{svc.model}</span>
+                    <span className="editor__tag">{t(MODEL_LABELS[svc.model] || { en: svc.model, es: svc.model })}</span>
                     <label className="editor__inline-check">
                       <input
                         type="checkbox"

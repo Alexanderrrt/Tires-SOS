@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 import { SITE } from "../site.config";
 import { addDaysToDateKey, dayOfWeekForDateKey, getShopDateTime } from "../../lib/shop-time";
+import { adminServiceLabel } from "./admin-display";
 
 const HOURS = SITE.hours;
 
@@ -81,11 +82,11 @@ const COPY = {
   confirmed: { en: "Confirmed", es: "Confirmada" },
   requested: { en: "Requested", es: "Solicitada" },
   completed: { en: "Completed", es: "Completada" },
-  noShow: { en: "No-show", es: "No llego" },
+  noShow: { en: "No-show", es: "No llegó" },
   canceled: { en: "Canceled", es: "Cancelada" },
   preferred: { en: "Preferred", es: "Preferido" },
-  blockDay: { en: "Block day", es: "Bloquear dia" },
-  unblockDay: { en: "Unblock day", es: "Desbloquear dia" },
+  blockDay: { en: "Block day", es: "Bloquear día" },
+  unblockDay: { en: "Unblock day", es: "Desbloquear día" },
   block: { en: "Block", es: "Bloquear" },
   unblock: { en: "Unblock", es: "Desbloquear" },
   blocked: { en: "Blocked", es: "Bloqueado" },
@@ -93,9 +94,9 @@ const COPY = {
   newAppointment: { en: "New Appointment", es: "Nueva Cita" },
   createTitle: { en: "Create Manual Appointment", es: "Crear Cita Manual" },
   customerNameLabel: { en: "Customer name", es: "Nombre del cliente" },
-  phoneLabel: { en: "Phone", es: "Telefono" },
+  phoneLabel: { en: "Phone", es: "Teléfono" },
   serviceLabel: { en: "Service", es: "Servicio" },
-  vehicleLabel: { en: "Vehicle", es: "Vehiculo" },
+  vehicleLabel: { en: "Vehicle", es: "Vehículo" },
   notesLabel: { en: "Notes", es: "Notas" },
   dateLabel: { en: "Date", es: "Fecha" },
   timeLabel: { en: "Time", es: "Hora" },
@@ -103,7 +104,10 @@ const COPY = {
   creating: { en: "Creating...", es: "Creando..." },
   cancel: { en: "Cancel", es: "Cancelar" },
   createDateHint: { en: "Must be a future business day.",
-    es: "Debe ser un dia laboral futuro." },
+    es: "Debe ser un día laboral futuro." },
+  previousWeek: { en: "Previous week", es: "Semana anterior" },
+  nextWeek: { en: "Next week", es: "Semana siguiente" },
+  appointmentShort: { en: "Appt", es: "Cita" },
 };
 
 const APPT_STATUSES = [
@@ -114,7 +118,7 @@ const APPT_STATUSES = [
   { value: "canceled", label: COPY.canceled },
 ];
 
-export default function AppointmentCalendar({ appointments, blockedSlots = [], t, onSchedule, onUnschedule, onStatus, onDelete, onBlock, onUnblock, onCreate, disabled, updatingId }) {
+export default function AppointmentCalendar({ appointments, blockedSlots = [], t, lang = "en", onSchedule, onUnschedule, onStatus, onDelete, onBlock, onUnblock, onCreate, disabled, updatingId }) {
   const [weekOffset, setWeekOffset] = useState(0);
   const [scheduling, setScheduling] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
@@ -255,8 +259,9 @@ export default function AppointmentCalendar({ appointments, blockedSlots = [], t
   const weekLabel = useMemo(() => {
     if (!days.length) return "";
     const opts = { month: "short", day: "numeric" };
-    return `${days[0].date.toLocaleDateString("en-US", { ...opts, timeZone: "UTC" })} - ${days[days.length - 1].date.toLocaleDateString("en-US", { ...opts, timeZone: "UTC" })}`;
-  }, [days]);
+    const locale = lang === "es" ? "es-US" : "en-US";
+    return `${days[0].date.toLocaleDateString(locale, { ...opts, timeZone: "UTC" })} - ${days[days.length - 1].date.toLocaleDateString(locale, { ...opts, timeZone: "UTC" })}`;
+  }, [days, lang]);
 
   const cells = [];
   cells.push(
@@ -321,7 +326,7 @@ export default function AppointmentCalendar({ appointments, blockedSlots = [], t
         >
           {booked && (
             <div className="cal__appt">
-              <strong>{booked.service || "Appt"}</strong>
+              <strong>{adminServiceLabel(booked.service, lang) || t(COPY.appointmentShort)}</strong>
               <span>{booked.customerName || booked.phone || ""}</span>
             </div>
           )}
@@ -336,14 +341,14 @@ export default function AppointmentCalendar({ appointments, blockedSlots = [], t
   return (
     <div className="cal">
       <div className="cal__nav">
-        <button type="button" onClick={() => setWeekOffset((o) => o - 1)} className="btn btn--ghost btn--small" aria-label="Previous week">
+        <button type="button" onClick={() => setWeekOffset((o) => o - 1)} className="btn btn--ghost btn--small" aria-label={t(COPY.previousWeek)}>
           &#8249;
         </button>
         <button type="button" onClick={() => setWeekOffset(0)} className="btn btn--ghost btn--small">
           {t(COPY.thisWeek)}
         </button>
         <span className="cal__week-label">{weekLabel}</span>
-        <button type="button" onClick={() => setWeekOffset((o) => o + 1)} className="btn btn--ghost btn--small" aria-label="Next week">
+        <button type="button" onClick={() => setWeekOffset((o) => o + 1)} className="btn btn--ghost btn--small" aria-label={t(COPY.nextWeek)}>
           &#8250;
         </button>
         <button
@@ -483,7 +488,7 @@ export default function AppointmentCalendar({ appointments, blockedSlots = [], t
       {selectedAppt && (
         <div className="cal__detail">
           <div className="cal__detail-head">
-            <h4>{selectedAppt.service || t(COPY.noService)}</h4>
+            <h4>{adminServiceLabel(selectedAppt.service, lang) || t(COPY.noService)}</h4>
             <button type="button" className="btn btn--ghost btn--small" onClick={() => setSelectedId(null)}>
               {t(COPY.close)}
             </button>
@@ -494,7 +499,7 @@ export default function AppointmentCalendar({ appointments, blockedSlots = [], t
             {selectedAppt.vehicle && <span>{selectedAppt.vehicle}</span>}
             {selectedAppt.scheduledDate && (
               <span>
-                {new Date(selectedAppt.scheduledDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}{" "}
+                {new Date(selectedAppt.scheduledDate + "T12:00:00").toLocaleDateString(lang === "es" ? "es-US" : "en-US", { weekday: "short", month: "short", day: "numeric" })}{" "}
                 {formatTime12(selectedAppt.scheduledTime)}
               </span>
             )}
@@ -546,7 +551,7 @@ export default function AppointmentCalendar({ appointments, blockedSlots = [], t
         {unscheduled.map((appt) => (
           <div key={appt.id} className={`cal__card ${scheduling === appt.id ? "cal__card--active" : ""}`}>
             <div className="cal__card-info">
-              <strong>{appt.service || t(COPY.noService)}</strong>
+              <strong>{adminServiceLabel(appt.service, lang) || t(COPY.noService)}</strong>
               <span>{appt.customerName || appt.phone || t(COPY.unknown)}</span>
               {appt.vehicle && <span>{appt.vehicle}</span>}
               {appt.preferredTime && (
