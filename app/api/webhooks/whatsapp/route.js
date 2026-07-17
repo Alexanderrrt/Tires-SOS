@@ -67,7 +67,17 @@ export async function POST(request) {
                 });
               } catch (error) {
                 await setWhatsAppBotEnabled(conversation.id, true).catch(() => {});
-                throw error;
+                console.error("WhatsApp handoff email failed; the bot remains active.", error);
+                const fallbackReply = lang === "es"
+                  ? "Sigo aquí contigo. No pude avisar al equipo por correo en este momento; si necesitas atención inmediata, llama al (408) 332-8962. Puedes seguir escribiéndome mientras tanto."
+                  : "I'm still here with you. I couldn't notify the team by email right now; for immediate help, call (408) 332-8962. You can keep messaging me in the meantime.";
+                try {
+                  const sent = await sendWhatsAppText(message.from, fallbackReply);
+                  await saveOutboundWhatsAppMessage({ conversationId: conversation.id, messageId: sent.messages?.[0]?.id, body: fallbackReply });
+                } catch (sendError) {
+                  console.error("WhatsApp handoff fallback reply failed.", sendError);
+                }
+                continue;
               }
               const handoffReply = lang === "es"
                 ? "Claro. Ya avisé al equipo de Tires SOS Rescue para que una persona continúe contigo por este chat. El asistente automático queda en pausa."
