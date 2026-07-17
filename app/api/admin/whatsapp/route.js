@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { verifySession, SESSION_COOKIE } from "../../../../lib/auth";
 import { sendWhatsAppMedia, sendWhatsAppText, uploadWhatsAppMedia, whatsappConfigured } from "../../../../lib/whatsapp-client";
-import { getWhatsAppConversation, getWhatsAppGlobalBotEnabled, listWhatsAppConversations, resetWhatsAppConversation, saveOutboundWhatsAppMessage, setWhatsAppBotEnabled, setWhatsAppContextEnabled, setWhatsAppGlobalBotEnabled } from "../../../../lib/whatsapp-store";
+import { getWhatsAppConversation, getWhatsAppGlobalBotEnabled, getWhatsAppResetState, listWhatsAppConversations, resetWhatsAppConversation, saveOutboundWhatsAppMessage, setWhatsAppBotEnabled, setWhatsAppContextEnabled, setWhatsAppGlobalBotEnabled } from "../../../../lib/whatsapp-store";
 import { deleteRecord, getLeadBySession } from "../../../../lib/chat-records-store";
 
 async function authorized() {
@@ -65,11 +65,12 @@ export async function DELETE(request) {
   if (!(await authorized())) return Response.json({ error: "Unauthorized." }, { status: 401 });
   try {
     const { conversationId } = await request.json();
-    const { leadSessionId } = await resetWhatsAppConversation(conversationId);
+    const { leadSessionId } = await getWhatsAppResetState(conversationId);
     if (leadSessionId) {
       const lead = await getLeadBySession(leadSessionId).catch(() => null);
       if (lead?.id) await deleteRecord("lead", lead.id);
     }
+    await resetWhatsAppConversation(conversationId);
     return Response.json({ ok: true });
   } catch (error) { return Response.json({ error: error.message }, { status: 500 }); }
 }

@@ -50,7 +50,10 @@ export async function POST(request) {
             const lang = detectWhatsAppLanguage(body, workflowHistory);
             const offeredSlots = Array.isArray(conversation.offered_slots) ? conversation.offered_slots : [];
             const choice = body.trim().match(/^([1-9])$/);
-            const sessionId = conversation.lead_session_id || `whatsapp_${message.from}`;
+            // A reset creates a new conversation row. Include that row's id in the
+            // fallback so a new customer can never inherit the prior phone owner's
+            // lead, appointment, name, or offered times.
+            const sessionId = conversation.lead_session_id || `whatsapp_${message.from}_${conversation.id}`;
             const fieldsBeforeReply = extractChatFields(workflowHistory);
             const leadBeforeReply = await getLeadBySession(sessionId);
             const handoff = detectWhatsAppHandoff(workflowHistory, { appointmentConfirmed: Boolean(conversation.appointment_id) });
