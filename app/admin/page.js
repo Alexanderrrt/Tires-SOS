@@ -16,7 +16,7 @@ export const metadata = {
 };
 
 export default async function AdminPage() {
-  const token = cookies().get(SESSION_COOKIE)?.value;
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
   const ok = await verifySession(token);
   if (!ok) redirect("/admin/login");
 

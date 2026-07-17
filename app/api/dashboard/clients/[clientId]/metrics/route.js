@@ -32,7 +32,7 @@ export async function GET(request, { params }) {
   const denied = await requireDashboardUser();
   if (denied) return denied;
   try {
-    const { clientId } = params;
+    const { clientId } = await params;
     const { searchParams } = new URL(request.url);
     const days = parseInt(searchParams.get("days")) || 7;
 

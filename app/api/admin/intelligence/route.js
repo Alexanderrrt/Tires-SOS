@@ -7,7 +7,7 @@ import { SESSION_COOKIE, verifySession } from "@/lib/auth";
  * POST /api/admin/intelligence
  */
 export async function GET(request) {
-  const token = cookies().get(SESSION_COOKIE)?.value;
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!(await verifySession(token))) {
     return Response.json({ error: "Unauthorized." }, { status: 401 });
   }

@@ -13,7 +13,7 @@ export async function POST() {
     return json({ ok: false, status: "auth_not_configured", error: "Admin authentication is not configured." }, 503);
   }
 
-  const token = cookies().get(SESSION_COOKIE)?.value;
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!(await verifySession(token))) {
     return json({ ok: false, status: "unauthorized", error: "Unauthorized." }, 401);
   }

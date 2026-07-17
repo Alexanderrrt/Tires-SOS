@@ -4,7 +4,7 @@ import { setPricing, storeConfigured } from "../../../../lib/pricing-store";
 import { sanitizePricing } from "../../../../lib/pricing-validate";
 
 async function requireAuth() {
-  const token = cookies().get(SESSION_COOKIE)?.value;
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
   return verifySession(token);
 }
 
