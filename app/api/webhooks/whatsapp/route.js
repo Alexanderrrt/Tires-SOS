@@ -3,7 +3,7 @@ import { getRecentWhatsAppMessages, getWhatsAppGlobalBotEnabled, saveInboundWhat
 import { sendWhatsAppText } from "../../../../lib/whatsapp-client";
 import { sendWhatsAppHandoffEmail } from "../../../../lib/whatsapp-handoff";
 import { callGroqChat, groqReplyText } from "../../../../lib/groq-client";
-import { captureChatRecord, extractChatFields, getLeadBySession, reserveAppointment } from "../../../../lib/chat-records-store";
+import { captureChatRecord, extractChatFields, getAppointmentBySession, getLeadBySession, reserveAppointment } from "../../../../lib/chat-records-store";
 import { formatWhatsAppSlots, nextWhatsAppAppointmentSlots } from "../../../../lib/whatsapp-booking";
 import { detectWhatsAppHandoff, detectWhatsAppLanguage, hasWhatsAppAppointmentIntent, nextWhatsAppBookingQuestion } from "../../../../lib/whatsapp-workflow";
 
@@ -56,7 +56,12 @@ export async function POST(request) {
             const sessionId = conversation.lead_session_id || `whatsapp_${message.from}_${conversation.id}`;
             const fieldsBeforeReply = extractChatFields(workflowHistory);
             const leadBeforeReply = await getLeadBySession(sessionId);
-            const handoff = detectWhatsAppHandoff(workflowHistory, { appointmentConfirmed: Boolean(conversation.appointment_id) });
+            const appointmentBeforeReply = await getAppointmentBySession(sessionId);
+            const appointmentConfirmed = Boolean(
+              conversation.appointment_id
+              || (appointmentBeforeReply?.scheduledDate && appointmentBeforeReply?.scheduledTime),
+            );
+            const handoff = detectWhatsAppHandoff(workflowHistory, { appointmentConfirmed });
             if (handoff.shouldHandoff) {
               await setWhatsAppBotEnabled(conversation.id, false);
               try {
@@ -100,7 +105,7 @@ export async function POST(request) {
               && fieldsBeforeReply.customerName
               && leadBeforeReply.phone,
             );
-            if (offeredSlots.length && choice && bookingReadyBeforeReply) {
+            if (!appointmentConfirmed && offeredSlots.length && choice && bookingReadyBeforeReply) {
               const slot = offeredSlots[Number(choice[1]) - 1];
               if (slot) {
                 const reservation = await reserveAppointment(sessionId, slot.date, slot.time);
@@ -113,7 +118,7 @@ export async function POST(request) {
                 continue;
               }
             }
-            const bookingQuestion = (leadBeforeReply?.appointmentRequested || hasWhatsAppAppointmentIntent(workflowHistory))
+            const bookingQuestion = !appointmentConfirmed && (leadBeforeReply?.appointmentRequested || hasWhatsAppAppointmentIntent(workflowHistory))
               ? nextWhatsAppBookingQuestion(fieldsBeforeReply, lang, body)
               : "";
             let reply = bookingQuestion;
@@ -141,6 +146,7 @@ APPOINTMENT WORKFLOW
 
 STYLE
 - Maximum 3 short sentences. Warm, direct, natural. No long explanations, parenthetical translations, or repetitive sales language.` },
+              ...(appointmentConfirmed ? [{ role: "system", content: `The customer's appointment is already confirmed for ${appointmentBeforeReply.scheduledDate} at ${appointmentBeforeReply.scheduledTime}. Do not offer or request another time unless the customer explicitly asks to reschedule or book a separate appointment. If they ask whether they have an appointment, confirm this exact date and time.` }] : []),
               ...history,
               ], { maxTokens: 150, temperature: 0.15 });
               reply = groqReplyText(ai);
@@ -159,7 +165,7 @@ STYLE
             const confirmedVehicle = confirmedFields.vehicle;
             const confirmedName = confirmedFields.customerName;
             let finalReply = reply;
-            if (lead?.appointmentRequested && confirmedService && confirmedVehicle && confirmedName && lead.phone) {
+            if (!appointmentConfirmed && lead?.appointmentRequested && confirmedService && confirmedVehicle && confirmedName && lead.phone) {
               if (offeredSlots.length) {
                 await setWhatsAppBookingState(conversation.id, { offeredSlots, leadSessionId: sessionId });
               } else {
