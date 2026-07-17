@@ -12,7 +12,10 @@ export async function GET() {
   if (!(await authorized())) return Response.json({ error: "Unauthorized." }, { status: 401 });
   try {
     const [conversations, globalBotEnabled] = await Promise.all([listWhatsAppConversations(), getWhatsAppGlobalBotEnabled().catch(() => false)]);
-    return Response.json({ conversations, globalBotEnabled, configured: whatsappConfigured() });
+    return Response.json(
+      { conversations, globalBotEnabled, configured: whatsappConfigured() },
+      { headers: { "Cache-Control": "no-store, max-age=0" } },
+    );
   }
   catch (error) { return Response.json({ error: error.message }, { status: 500 }); }
 }

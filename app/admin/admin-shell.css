@@ -266,6 +266,11 @@ button.ops-metric:hover { border-color: #697583; background: #1b1f24; }
 .whatsapp-inbox__sidebar-head, .whatsapp-thread__head { border-color: var(--admin-border); background: var(--admin-panel); }
 .whatsapp-inbox__sidebar-head strong, .whatsapp-empty strong { color: var(--admin-text); font-family: inherit; font-style: normal; letter-spacing: normal; text-transform: none; }
 .whatsapp-inbox__eyebrow { color: var(--admin-muted); }
+.whatsapp-live-status { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; color: var(--admin-muted); font-size: .65rem; font-weight: 700; }
+.whatsapp-live-status i { width: 7px; height: 7px; border-radius: 50%; background: var(--admin-warn); box-shadow: 0 0 0 3px #f2b94b18; }
+.whatsapp-live-status--live { color: var(--admin-good); }
+.whatsapp-live-status--live i { background: var(--admin-good); box-shadow: 0 0 0 3px #55d98218; }
+.whatsapp-live-status--reconnecting { color: var(--admin-warn); }
 .whatsapp-icon-btn { border-color: var(--admin-border); background: var(--admin-panel-subtle); color: #c5cbd3; }
 .whatsapp-global-bot { border-color: var(--admin-border); background: var(--admin-panel-subtle); color: #c5cbd3; }
 .whatsapp-global-bot.is-on { border-color: #9fd5ae; background: var(--admin-good-soft); color: var(--admin-good); }

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 function initials(name) { return String(name || "WA").split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase(); }
 function messageTime(value) { return new Date(value).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }); }
@@ -12,8 +12,11 @@ export default function WhatsAppInbox({ initialConversations = [], initialGlobal
   const [query, setQuery] = useState("");
   const [attachment, setAttachment] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [liveState, setLiveState] = useState("connecting");
   const fileInput = useRef(null);
   const messageList = useRef(null);
+  const refreshInFlight = useRef(false);
+  const mounted = useRef(true);
   const selected = conversations.find((c) => c.id === selectedId);
   const filtered = useMemo(() => conversations.filter((c) => `${c.customerName || ""} ${c.waId}`.toLowerCase().includes(query.toLowerCase())), [conversations, query]);
   useEffect(() => {
@@ -21,7 +24,42 @@ export default function WhatsAppInbox({ initialConversations = [], initialGlobal
     if (list) list.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
   }, [selectedId, selected?.messages.length]);
 
-  async function refresh() { const res = await fetch("/api/admin/whatsapp", { cache: "no-store" }); const data = await res.json(); if (res.ok) { setConversations(data.conversations || []); setGlobalBotEnabled(Boolean(data.globalBotEnabled)); } }
+  const refresh = useCallback(async () => {
+    if (refreshInFlight.current) return;
+    refreshInFlight.current = true;
+    try {
+      const res = await fetch("/api/admin/whatsapp", { cache: "no-store" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Live sync failed.");
+      if (!mounted.current) return;
+      const nextConversations = data.conversations || [];
+      setConversations(nextConversations);
+      setGlobalBotEnabled(Boolean(data.globalBotEnabled));
+      setSelectedId((current) => current && nextConversations.some((conversation) => conversation.id === current) ? current : nextConversations[0]?.id || "");
+      setLiveState("live");
+    } catch {
+      if (mounted.current) setLiveState("reconnecting");
+    } finally {
+      refreshInFlight.current = false;
+    }
+  }, []);
+
+  useEffect(() => {
+    mounted.current = true;
+    if (!configured) return () => { mounted.current = false; };
+    const sync = () => { if (!document.hidden) void refresh(); };
+    void refresh();
+    const interval = window.setInterval(sync, 1000);
+    const resume = () => { if (!document.hidden) void refresh(); };
+    window.addEventListener("focus", resume);
+    document.addEventListener("visibilitychange", resume);
+    return () => {
+      mounted.current = false;
+      window.clearInterval(interval);
+      window.removeEventListener("focus", resume);
+      document.removeEventListener("visibilitychange", resume);
+    };
+  }, [configured, refresh]);
   async function send() {
     if (!selected || !draft.trim()) return; setBusy(true);
     const res = await fetch("/api/admin/whatsapp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ conversationId: selected.id, body: draft }) });
@@ -59,7 +97,7 @@ export default function WhatsAppInbox({ initialConversations = [], initialGlobal
 
   return <section className="whatsapp-inbox">
     <aside className="whatsapp-inbox__sidebar">
-      <div className="whatsapp-inbox__sidebar-head"><div><span className="whatsapp-inbox__eyebrow">Customer conversations</span><strong>Inbox</strong></div><button className="whatsapp-icon-btn" onClick={refresh} aria-label="Refresh conversations">↻</button></div>
+      <div className="whatsapp-inbox__sidebar-head"><div><span className="whatsapp-inbox__eyebrow">Customer conversations</span><strong>Inbox</strong></div><span className={`whatsapp-live-status whatsapp-live-status--${liveState}`} role="status"><i />{liveState === "live" ? "Live" : liveState === "reconnecting" ? "Reconnecting" : "Connecting"}</span><button className="whatsapp-icon-btn" onClick={refresh} aria-label="Refresh conversations">↻</button></div>
       <button type="button" className={`whatsapp-global-bot ${globalBotEnabled ? "is-on" : ""}`} onClick={toggleGlobalBot} disabled={busy} aria-pressed={globalBotEnabled}>
         <span className="whatsapp-global-bot__icon">AI</span><span><strong>Automatic replies {globalBotEnabled ? "on" : "off"}</strong><small>{globalBotEnabled ? "Master bot is active" : "All bot replies are paused"}</small></span><i />
       </button>
