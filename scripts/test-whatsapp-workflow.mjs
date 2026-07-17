@@ -14,6 +14,7 @@ import {
   whatsAppStaleSlotReply,
   withWhatsAppWelcome,
 } from "../lib/whatsapp-workflow.js";
+import { isExpectedWhatsAppWebhookRecipient } from "../lib/whatsapp-client.js";
 
 const user = (content) => ({ role: "user", content });
 const assistant = (content) => ({ role: "assistant", content });
@@ -83,4 +84,8 @@ assert.equal(detectWhatsAppHandoff([user("You keep asking the same question")]).
 assert.equal(detectWhatsAppHandoff([user("¿Por qué preguntas otra vez?")]).shouldHandoff, true);
 assert.equal(detectWhatsAppHandoff([user("Hello"), assistant("Hi"), user("Hello")]).shouldHandoff, true);
 
-console.log("WhatsApp workflow regression suite passed (55 checks).");
+assert.equal(isExpectedWhatsAppWebhookRecipient({ phone_number_id: "12345" }, "12345"), true);
+assert.equal(isExpectedWhatsAppWebhookRecipient({ phone_number_id: "99999" }, "12345"), false);
+assert.equal(isExpectedWhatsAppWebhookRecipient({}, "12345"), false);
+
+console.log("WhatsApp workflow regression suite passed (58 checks).");

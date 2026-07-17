@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { getRecentWhatsAppMessages, getWhatsAppGlobalBotEnabled, saveInboundWhatsAppMessage, saveOutboundWhatsAppMessage, setWhatsAppBookingState, setWhatsAppBotEnabled } from "../../../../lib/whatsapp-store";
-import { sendWhatsAppText } from "../../../../lib/whatsapp-client";
+import { isExpectedWhatsAppWebhookRecipient, sendWhatsAppText } from "../../../../lib/whatsapp-client";
 import { sendWhatsAppHandoffEmail } from "../../../../lib/whatsapp-handoff";
 import { callGroqChat, groqReplyText } from "../../../../lib/groq-client";
 import { captureChatRecord, extractChatFields, getAppointmentBySession, getLeadBySession, reserveAppointment, updateRecordStatus } from "../../../../lib/chat-records-store";
@@ -39,11 +39,16 @@ export async function POST(request) {
   for (const entry of payload.entry || []) {
     for (const change of entry.changes || []) {
       const value = change.value || {};
+      if (!isExpectedWhatsAppWebhookRecipient(value.metadata)) {
+        console.warn("Ignored a WhatsApp webhook event for an unconfigured phone number.");
+        continue;
+      }
       const names = new Map((value.contacts || []).map((c) => [c.wa_id, c.profile?.name]));
       for (const message of value.messages || []) {
         const body = message.text?.body;
         if (message.id && message.from && body) {
           const conversation = await saveInboundWhatsAppMessage({ messageId: message.id, waId: message.from, customerName: names.get(message.from), body });
+          if (!conversation.inboundMessageSaved) continue;
           if (globalBotEnabled && conversation.bot_enabled) {
             const history = await getRecentWhatsAppMessages(conversation.id, conversation.context_enabled ? 30 : 1);
             const workflowHistory = conversation.context_enabled ? history : await getRecentWhatsAppMessages(conversation.id, 30);
