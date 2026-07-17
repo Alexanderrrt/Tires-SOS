@@ -5,7 +5,7 @@ import { sendWhatsAppHandoffEmail } from "../../../../lib/whatsapp-handoff";
 import { callGroqChat, groqReplyText } from "../../../../lib/groq-client";
 import { captureChatRecord, extractChatFields, getAppointmentBySession, getLeadBySession, reserveAppointment } from "../../../../lib/chat-records-store";
 import { formatWhatsAppSlots, nextWhatsAppAppointmentSlots } from "../../../../lib/whatsapp-booking";
-import { detectWhatsAppHandoff, detectWhatsAppLanguage, hasWhatsAppAppointmentIntent, nextWhatsAppBookingQuestion, whatsAppGreetingReply } from "../../../../lib/whatsapp-workflow";
+import { detectWhatsAppHandoff, detectWhatsAppLanguage, hasWhatsAppAppointmentIntent, nextWhatsAppBookingQuestion, whatsAppGreetingReply, whatsAppStaleSlotReply } from "../../../../lib/whatsapp-workflow";
 
 export const dynamic = "force-dynamic";
 
@@ -121,7 +121,7 @@ export async function POST(request) {
             const bookingQuestion = !appointmentConfirmed && (leadBeforeReply?.appointmentRequested || hasWhatsAppAppointmentIntent(workflowHistory))
               ? nextWhatsAppBookingQuestion(fieldsBeforeReply, lang, body)
               : "";
-            let reply = bookingQuestion || whatsAppGreetingReply(body, lang);
+            let reply = bookingQuestion || whatsAppGreetingReply(body, lang) || whatsAppStaleSlotReply(body, offeredSlots, lang);
             if (!reply) {
               const ai = await callGroqChat([
               { role: "system", content: `You are the WhatsApp booking assistant for Tires SOS Rescue in San Jose.
