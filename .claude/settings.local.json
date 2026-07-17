@@ -28,7 +28,18 @@
       "mcp__plugin_vercel_vercel__get_runtime_logs",
       "mcp__plugin_vercel_vercel__get_runtime_errors",
       "Skill(weekly-report)",
-      "Skill(weekly-report:*)"
+      "Skill(weekly-report:*)",
+      "PowerShell(Add-Type -AssemblyName System.IO.Compression.FileSystem; $z = [System.IO.Compression.ZipFile]::OpenRead\\(\"C:\\\\Users\\\\Sales\\\\Downloads\\\\BeamNG-drive-AnkerGames.zip\"\\); $z.Entries | Sort-Object Length -Descending | Select-Object -First 40 FullName, Length; \"---- total entries: $\\($z.Entries.Count\\)\"; \"---- executables/scripts ----\"; $z.Entries | Where-Object { $_.FullName -match '\\\\.\\(exe|dll|bat|cmd|ps1|vbs|js|msi|scr|com|lnk\\)$' } | Select-Object FullName, Length; $z.Dispose\\(\\))",
+      "PowerShell(Add-Type -AssemblyName System.IO.Compression.FileSystem; $z = [System.IO.Compression.ZipFile]::OpenRead\\(\"C:\\\\Users\\\\Sales\\\\Downloads\\\\BeamNG-drive-AnkerGames.zip\"\\); foreach \\($name in @\\('Run Me!.bat','BeamNG.drive/Bin64/banana-bench.x64.bat','BeamNG.drive/Bin64/test_json_performance.bat'\\)\\) { $e = $z.Entries | Where-Object { $_.FullName -eq $name }; if \\($e\\) { \"===== $name \\($\\($e.Length\\) bytes\\) =====\"; $r = New-Object System.IO.StreamReader\\($e.Open\\(\\)\\); $r.ReadToEnd\\(\\); $r.Close\\(\\) } }; \"===== sizes of notable binaries =====\"; $z.Entries | Where-Object { $_.FullName -match '\\(OnlineFix64\\\\.dll|support\\\\.exe|steam_api64\\\\.dll|BeamMP-Launcher\\\\.exe|winmm\\\\.dll|version\\\\.dll|dinput8\\\\.dll\\)$' } | Select-Object FullName, Length; $z.Dispose\\(\\))",
+      "PowerShell(& \"C:\\\\Program Files\\\\Windows Defender\\\\MpCmdRun.exe\" -Scan -ScanType 3 -File \"C:\\\\Users\\\\Sales\\\\Downloads\\\\BeamNG-drive-AnkerGames.zip\" -DisableRemediation)",
+      "Bash(tar -xOf \"/c/Users/Sales/Downloads/BeamNG-drive-AnkerGames.zip\" \"Run Me!.bat\")",
+      "PowerShell(& \"$env:windir\\\\System32\\\\tar.exe\" -xOf \"C:\\\\Users\\\\Sales\\\\Downloads\\\\BeamNG-drive-AnkerGames.zip\" \"Run Me!.bat\")",
+      "PowerShell($s = Get-MpComputerStatus; \"AV enabled: $\\($s.AntivirusEnabled\\)  RealTime: $\\($s.RealTimeProtectionEnabled\\)  Signatures last updated: $\\($s.AntivirusSignatureLastUpdated\\)  Signature age \\(days\\): $\\($s.AntivirusSignatureAge\\)\"; $p = Get-MpPreference; \"Excluded paths: $\\($p.ExclusionPath -join '; '\\)\"; \"Excluded extensions: $\\($p.ExclusionExtension -join '; '\\)\"; \"Excluded processes: $\\($p.ExclusionProcess -join '; '\\)\"; \"---- recent threat detections ----\"; Get-MpThreatDetection | Sort-Object InitialDetectionTime -Descending | Select-Object -First 10 ThreatID, InitialDetectionTime, Resources | Format-List)",
+      "PowerShell($dest = \"C:\\\\Users\\\\Sales\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Sales-Desktop-Tires-SOS\\\\55065548-b2fe-4584-85f4-4cebd900f1cf\\\\scratchpad\\\\zipcheck\"; New-Item -ItemType Directory -Force $dest | Out-Null; Set-Location $dest; & \"$env:windir\\\\System32\\\\tar.exe\" -xf \"C:\\\\Users\\\\Sales\\\\Downloads\\\\BeamNG-drive-AnkerGames.zip\" \"BeamNG.drive/Bin64/OnlineFix64.dll\" \"BeamNG.drive/support.exe\" \"BeamNG.drive/Bin64/steam_api64.dll\" \"BeamNG.drive/BeamMP-Launcher.exe\"; Get-ChildItem -Recurse -File $dest | ForEach-Object { $h = Get-FileHash $_.FullName -Algorithm SHA256; \"{0}  {1}  {2:N0} bytes\" -f $h.Hash, $_.Name, $_.Length })",
+      "PowerShell(Get-MpThreatDetection)",
+      "PowerShell(Get-MpThreat)",
+      "WebSearch",
+      "PowerShell(Remove-Item -Recurse -Force -Confirm:$false \"C:\\\\Users\\\\Sales\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Sales-Desktop-Tires-SOS\\\\55065548-b2fe-4584-85f4-4cebd900f1cf\\\\scratchpad\\\\zipcheck\")"
     ]
   }
 }

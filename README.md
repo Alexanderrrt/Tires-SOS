@@ -238,6 +238,20 @@ Key files:
 One-time setup (Google Cloud OAuth client + `node scripts/gmail-oauth-setup.js`
 to mint a refresh token) is documented in that script's header comment.
 
+**Auto-reply only ever covers the customer's first message.** Yelp's
+`reply+<id>@messaging.yelp.com` relay accepts exactly one email reply per
+conversation thread, ever — a second reply to the same thread bounces
+("You have already replied to this message... send another reply through
+Yelp for Business"), even from a real inbox. When a customer replies again,
+Yelp sends a separate notification email ("New Reply Message from
+`<Customer>`", from `no-reply@yelp.com`, no message text inline, no reply-to
+address of its own). `lib/yelp-lead-parser.js` detects that format
+(`isFollowUpNotification`) and `lib/yelp-lead-responder.js` routes it
+straight to the owner-alert path (`yelp_leads` row with `status: "failed"`
++ a notification email) instead of attempting a send — there is no email
+channel to auto-reply through for anything past the first message; it has to
+be answered by hand in the Yelp app/dashboard.
+
 ---
 
 ## Component tree (homepage)
