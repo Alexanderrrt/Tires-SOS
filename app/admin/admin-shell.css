@@ -44,9 +44,14 @@
   padding: 10px clamp(16px, 2vw, 32px) 0;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
-  scrollbar-width: thin;
+  scrollbar-width: none;
   background: color-mix(in srgb, var(--ink) 94%, transparent);
   backdrop-filter: blur(16px);
+}
+
+.editor__tabs::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .editor__tab {
@@ -168,7 +173,8 @@
   }
 
   .whatsapp-inbox {
-    min-height: calc(100dvh - 140px);
+    height: max(540px, calc(100dvh - 250px));
+    min-height: 540px;
     border-radius: 14px;
   }
 }

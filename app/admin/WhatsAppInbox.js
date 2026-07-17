@@ -12,10 +12,13 @@ export default function WhatsAppInbox({ initialConversations = [], configured })
   const [attachment, setAttachment] = useState(null);
   const [busy, setBusy] = useState(false);
   const fileInput = useRef(null);
-  const messageEnd = useRef(null);
+  const messageList = useRef(null);
   const selected = conversations.find((c) => c.id === selectedId);
   const filtered = useMemo(() => conversations.filter((c) => `${c.customerName || ""} ${c.waId}`.toLowerCase().includes(query.toLowerCase())), [conversations, query]);
-  useEffect(() => { messageEnd.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [selectedId, selected?.messages.length]);
+  useEffect(() => {
+    const list = messageList.current;
+    if (list) list.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
+  }, [selectedId, selected?.messages.length]);
 
   async function refresh() { const res = await fetch("/api/admin/whatsapp", { cache: "no-store" }); const data = await res.json(); if (res.ok) setConversations(data.conversations || []); }
   async function send() {
@@ -60,7 +63,7 @@ export default function WhatsAppInbox({ initialConversations = [], configured })
     <div className="whatsapp-inbox__thread">
       {selected ? <><header className="whatsapp-thread__head"><div className="whatsapp-thread__identity"><span className="whatsapp-avatar whatsapp-avatar--large">{initials(selected.customerName)}</span><div><strong>{selected.customerName || "WhatsApp customer"}</strong><small>+{selected.waId} · WhatsApp</small></div></div>
         <div className="whatsapp-thread__controls"><button className={`whatsapp-memory-toggle ${selected.contextEnabled ? "is-on" : ""}`} onClick={toggleContext} disabled={busy}>Memory: {selected.contextEnabled ? "Full chat" : "Latest message"}</button><button className="whatsapp-reset" onClick={resetCustomer} disabled={busy}>Reset customer</button><button className={`whatsapp-bot-toggle ${selected.botEnabled ? "is-on" : ""}`} onClick={toggleBot} disabled={busy}><span className="whatsapp-bot-toggle__dot"/><span><strong>AI Bot {selected.botEnabled ? "On" : "Off"}</strong><small>{selected.botEnabled ? "Auto-replying" : "Manual replies"}</small></span></button></div></header>
-        <div className="whatsapp-inbox__messages"><div className="whatsapp-day-pill">Conversation history</div>{selected.messages.map((m) => <div key={m.id} className={`whatsapp-message whatsapp-message--${m.direction}`}><p>{m.body}</p><span>{messageTime(m.createdAt)} {m.direction === "outbound" && "✓✓"}</span></div>)}<div ref={messageEnd}/></div>
+        <div ref={messageList} className="whatsapp-inbox__messages"><div className="whatsapp-day-pill">Conversation history</div>{selected.messages.map((m) => <div key={m.id} className={`whatsapp-message whatsapp-message--${m.direction}`}><p>{m.body}</p><span>{messageTime(m.createdAt)} {m.direction === "outbound" && "✓✓"}</span></div>)}</div>
         <div className="whatsapp-inbox__composer">{attachment && <div className="whatsapp-attachment-chip"><span>📎 {attachment.name}</span><button onClick={() => setAttachment(null)}>×</button></div>}<input ref={fileInput} className="whatsapp-file-input" type="file" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" onChange={(e) => setAttachment(e.target.files?.[0] || null)}/><button className="whatsapp-attach" onClick={() => fileInput.current?.click()} aria-label="Attach file">📎</button><textarea value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !attachment) { e.preventDefault(); send(); } }} placeholder={attachment ? "Add an optional caption…" : "Type a reply…"} rows={2}/><button className="whatsapp-send" onClick={attachment ? sendAttachment : send} disabled={busy || (!attachment && !draft.trim())}><span>{attachment ? "Send file" : "Send"}</span>➤</button><small>Files up to 16 MB · Enter to send text</small></div></> : <div className="whatsapp-empty"><span>💬</span><strong>Your WhatsApp inbox</strong><p>Select a conversation to view messages and control the AI bot.</p></div>}
     </div>
   </section>;
