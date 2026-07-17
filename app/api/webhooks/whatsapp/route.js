@@ -73,7 +73,7 @@ export async function POST(request) {
               }
             }
             const bookingQuestion = (leadBeforeReply?.appointmentRequested || hasWhatsAppAppointmentIntent(workflowHistory))
-              ? nextWhatsAppBookingQuestion(fieldsBeforeReply, lang)
+              ? nextWhatsAppBookingQuestion(fieldsBeforeReply, lang, body)
               : "";
             let reply = bookingQuestion;
             if (!reply) {
