@@ -8,6 +8,7 @@ import { COPY } from "../site.config";
 import AdminLoader from "./AdminLoader";
 import AppointmentCalendar from "./AppointmentCalendar";
 import ApiStatus from "./ApiStatus";
+import AdminOverview from "./AdminOverview";
 import YelpLeads from "./YelpLeads";
 import WhatsAppInbox from "./WhatsAppInbox";
 
@@ -15,6 +16,8 @@ const E = COPY.admin.editor;
 
 const CHAT_ADMIN = {
   adminTitle: { en: "Admin", es: "Admin" },
+  overviewTitle: { en: "Operations Overview", es: "Resumen de operaciones" },
+  overviewTab: { en: "Overview", es: "Resumen" },
   leadsTab: { en: "Leads", es: "Clientes" },
   appointmentsTab: { en: "Appointments", es: "Citas" },
   yelpTab: { en: "Yelp", es: "Yelp" },
@@ -149,6 +152,22 @@ function formatDate(value) {
     hour: "numeric",
     minute: "2-digit",
   });
+}
+
+function csvCell(value) {
+  return `"${String(value ?? "").replaceAll('"', '""')}"`;
+}
+
+function downloadCsv(filename, rows) {
+  if (!rows.length) return;
+  const headers = Object.keys(rows[0]);
+  const csv = [headers.map(csvCell).join(","), ...rows.map((row) => headers.map((key) => csvCell(row[key])).join(","))].join("\n");
+  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 function RecordField({ label, value, fallback }) {
@@ -314,7 +333,9 @@ export default function PricingEditor({
   const router = useRouter();
   const { lang, toggleLang } = useLanguage();
   const t = useT();
-  const [activeTab, setActiveTab] = useState("leads");
+  const [activeTab, setActiveTab] = useState("overview");
+  const [recordQuery, setRecordQuery] = useState("");
+  const [recordStatus, setRecordStatus] = useState("all");
   const [pricing, setPricing] = useState(initialPricing);
   const [chatSettings, setChatSettings] = useState(initialChatSettings);
   const [records, setRecords] = useState({
@@ -643,8 +664,17 @@ export default function PricingEditor({
     router.refresh();
   }
 
+  function navigate(nextTab) {
+    setActiveTab(nextTab);
+    setRecordQuery("");
+    setRecordStatus("all");
+    setStatus(null);
+  }
+
   const title =
-    activeTab === "leads"
+    activeTab === "overview"
+      ? CHAT_ADMIN.overviewTitle
+      : activeTab === "leads"
       ? CHAT_ADMIN.leadsTitle
       : activeTab === "appointments"
         ? CHAT_ADMIN.appointmentsTitle
@@ -653,17 +683,70 @@ export default function PricingEditor({
           : activeTab === "chat"
             ? CHAT_ADMIN.chatTitle
             : activeTab === "whatsapp" ? { en: "WhatsApp Inbox", es: "Bandeja de WhatsApp" }
+            : activeTab === "api" ? { en: "API & System Health", es: "API y estado del sistema" }
             : E.title;
   const showSave = activeTab === "chat" || activeTab === "pricing";
   const recordsTab = activeTab === "leads" || activeTab === "appointments";
+  const query = recordQuery.trim().toLowerCase();
+  const recordMatches = (record) => !query || [record.customerName, record.phone, record.vehicle, record.service, record.source, record.summary, record.status]
+    .some((value) => String(value || "").toLowerCase().includes(query));
+  const filteredLeads = records.leads.filter((lead) => recordMatches(lead) && (recordStatus === "all" || lead.status === recordStatus));
+  const filteredAppointments = records.appointments.filter((item) => recordMatches(item) && (recordStatus === "all" || item.status === recordStatus));
+  const statusOptions = activeTab === "appointments" ? APPOINTMENT_STATUSES : LEAD_STATUSES;
+  const navGroups = [
+    { label: "Workspace", items: [
+      { id: "overview", label: t(CHAT_ADMIN.overviewTab), mark: "OV" },
+      { id: "leads", label: t(CHAT_ADMIN.leadsTab), mark: "LD", count: records.leads.length },
+      { id: "appointments", label: t(CHAT_ADMIN.appointmentsTab), mark: "AP", count: records.appointments.length },
+    ] },
+    { label: "Channels", items: [
+      { id: "whatsapp", label: "WhatsApp", mark: "WA", count: initialWhatsAppConversations.length },
+      { id: "yelp", label: t(CHAT_ADMIN.yelpTab), mark: "YP", count: yelpLeads.length },
+    ] },
+    { label: "Configuration", items: [
+      { id: "chat", label: t(CHAT_ADMIN.chatTab), mark: "CH" },
+      { id: "pricing", label: t(CHAT_ADMIN.pricingTab), mark: "PR" },
+      { id: "api", label: t(CHAT_ADMIN.apiTab), mark: "API" },
+    ] },
+  ];
+
+  function exportCurrentRecords() {
+    const source = activeTab === "appointments" ? filteredAppointments : filteredLeads;
+    const rows = source.map((record) => activeTab === "appointments" ? {
+      Name: record.customerName, Phone: record.phone, Service: record.service, Vehicle: record.vehicle,
+      Status: record.status, Date: record.scheduledDate || record.preferredDate, Time: record.scheduledTime || record.preferredTime,
+    } : {
+      Name: record.customerName, Phone: record.phone, Source: record.source, Service: record.service,
+      Vehicle: record.vehicle, Status: record.status, Updated: record.updatedAt,
+    });
+    downloadCsv(`${activeTab}-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+  }
 
   return (
     <>
       {loggingOut && <AdminLoader message={t(E.loggingOut)} />}
-      <div className="editor">
-        <header className="editor__bar">
-          <div>
-            <h1>{t(title)}</h1>
+      <div className="editor admin-console">
+        <aside className="admin-navigation">
+          <div className="admin-navigation__brand"><strong>Tires SOS</strong><span>Operations</span></div>
+          <nav aria-label={t(CHAT_ADMIN.adminTitle)}>
+            {navGroups.map((group) => <div className="admin-navigation__group" key={group.label}>
+              <span>{group.label}</span>
+              {group.items.map((item) => <button type="button" key={item.id} className={activeTab === item.id ? "is-active" : ""} onClick={() => navigate(item.id)}>
+                <i>{item.mark}</i><strong>{item.label}</strong>{Number.isFinite(item.count) && <b>{item.count}</b>}
+              </button>)}
+            </div>)}
+          </nav>
+          <div className="admin-navigation__footer">
+            <span className={recordsPersistent ? "is-online" : "is-offline"} />
+            <div><strong>{recordsPersistent ? "Systems connected" : "Limited storage"}</strong><small>Admin workspace</small></div>
+          </div>
+        </aside>
+
+        <section className="admin-workspace">
+          <header className="editor__bar">
+            <div className="admin-page-heading">
+              <span>Admin / {activeTab}</span>
+              <h1>{t(title)}</h1>
             {activeTab === "pricing" && !persistent && <p className="editor__warn">{t(E.storageWarn)}</p>}
             {activeTab === "chat" && !chatPersistent && <p className="editor__warn">{t(CHAT_ADMIN.chatStorageWarn)}</p>}
             {recordsTab && !recordsPersistent && <p className="editor__warn">{t(CHAT_ADMIN.recordsStorageWarn)}</p>}
@@ -695,63 +778,29 @@ export default function PricingEditor({
               </button>
             )}
           </div>
-        </header>
+          </header>
 
-        <nav className="editor__tabs" aria-label={t(CHAT_ADMIN.adminTitle)}>
-          <button
-            type="button"
-            className={`editor__tab ${activeTab === "leads" ? "editor__tab--on" : ""}`}
-            onClick={() => setActiveTab("leads")}
-          >
-            {t(CHAT_ADMIN.leadsTab)}
-            <span>{records.leads.length}</span>
-          </button>
-          <button
-            type="button"
-            className={`editor__tab ${activeTab === "appointments" ? "editor__tab--on" : ""}`}
-            onClick={() => setActiveTab("appointments")}
-          >
-            {t(CHAT_ADMIN.appointmentsTab)}
-            <span>{records.appointments.length}</span>
-          </button>
-          <button
-            type="button"
-            className={`editor__tab ${activeTab === "yelp" ? "editor__tab--on" : ""}`}
-            onClick={() => setActiveTab("yelp")}
-          >
-            {t(CHAT_ADMIN.yelpTab)}
-            <span>{yelpLeads.length}</span>
-          </button>
-          <button type="button" className={`editor__tab ${activeTab === "whatsapp" ? "editor__tab--on" : ""}`} onClick={() => setActiveTab("whatsapp")}>
-            WhatsApp <span>{initialWhatsAppConversations.length}</span>
-          </button>
-          <button
-            type="button"
-            className={`editor__tab ${activeTab === "chat" ? "editor__tab--on" : ""}`}
-            onClick={() => setActiveTab("chat")}
-          >
-            {t(CHAT_ADMIN.chatTab)}
-          </button>
-          <button
-            type="button"
-            className={`editor__tab ${activeTab === "pricing" ? "editor__tab--on" : ""}`}
-            onClick={() => setActiveTab("pricing")}
-          >
-            {t(CHAT_ADMIN.pricingTab)}
-          </button>
-          <button
-            type="button"
-            className={`editor__tab ${activeTab === "api" ? "editor__tab--on" : ""}`}
-            onClick={() => setActiveTab("api")}
-          >
-            {t(CHAT_ADMIN.apiTab)}
-          </button>
-        </nav>
+          {recordsTab && <div className="admin-commandbar">
+            <label><span>Search</span><input type="search" value={recordQuery} onChange={(event) => setRecordQuery(event.target.value)} placeholder={activeTab === "leads" ? "Name, phone, vehicle, source..." : "Name, service, vehicle..."} /></label>
+            <label><span>Status</span><select value={recordStatus} onChange={(event) => setRecordStatus(event.target.value)}><option value="all">All statuses</option>{statusOptions.map((option) => <option value={option.value} key={option.value}>{t(option.label)}</option>)}</select></label>
+            <span className="admin-commandbar__count">{activeTab === "leads" ? filteredLeads.length : filteredAppointments.length} results</span>
+            <button type="button" onClick={exportCurrentRecords} disabled={!(activeTab === "leads" ? filteredLeads.length : filteredAppointments.length)}>Export CSV</button>
+          </div>}
 
-        {activeTab === "leads" ? (
+          <main className="admin-content">
+
+        {activeTab === "overview" ? (
+          <AdminOverview
+            records={records}
+            yelpLeads={yelpLeads}
+            whatsappConversations={initialWhatsAppConversations}
+            integrations={{ pricing: persistent, chat: chatPersistent, records: recordsPersistent, whatsapp: whatsappConfigured, yelp: yelpConfigured }}
+            onNavigate={navigate}
+          />
+        ) : activeTab === "leads" ? (
           <section className="record-list" aria-label={t(CHAT_ADMIN.leadsTitle)}>
-            {records.leads.length ? (
-              records.leads.map((lead) => (
+            {filteredLeads.length ? (
+              filteredLeads.map((lead) => (
                 <LeadCard
                   key={lead.id}
                   lead={lead}
@@ -767,7 +816,7 @@ export default function PricingEditor({
           </section>
         ) : activeTab === "appointments" ? (
           <AppointmentCalendar
-            appointments={records.appointments}
+            appointments={filteredAppointments}
             blockedSlots={records.blockedSlots || []}
             t={t}
             onSchedule={scheduleAppointment}
@@ -1123,6 +1172,8 @@ export default function PricingEditor({
         ) : (
           <ApiStatus t={t} lang={lang} />
         )}
+          </main>
+        </section>
       </div>
     </>
   );
