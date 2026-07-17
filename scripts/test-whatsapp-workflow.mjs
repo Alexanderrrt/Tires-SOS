@@ -12,6 +12,7 @@ import {
   nextWhatsAppBookingQuestion,
   whatsAppGreetingReply,
   whatsAppStaleSlotReply,
+  withWhatsAppWelcome,
 } from "../lib/whatsapp-workflow.js";
 
 const user = (content) => ({ role: "user", content });
@@ -42,6 +43,9 @@ assert.equal(detectWhatsAppLanguage("Gracias", [user("Hello")]), "es");
 assert.match(whatsAppGreetingReply("Hello", "en"), /^Hi!/);
 assert.match(whatsAppGreetingReply("Hola", "es"), /^¡Hola!/);
 assert.equal(whatsAppGreetingReply("I need tires", "en"), "");
+assert.equal(withWhatsAppWelcome("What is your vehicle's year, make, and model?", "en"), "Hi! Thanks for contacting Tires SOS Rescue.\n\nWhat is your vehicle's year, make, and model?");
+assert.equal(withWhatsAppWelcome("¿Qué servicio necesitas?", "es"), "¡Hola! Gracias por contactar a Tires SOS Rescue.\n\n¿Qué servicio necesitas?");
+assert.equal(withWhatsAppWelcome(whatsAppGreetingReply("Hi", "en"), "en"), whatsAppGreetingReply("Hi", "en"));
 assert.match(whatsAppStaleSlotReply("9", [], "en"), /active list/);
 assert.equal(whatsAppStaleSlotReply("2", [{ date: "2026-07-18", time: "10:00" }], "en"), "");
 
@@ -79,4 +83,4 @@ assert.equal(detectWhatsAppHandoff([user("You keep asking the same question")]).
 assert.equal(detectWhatsAppHandoff([user("¿Por qué preguntas otra vez?")]).shouldHandoff, true);
 assert.equal(detectWhatsAppHandoff([user("Hello"), assistant("Hi"), user("Hello")]).shouldHandoff, true);
 
-console.log("WhatsApp workflow regression suite passed (52 checks).");
+console.log("WhatsApp workflow regression suite passed (55 checks).");

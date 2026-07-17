@@ -5,7 +5,7 @@ import { sendWhatsAppHandoffEmail } from "../../../../lib/whatsapp-handoff";
 import { callGroqChat, groqReplyText } from "../../../../lib/groq-client";
 import { captureChatRecord, extractChatFields, getAppointmentBySession, getLeadBySession, reserveAppointment, updateRecordStatus } from "../../../../lib/chat-records-store";
 import { formatWhatsAppSlots, nextWhatsAppAppointmentSlots } from "../../../../lib/whatsapp-booking";
-import { detectWhatsAppHandoff, detectWhatsAppLanguage, hasWhatsAppAppointmentIntent, hasWhatsAppCancellationIntent, hasWhatsAppRescheduleIntent, nextWhatsAppBookingQuestion, whatsAppGreetingReply, whatsAppStaleSlotReply } from "../../../../lib/whatsapp-workflow";
+import { detectWhatsAppHandoff, detectWhatsAppLanguage, hasWhatsAppAppointmentIntent, hasWhatsAppCancellationIntent, hasWhatsAppRescheduleIntent, nextWhatsAppBookingQuestion, whatsAppGreetingReply, whatsAppStaleSlotReply, withWhatsAppWelcome } from "../../../../lib/whatsapp-workflow";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +48,9 @@ export async function POST(request) {
             const history = await getRecentWhatsAppMessages(conversation.id, conversation.context_enabled ? 30 : 1);
             const workflowHistory = conversation.context_enabled ? history : await getRecentWhatsAppMessages(conversation.id, 30);
             const lang = detectWhatsAppLanguage(body, workflowHistory);
+            const firstCustomerMessage = workflowHistory.filter((item) => item.role === "user").length === 1
+              && !workflowHistory.some((item) => item.role === "assistant");
+            const welcome = (text) => firstCustomerMessage ? withWhatsAppWelcome(text, lang) : text;
             const offeredSlots = Array.isArray(conversation.offered_slots) ? conversation.offered_slots : [];
             const choice = body.trim().match(/^([1-9])$/);
             // A reset creates a new conversation row. Include that row's id in the
@@ -83,9 +86,9 @@ export async function POST(request) {
               } catch (error) {
                 await setWhatsAppBotEnabled(conversation.id, true).catch(() => {});
                 console.error("WhatsApp handoff email failed; the bot remains active.", error);
-                const fallbackReply = lang === "es"
+                const fallbackReply = welcome(lang === "es"
                   ? "Sigo aquí contigo. No pude avisar al equipo por correo en este momento; si necesitas atención inmediata, llama al (408) 332-8962. Puedes seguir escribiéndome mientras tanto."
-                  : "I'm still here with you. I couldn't notify the team by email right now; for immediate help, call (408) 332-8962. You can keep messaging me in the meantime.";
+                  : "I'm still here with you. I couldn't notify the team by email right now; for immediate help, call (408) 332-8962. You can keep messaging me in the meantime.");
                 try {
                   const sent = await sendWhatsAppText(message.from, fallbackReply);
                   await saveOutboundWhatsAppMessage({ conversationId: conversation.id, messageId: sent.messages?.[0]?.id, body: fallbackReply });
@@ -94,9 +97,9 @@ export async function POST(request) {
                 }
                 continue;
               }
-              const handoffReply = lang === "es"
+              const handoffReply = welcome(lang === "es"
                 ? "Claro. Ya avisé al equipo de Tires SOS Rescue para que una persona continúe contigo por este chat. El asistente automático queda en pausa."
-                : "Of course. I notified the Tires SOS Rescue team so a person can continue with you in this chat. The automated assistant is now paused.";
+                : "Of course. I notified the Tires SOS Rescue team so a person can continue with you in this chat. The automated assistant is now paused.");
               try {
                 const sent = await sendWhatsAppText(message.from, handoffReply);
                 await saveOutboundWhatsAppMessage({ conversationId: conversation.id, messageId: sent.messages?.[0]?.id, body: handoffReply });
@@ -224,6 +227,7 @@ STYLE
             } else {
               await setWhatsAppBookingState(conversation.id, { offeredSlots: [], leadSessionId: sessionId });
             }
+            finalReply = welcome(finalReply);
             if (finalReply) {
               const sent = await sendWhatsAppText(message.from, finalReply);
               await saveOutboundWhatsAppMessage({ conversationId: conversation.id, messageId: sent.messages?.[0]?.id, body: finalReply });
