@@ -56,6 +56,12 @@ export async function POST(request) {
             const sessionId = conversation.lead_session_id || `whatsapp_${message.from}_${conversation.id}`;
             const fieldsBeforeReply = extractChatFields(workflowHistory);
             const leadBeforeReply = await getLeadBySession(sessionId);
+            const bookingFieldsBeforeReply = {
+              ...fieldsBeforeReply,
+              service: fieldsBeforeReply.service || leadBeforeReply?.service || "",
+              vehicle: fieldsBeforeReply.vehicle || leadBeforeReply?.vehicle || "",
+              customerName: fieldsBeforeReply.customerName || leadBeforeReply?.customerName || "",
+            };
             const appointmentBeforeReply = await getAppointmentBySession(sessionId);
             const appointmentConfirmed = Boolean(
               appointmentBeforeReply?.status === "confirmed"
@@ -111,9 +117,9 @@ export async function POST(request) {
             }
             const bookingReadyBeforeReply = Boolean(
               leadBeforeReply?.appointmentRequested
-              && fieldsBeforeReply.service
-              && fieldsBeforeReply.vehicle
-              && fieldsBeforeReply.customerName
+              && bookingFieldsBeforeReply.service
+              && bookingFieldsBeforeReply.vehicle
+              && bookingFieldsBeforeReply.customerName
               && leadBeforeReply.phone,
             );
             if (appointmentConfirmed && offeredSlots.length && choice) {
@@ -153,7 +159,7 @@ export async function POST(request) {
               continue;
             }
             const bookingQuestion = !appointmentConfirmed && (leadBeforeReply?.appointmentRequested || hasWhatsAppAppointmentIntent(workflowHistory))
-              ? nextWhatsAppBookingQuestion(fieldsBeforeReply, lang, body)
+              ? nextWhatsAppBookingQuestion(bookingFieldsBeforeReply, lang, body)
               : "";
             let reply = bookingQuestion || whatsAppGreetingReply(body, lang) || whatsAppStaleSlotReply(body, offeredSlots, lang);
             if (!reply) {
@@ -195,9 +201,9 @@ STYLE
             });
             const lead = await getLeadBySession(sessionId);
             const confirmedFields = extractChatFields(workflowHistory);
-            const confirmedService = confirmedFields.service;
-            const confirmedVehicle = confirmedFields.vehicle;
-            const confirmedName = confirmedFields.customerName;
+            const confirmedService = confirmedFields.service || lead?.service;
+            const confirmedVehicle = confirmedFields.vehicle || lead?.vehicle;
+            const confirmedName = confirmedFields.customerName || lead?.customerName;
             let finalReply = reply;
             if (!appointmentConfirmed && lead?.appointmentRequested && confirmedService && confirmedVehicle && confirmedName && lead.phone) {
               if (offeredSlots.length) {
