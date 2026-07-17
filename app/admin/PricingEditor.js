@@ -9,6 +9,7 @@ import AdminLoader from "./AdminLoader";
 import AppointmentCalendar from "./AppointmentCalendar";
 import ApiStatus from "./ApiStatus";
 import YelpLeads from "./YelpLeads";
+import WhatsAppInbox from "./WhatsAppInbox";
 
 const E = COPY.admin.editor;
 
@@ -302,6 +303,8 @@ export default function PricingEditor({
   initialRecords,
   initialYelpLeads,
   yelpConfigured,
+  initialWhatsAppConversations,
+  whatsappConfigured,
   persistent,
   chatPersistent,
   recordsPersistent,
@@ -648,6 +651,7 @@ export default function PricingEditor({
           ? CHAT_ADMIN.yelpTitle
           : activeTab === "chat"
             ? CHAT_ADMIN.chatTitle
+            : activeTab === "whatsapp" ? { en: "WhatsApp Inbox", es: "Bandeja de WhatsApp" }
             : E.title;
   const showSave = activeTab === "chat" || activeTab === "pricing";
   const recordsTab = activeTab === "leads" || activeTab === "appointments";
@@ -717,6 +721,9 @@ export default function PricingEditor({
             {t(CHAT_ADMIN.yelpTab)}
             <span>{yelpLeads.length}</span>
           </button>
+          <button type="button" className={`editor__tab ${activeTab === "whatsapp" ? "editor__tab--on" : ""}`} onClick={() => setActiveTab("whatsapp")}>
+            WhatsApp <span>{initialWhatsAppConversations.length}</span>
+          </button>
           <button
             type="button"
             className={`editor__tab ${activeTab === "chat" ? "editor__tab--on" : ""}`}
@@ -781,6 +788,8 @@ export default function PricingEditor({
             onRunNow={runYelpNow}
             lastRunResult={lastYelpResult}
           />
+        ) : activeTab === "whatsapp" ? (
+          <WhatsAppInbox initialConversations={initialWhatsAppConversations} configured={whatsappConfigured} />
         ) : activeTab === "chat" ? (
           <>
             <section className="editor__group">
