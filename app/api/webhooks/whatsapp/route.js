@@ -1,6 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { saveInboundWhatsAppMessage } from "../../../../lib/whatsapp-store";
-import { saveOutboundWhatsAppMessage } from "../../../../lib/whatsapp-store";
+import { getRecentWhatsAppMessages, saveInboundWhatsAppMessage, saveOutboundWhatsAppMessage } from "../../../../lib/whatsapp-store";
 import { sendWhatsAppText } from "../../../../lib/whatsapp-client";
 import { callGroqChat, groqReplyText } from "../../../../lib/groq-client";
 
@@ -41,10 +40,28 @@ export async function POST(request) {
         if (message.id && message.from && body) {
           const conversation = await saveInboundWhatsAppMessage({ messageId: message.id, waId: message.from, customerName: names.get(message.from), body });
           if (conversation.bot_enabled) {
+            const history = await getRecentWhatsAppMessages(conversation.id);
             const ai = await callGroqChat([
-              { role: "system", content: "You are the bilingual WhatsApp assistant for Tires SOS Rescue in San Jose. Reply in the customer's language. Be warm, concise, and helpful. Never invent prices, availability, or policies. For exact quotes or appointments, collect the service, vehicle year/make/model, and customer name, then say the shop team will confirm. Do not claim a booking is confirmed." },
-              { role: "user", content: body },
-            ], { maxTokens: 220, temperature: 0.25 });
+              { role: "system", content: `You are the WhatsApp booking assistant for Tires SOS Rescue in San Jose.
+
+LANGUAGE
+- Reply only in the language of the customer's MOST RECENT message. English message = English reply. Spanish message = Spanish reply. Never include both languages unless asked.
+
+MEMORY
+- Read the full conversation. Remember every detail already provided. Never ask for a detail again.
+- Interpret natural phrases correctly. "Solo el cambio de aceite" means "only the oil change"; Solo is not a vehicle make/model.
+
+APPOINTMENT WORKFLOW
+- Collect exactly these items, one missing item at a time: (1) service, (2) vehicle year/make/model, (3) customer name.
+- If the customer provides multiple items together, accept all of them.
+- Do not ask about trim, engine, oil type, viscosity, tire size, quantity, or unrelated services.
+- Once service, vehicle year/make/model, and name are known, summarize them in one short sentence and say the shop team will confirm the appointment time shortly.
+- Never claim the appointment is confirmed and never invent availability, prices, dates, or times.
+
+STYLE
+- Maximum 3 short sentences. Warm, direct, natural. No long explanations, parenthetical translations, or repetitive sales language.` },
+              ...history,
+            ], { maxTokens: 150, temperature: 0.15 });
             const reply = groqReplyText(ai);
             if (reply) {
               const sent = await sendWhatsAppText(message.from, reply);
