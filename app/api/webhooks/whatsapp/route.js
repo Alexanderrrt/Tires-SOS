@@ -3,9 +3,9 @@ import { getRecentWhatsAppMessages, getWhatsAppGlobalBotEnabled, saveInboundWhat
 import { sendWhatsAppText } from "../../../../lib/whatsapp-client";
 import { sendWhatsAppHandoffEmail } from "../../../../lib/whatsapp-handoff";
 import { callGroqChat, groqReplyText } from "../../../../lib/groq-client";
-import { captureChatRecord, extractChatFields, getAppointmentBySession, getLeadBySession, reserveAppointment } from "../../../../lib/chat-records-store";
+import { captureChatRecord, extractChatFields, getAppointmentBySession, getLeadBySession, reserveAppointment, updateRecordStatus } from "../../../../lib/chat-records-store";
 import { formatWhatsAppSlots, nextWhatsAppAppointmentSlots } from "../../../../lib/whatsapp-booking";
-import { detectWhatsAppHandoff, detectWhatsAppLanguage, hasWhatsAppAppointmentIntent, hasWhatsAppRescheduleIntent, nextWhatsAppBookingQuestion, whatsAppGreetingReply, whatsAppStaleSlotReply } from "../../../../lib/whatsapp-workflow";
+import { detectWhatsAppHandoff, detectWhatsAppLanguage, hasWhatsAppAppointmentIntent, hasWhatsAppCancellationIntent, hasWhatsAppRescheduleIntent, nextWhatsAppBookingQuestion, whatsAppGreetingReply, whatsAppStaleSlotReply } from "../../../../lib/whatsapp-workflow";
 
 export const dynamic = "force-dynamic";
 
@@ -58,8 +58,9 @@ export async function POST(request) {
             const leadBeforeReply = await getLeadBySession(sessionId);
             const appointmentBeforeReply = await getAppointmentBySession(sessionId);
             const appointmentConfirmed = Boolean(
-              conversation.appointment_id
-              || (appointmentBeforeReply?.scheduledDate && appointmentBeforeReply?.scheduledTime),
+              appointmentBeforeReply?.status === "confirmed"
+              && appointmentBeforeReply?.scheduledDate
+              && appointmentBeforeReply?.scheduledTime,
             );
             const handoff = detectWhatsAppHandoff(workflowHistory, { appointmentConfirmed });
             if (handoff.shouldHandoff) {
@@ -96,6 +97,16 @@ export async function POST(request) {
               } catch (error) {
                 console.error("WhatsApp handoff confirmation failed after the email alert was sent.", error);
               }
+              continue;
+            }
+            if (appointmentConfirmed && hasWhatsAppCancellationIntent(body)) {
+              await updateRecordStatus("appointment", appointmentBeforeReply.id, "canceled");
+              await setWhatsAppBookingState(conversation.id, { offeredSlots: [], leadSessionId: sessionId, appointmentId: null });
+              const reply = lang === "es"
+                ? `Tu cita del ${appointmentBeforeReply.scheduledDate} a las ${appointmentBeforeReply.scheduledTime} fue cancelada.`
+                : `Your appointment on ${appointmentBeforeReply.scheduledDate} at ${appointmentBeforeReply.scheduledTime} has been canceled.`;
+              const sent = await sendWhatsAppText(message.from, reply);
+              await saveOutboundWhatsAppMessage({ conversationId: conversation.id, messageId: sent.messages?.[0]?.id, body: reply });
               continue;
             }
             const bookingReadyBeforeReply = Boolean(
