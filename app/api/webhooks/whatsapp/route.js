@@ -5,7 +5,7 @@ import { sendWhatsAppHandoffEmail } from "../../../../lib/whatsapp-handoff";
 import { callGroqChat, groqReplyText } from "../../../../lib/groq-client";
 import { captureChatRecord, extractChatFields, getAppointmentBySession, getLeadBySession, reserveAppointment } from "../../../../lib/chat-records-store";
 import { formatWhatsAppSlots, nextWhatsAppAppointmentSlots } from "../../../../lib/whatsapp-booking";
-import { detectWhatsAppHandoff, detectWhatsAppLanguage, hasWhatsAppAppointmentIntent, nextWhatsAppBookingQuestion, whatsAppGreetingReply, whatsAppStaleSlotReply } from "../../../../lib/whatsapp-workflow";
+import { detectWhatsAppHandoff, detectWhatsAppLanguage, hasWhatsAppAppointmentIntent, hasWhatsAppRescheduleIntent, nextWhatsAppBookingQuestion, whatsAppGreetingReply, whatsAppStaleSlotReply } from "../../../../lib/whatsapp-workflow";
 
 export const dynamic = "force-dynamic";
 
@@ -105,6 +105,19 @@ export async function POST(request) {
               && fieldsBeforeReply.customerName
               && leadBeforeReply.phone,
             );
+            if (appointmentConfirmed && offeredSlots.length && choice) {
+              const slot = offeredSlots[Number(choice[1]) - 1];
+              if (slot) {
+                const reservation = await reserveAppointment(appointmentBeforeReply?.id || sessionId, slot.date, slot.time);
+                const confirmation = lang === "es"
+                  ? `Listo, tu cita fue reprogramada para ${slot.date} a las ${slot.time}.`
+                  : `Your appointment has been rescheduled for ${slot.date} at ${slot.time}.`;
+                const sent = await sendWhatsAppText(message.from, confirmation);
+                await saveOutboundWhatsAppMessage({ conversationId: conversation.id, messageId: sent.messages?.[0]?.id, body: confirmation });
+                await setWhatsAppBookingState(conversation.id, { offeredSlots: [], leadSessionId: sessionId, appointmentId: reservation.appointment?.id || appointmentBeforeReply?.id });
+                continue;
+              }
+            }
             if (!appointmentConfirmed && offeredSlots.length && choice && bookingReadyBeforeReply) {
               const slot = offeredSlots[Number(choice[1]) - 1];
               if (slot) {
@@ -117,6 +130,16 @@ export async function POST(request) {
                 await setWhatsAppBookingState(conversation.id, { offeredSlots: [], leadSessionId: sessionId, appointmentId: reservation.appointment?.id || null });
                 continue;
               }
+            }
+            if (appointmentConfirmed && hasWhatsAppRescheduleIntent(body)) {
+              const slots = await nextWhatsAppAppointmentSlots();
+              const reply = slots.length
+                ? formatWhatsAppSlots(slots, lang)
+                : (lang === "es" ? "No hay otros horarios disponibles en los próximos 7 días. Puedes pedir un representante aquí o llamar al (408) 332-8962." : "There are no other times available in the next 7 days. You can ask for a representative here or call (408) 332-8962.");
+              await setWhatsAppBookingState(conversation.id, { offeredSlots: slots, leadSessionId: sessionId, appointmentId: appointmentBeforeReply?.id });
+              const sent = await sendWhatsAppText(message.from, reply);
+              await saveOutboundWhatsAppMessage({ conversationId: conversation.id, messageId: sent.messages?.[0]?.id, body: reply });
+              continue;
             }
             const bookingQuestion = !appointmentConfirmed && (leadBeforeReply?.appointmentRequested || hasWhatsAppAppointmentIntent(workflowHistory))
               ? nextWhatsAppBookingQuestion(fieldsBeforeReply, lang, body)
