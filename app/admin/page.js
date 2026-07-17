@@ -10,6 +10,7 @@ import { listWhatsAppConversations } from "../../lib/whatsapp-store";
 import { whatsappConfigured } from "../../lib/whatsapp-client";
 import PricingEditor from "./PricingEditor";
 import "./whatsapp.css";
+import "./admin-shell.css";
 
 export const dynamic = "force-dynamic";
 

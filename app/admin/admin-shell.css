@@ -1,0 +1,174 @@
+/* Admin workspace layout. Kept separate from the public-site styles so the
+   dashboard can use the full viewport without changing the storefront. */
+.admin {
+  width: 100%;
+  max-width: none;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0 clamp(16px, 2vw, 32px) clamp(28px, 4vw, 56px);
+}
+
+.editor {
+  width: 100%;
+  min-width: 0;
+}
+
+.editor__bar {
+  top: 0;
+  min-height: 76px;
+  margin: 0;
+  padding: 14px 0 12px;
+  align-items: center;
+  background: color-mix(in srgb, var(--ink) 94%, transparent);
+  backdrop-filter: blur(16px);
+}
+
+.editor__bar > div:first-child {
+  min-width: 0;
+}
+
+.editor__bar h1 {
+  line-height: 1.05;
+}
+
+.editor__actions {
+  justify-content: flex-end;
+}
+
+.editor__tabs {
+  position: sticky;
+  top: 76px;
+  z-index: 9;
+  gap: 6px;
+  margin: 0 calc(clamp(16px, 2vw, 32px) * -1) 20px;
+  padding: 10px clamp(16px, 2vw, 32px) 0;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  background: color-mix(in srgb, var(--ink) 94%, transparent);
+  backdrop-filter: blur(16px);
+}
+
+.editor__tab {
+  flex: 0 0 auto;
+  min-height: 42px;
+  white-space: nowrap;
+}
+
+.editor__group,
+.record-list,
+.cal,
+.api-panel {
+  width: 100%;
+}
+
+.whatsapp-inbox {
+  height: calc(100dvh - 178px);
+  min-height: 620px;
+}
+
+@media (min-width: 1400px) {
+  .editor__group {
+    padding: 1.5rem;
+  }
+
+  .record-list {
+    grid-template-columns: repeat(auto-fit, minmax(390px, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .admin {
+    padding-inline: 14px;
+  }
+
+  .editor__bar {
+    min-height: 0;
+    align-items: flex-start;
+  }
+
+  .editor__bar h1 {
+    font-size: clamp(1.35rem, 5vw, 1.7rem);
+  }
+
+  .editor__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .editor__tabs {
+    position: relative;
+    top: auto;
+    margin-inline: -14px;
+    padding-inline: 14px;
+  }
+
+  .whatsapp-inbox {
+    height: auto;
+    min-height: min(760px, calc(100dvh - 150px));
+  }
+}
+
+@media (max-width: 600px) {
+  .admin {
+    padding: 0 10px 28px;
+  }
+
+  .editor__bar {
+    gap: 10px;
+    padding-block: 12px;
+  }
+
+  .editor__actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .editor__actions .editor__ok,
+  .editor__actions .editor__err {
+    grid-column: 1 / -1;
+  }
+
+  .editor__actions .btn,
+  .editor__actions .lang-toggle {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding-inline: 8px;
+    justify-content: center;
+  }
+
+  .editor__tabs {
+    margin: 0 -10px 14px;
+    padding: 8px 10px 0;
+  }
+
+  .editor__tab {
+    min-height: 44px;
+    padding: 0.62rem 0.8rem;
+  }
+
+  .editor__group {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .editor__row,
+  .editor__row label,
+  .editor__cell,
+  .editor__row input {
+    width: 100%;
+  }
+
+  .editor__bi-grid,
+  .editor__prompt-grid,
+  .editor__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .whatsapp-inbox {
+    min-height: calc(100dvh - 140px);
+    border-radius: 14px;
+  }
+}
