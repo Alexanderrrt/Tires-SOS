@@ -16,7 +16,7 @@ import { validateShopSlot } from "../../../../lib/appointment-slots";
 import { isValidDateKey, isValidTimeKey } from "../../../../lib/shop-time";
 
 async function requireAuth() {
-  const token = cookies().get(SESSION_COOKIE)?.value;
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
   return verifySession(token);
 }
 

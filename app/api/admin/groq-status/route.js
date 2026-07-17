@@ -5,7 +5,7 @@ import { getGroqStatus, recordGroqResponse, recordGroqError } from "../../../../
 export const dynamic = "force-dynamic";
 
 async function requireAuth() {
-  const token = cookies().get(SESSION_COOKIE)?.value;
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
   return verifySession(token);
 }
 

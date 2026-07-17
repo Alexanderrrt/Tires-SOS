@@ -4,7 +4,7 @@ import { setChatSettings, chatStoreConfigured } from "../../../../lib/chat-setti
 import { sanitizeChatSettings } from "../../../../lib/chat-settings-validate";
 
 async function requireAuth() {
-  const token = cookies().get(SESSION_COOKIE)?.value;
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
   return verifySession(token);
 }
 

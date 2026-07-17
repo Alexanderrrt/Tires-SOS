@@ -32,7 +32,7 @@ export async function POST(request) {
   }
 
   const token = await signSession();
-  cookies().set(SESSION_COOKIE, token, {
+  (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

@@ -5,7 +5,7 @@ import { gmailConfigured } from "../../../../lib/gmail-client";
 import { runYelpLeadResponder } from "../../../../lib/yelp-lead-responder";
 
 async function requireAuth() {
-  const token = cookies().get(SESSION_COOKIE)?.value;
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
   return verifySession(token);
 }
 
