@@ -219,6 +219,18 @@ button.ops-metric:hover { border-color: #aeb6c1; }
 .cal__nav, .cal__section, .cal__detail, .cal__create-form { border-color: var(--admin-border); background: #fff; }
 .cal__week-label, .cal__detail h2, .cal__section h2 { color: var(--admin-text); font-family: inherit; text-transform: none; }
 .cal__grid { border-color: var(--admin-border); background: #fff; }
+.cal__corner {
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border-color: var(--admin-border);
+}
+.cal__corner img {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.5rem;
+  object-fit: cover;
+}
 .cal__day-header, .cal__time, .cal__cell { border-color: var(--admin-border); background: #fff; color: var(--admin-muted); }
 .cal__day-header--today { background: var(--admin-accent-soft); }
 .cal__day-header--today .cal__day-num { color: var(--admin-accent); }

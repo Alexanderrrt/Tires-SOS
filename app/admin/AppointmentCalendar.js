@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 import { SITE } from "../site.config";
 import { addDaysToDateKey, dayOfWeekForDateKey, getShopDateTime } from "../../lib/shop-time";
@@ -258,7 +259,11 @@ export default function AppointmentCalendar({ appointments, blockedSlots = [], t
   }, [days]);
 
   const cells = [];
-  cells.push(<div key="corner" className="cal__corner" />);
+  cells.push(
+    <div key="corner" className="cal__corner" aria-label="Tires SOS">
+      <Image src="/apple-touch-icon.png" alt="Tires SOS" width={40} height={40} priority />
+    </div>,
+  );
   days.forEach((day) => {
     const isDayBlocked = blockedMap.daySet.has(day.key);
     cells.push(
