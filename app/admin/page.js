@@ -9,6 +9,7 @@ import { gmailConfigured } from "../../lib/gmail-client";
 import { listWhatsAppConversations } from "../../lib/whatsapp-store";
 import { whatsappConfigured } from "../../lib/whatsapp-client";
 import PricingEditor from "./PricingEditor";
+import "./whatsapp.css";
 
 export const dynamic = "force-dynamic";
 

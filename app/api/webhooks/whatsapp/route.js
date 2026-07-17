@@ -42,7 +42,7 @@ export async function POST(request) {
         if (message.id && message.from && body) {
           const conversation = await saveInboundWhatsAppMessage({ messageId: message.id, waId: message.from, customerName: names.get(message.from), body });
           if (conversation.bot_enabled) {
-            const history = await getRecentWhatsAppMessages(conversation.id);
+            const history = await getRecentWhatsAppMessages(conversation.id, conversation.context_enabled ? 30 : 1);
             const lang = /\b(hola|cita|aceite|carro|vehiculo|gracias|quiero|necesito|solo)\b/i.test(body) ? "es" : "en";
             const offeredSlots = Array.isArray(conversation.offered_slots) ? conversation.offered_slots : [];
             const choice = body.trim().match(/^([1-9])$/);
