@@ -1,10 +1,11 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { getRecentWhatsAppMessages, getWhatsAppGlobalBotEnabled, saveInboundWhatsAppMessage, saveOutboundWhatsAppMessage, setWhatsAppBookingState } from "../../../../lib/whatsapp-store";
+import { getRecentWhatsAppMessages, getWhatsAppGlobalBotEnabled, saveInboundWhatsAppMessage, saveOutboundWhatsAppMessage, setWhatsAppBookingState, setWhatsAppBotEnabled } from "../../../../lib/whatsapp-store";
 import { sendWhatsAppText } from "../../../../lib/whatsapp-client";
+import { sendWhatsAppHandoffEmail } from "../../../../lib/whatsapp-handoff";
 import { callGroqChat, groqReplyText } from "../../../../lib/groq-client";
 import { captureChatRecord, extractChatFields, getLeadBySession, reserveAppointment } from "../../../../lib/chat-records-store";
 import { formatWhatsAppSlots, nextWhatsAppAppointmentSlots } from "../../../../lib/whatsapp-booking";
-import { detectWhatsAppLanguage, hasWhatsAppAppointmentIntent, nextWhatsAppBookingQuestion } from "../../../../lib/whatsapp-workflow";
+import { detectWhatsAppHandoff, detectWhatsAppLanguage, hasWhatsAppAppointmentIntent, nextWhatsAppBookingQuestion } from "../../../../lib/whatsapp-workflow";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,33 @@ export async function POST(request) {
             const sessionId = conversation.lead_session_id || `whatsapp_${message.from}`;
             const fieldsBeforeReply = extractChatFields(workflowHistory);
             const leadBeforeReply = await getLeadBySession(sessionId);
+            const handoff = detectWhatsAppHandoff(workflowHistory, { appointmentConfirmed: Boolean(conversation.appointment_id) });
+            if (handoff.shouldHandoff) {
+              await setWhatsAppBotEnabled(conversation.id, false);
+              try {
+                await sendWhatsAppHandoffEmail({
+                  conversationId: conversation.id,
+                  waId: message.from,
+                  customerName: conversation.customer_name || names.get(message.from),
+                  reason: handoff.reason,
+                  history: workflowHistory,
+                  lead: leadBeforeReply,
+                });
+              } catch (error) {
+                await setWhatsAppBotEnabled(conversation.id, true).catch(() => {});
+                throw error;
+              }
+              const handoffReply = lang === "es"
+                ? "Claro. Ya avisé al equipo de Tires SOS Rescue para que una persona continúe contigo por este chat. El asistente automático queda en pausa."
+                : "Of course. I notified the Tires SOS Rescue team so a person can continue with you in this chat. The automated assistant is now paused.";
+              try {
+                const sent = await sendWhatsAppText(message.from, handoffReply);
+                await saveOutboundWhatsAppMessage({ conversationId: conversation.id, messageId: sent.messages?.[0]?.id, body: handoffReply });
+              } catch (error) {
+                console.error("WhatsApp handoff confirmation failed after the email alert was sent.", error);
+              }
+              continue;
+            }
             const bookingReadyBeforeReply = Boolean(
               leadBeforeReply?.appointmentRequested
               && fieldsBeforeReply.service

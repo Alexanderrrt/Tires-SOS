@@ -20,6 +20,12 @@ export default function WhatsAppInbox({ initialConversations = [], initialGlobal
   const selected = conversations.find((c) => c.id === selectedId);
   const filtered = useMemo(() => conversations.filter((c) => `${c.customerName || ""} ${c.waId}`.toLowerCase().includes(query.toLowerCase())), [conversations, query]);
   useEffect(() => {
+    const requestedConversation = new URLSearchParams(window.location.search).get("conversation");
+    if (requestedConversation && initialConversations.some((conversation) => conversation.id === requestedConversation)) {
+      setSelectedId(requestedConversation);
+    }
+  }, [initialConversations]);
+  useEffect(() => {
     const list = messageList.current;
     if (list) list.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
   }, [selectedId, selected?.messages.length]);

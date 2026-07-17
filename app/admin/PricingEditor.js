@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLanguage, useT } from "../i18n/LanguageContext";
@@ -350,6 +350,13 @@ export default function PricingEditor({
   const [saving, setSaving] = useState(false);
   const [updatingId, setUpdatingId] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
+
+  useEffect(() => {
+    const requestedView = new URLSearchParams(window.location.search).get("view");
+    if (["overview", "leads", "appointments", "yelp", "whatsapp", "chat", "pricing", "api"].includes(requestedView)) {
+      setActiveTab(requestedView);
+    }
+  }, []);
 
   const edit = (mutator) =>
     setPricing((p) => {
