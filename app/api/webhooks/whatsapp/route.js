@@ -122,6 +122,14 @@ export async function POST(request) {
               && bookingFieldsBeforeReply.customerName
               && leadBeforeReply.phone,
             );
+            if (offeredSlots.length && choice && !offeredSlots[Number(choice[1]) - 1]) {
+              const reply = lang === "es"
+                ? `Esa opción no es válida. Responde con un número del 1 al ${offeredSlots.length}.`
+                : `That option isn't valid. Reply with a number from 1 to ${offeredSlots.length}.`;
+              const sent = await sendWhatsAppText(message.from, reply);
+              await saveOutboundWhatsAppMessage({ conversationId: conversation.id, messageId: sent.messages?.[0]?.id, body: reply });
+              continue;
+            }
             if (appointmentConfirmed && offeredSlots.length && choice) {
               const slot = offeredSlots[Number(choice[1]) - 1];
               if (slot) {
