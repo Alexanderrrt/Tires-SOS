@@ -1,7 +1,19 @@
+import { timingSafeEqual } from "node:crypto";
 import { optimizeBudget, getDailyPerformanceSummary, identifyUnderperformers } from "@/lib/budget-optimizer";
 import { generateAdVariations } from "@/lib/ai-ad-generator";
 import { sendOptimizationReport, sendDailySummary, sendBudgetAlert, sendErrorAlert } from "@/lib/send-report";
 import { saveOptimizationRun } from "@/lib/supabase-client";
+
+// Fail closed: reject when CRON_SECRET is unset, and compare in constant time.
+function authorized(request) {
+  const expected = process.env.CRON_SECRET?.trim();
+  const header = request.headers.get("authorization") || "";
+  const provided = header.startsWith("Bearer ") ? header.slice(7) : "";
+  if (!expected || !provided) return false;
+  const left = Buffer.from(provided);
+  const right = Buffer.from(expected);
+  return left.length === right.length && timingSafeEqual(left, right);
+}
 
 /**
  * Daily ad optimization cron job
@@ -15,11 +27,7 @@ import { saveOptimizationRun } from "@/lib/supabase-client";
  * 5. Send report to owner
  */
 export async function GET(request) {
-  // Verify cron secret token
-  const authHeader = request.headers.get("authorization");
-  const expectedToken = `Bearer ${process.env.CRON_SECRET}`;
-
-  if (authHeader !== expectedToken) {
+  if (!authorized(request)) {
     console.warn("Unauthorized cron request");
     return new Response(
       JSON.stringify({ error: "Unauthorized" }),
@@ -129,11 +137,7 @@ export async function GET(request) {
  * POST /api/cron/optimize-ads?manual=true with CRON_SECRET
  */
 export async function POST(request) {
-  // Same auth check
-  const authHeader = request.headers.get("authorization");
-  const expectedToken = `Bearer ${process.env.CRON_SECRET}`;
-
-  if (authHeader !== expectedToken) {
+  if (!authorized(request)) {
     return new Response(
       JSON.stringify({ error: "Unauthorized" }),
       { status: 401 }

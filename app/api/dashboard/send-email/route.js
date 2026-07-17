@@ -1,9 +1,12 @@
 import { sendDailySummary } from "../../../../lib/send-report";
+import { requireDashboardUser } from "../../../../lib/require-dashboard-user";
 
 // Sends the daily performance summary email. Protected by Clerk
-// middleware — only signed-in dashboard users can trigger it.
+// middleware, with an in-handler re-check as defense-in-depth.
 
 export async function POST(request) {
+  const denied = await requireDashboardUser();
+  if (denied) return denied;
   if (!process.env.RESEND_API_KEY || !process.env.NOTIFY_EMAIL_RECIPIENT) {
     return Response.json(
       { error: "Email is not configured (set RESEND_API_KEY and NOTIFY_EMAIL_RECIPIENT)." },

@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { requireDashboardUser } from "../../../../lib/require-dashboard-user";
 
 const DEFAULT_CLIENTS = [
   {
@@ -17,6 +18,8 @@ function cleanEnv(value) {
 }
 
 export async function GET() {
+  const denied = await requireDashboardUser();
+  if (denied) return denied;
   const url = cleanEnv(process.env.SUPABASE_URL);
   const key = cleanEnv(process.env.SUPABASE_SERVICE_ROLE_KEY);
 

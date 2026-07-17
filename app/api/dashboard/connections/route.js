@@ -4,16 +4,21 @@ import {
   setAdConnections,
   maskConnections,
 } from "../../../../lib/ad-connections-store";
+import { requireDashboardUser } from "../../../../lib/require-dashboard-user";
 
-// Clerk middleware already protects /api/dashboard(.*) — only signed-in
-// dashboard users reach these handlers.
+// Clerk middleware protects /api/dashboard(.*); requireDashboardUser() re-checks
+// in-handler as defense-in-depth because these routes handle ad credentials.
 
 export async function GET() {
+  const denied = await requireDashboardUser();
+  if (denied) return denied;
   const connections = await getAdConnections();
   return Response.json({ platforms: maskConnections(connections) });
 }
 
 export async function PUT(request) {
+  const denied = await requireDashboardUser();
+  if (denied) return denied;
   let body;
   try {
     body = await request.json();
@@ -61,6 +66,8 @@ export async function PUT(request) {
 }
 
 export async function DELETE(request) {
+  const denied = await requireDashboardUser();
+  if (denied) return denied;
   let body;
   try {
     body = await request.json();

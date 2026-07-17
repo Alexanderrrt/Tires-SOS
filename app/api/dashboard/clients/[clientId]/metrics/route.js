@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { requireDashboardUser } from "../../../../../../lib/require-dashboard-user";
 
 function cleanEnv(value) {
   return typeof value === "string" ? value.replace(/^\uFEFF/, "").trim() : value;
@@ -28,6 +29,8 @@ function emptySummary() {
  * GET /api/dashboard/clients/[clientId]/metrics?days=7
  */
 export async function GET(request, { params }) {
+  const denied = await requireDashboardUser();
+  if (denied) return denied;
   try {
     const { clientId } = params;
     const { searchParams } = new URL(request.url);

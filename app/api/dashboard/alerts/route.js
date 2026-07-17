@@ -1,10 +1,13 @@
 import { detectAnomalies } from "../../../../lib/advanced-ai-engine";
+import { requireDashboardUser } from "../../../../lib/require-dashboard-user";
 
 // Computes alerts from the metrics summary the dashboard already holds.
 // Rule-based checks plus the AI engine's anomaly detection over the
-// daily series. Clerk middleware protects this route.
+// daily series. Clerk middleware protects this route, re-checked in-handler.
 
 export async function POST(request) {
+  const denied = await requireDashboardUser();
+  if (denied) return denied;
   let body;
   try {
     body = await request.json();

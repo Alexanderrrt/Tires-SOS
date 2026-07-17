@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
 import { optimizeBudget, getDailyPerformanceSummary, identifyUnderperformers } from "@/lib/budget-optimizer";
 import { generateAdVariations } from "@/lib/ai-ad-generator";
@@ -20,6 +21,17 @@ import { getDeviceBreakdown as getMetaDeviceBreakdown } from "@/lib/meta-ads-api
 
 const anthropicClient = new Anthropic();
 
+// Fail closed: reject when CRON_SECRET is unset, and compare in constant time.
+function authorized(request) {
+  const expected = process.env.CRON_SECRET?.trim();
+  const header = request.headers.get("authorization") || "";
+  const provided = header.startsWith("Bearer ") ? header.slice(7) : "";
+  if (!expected || !provided) return false;
+  const left = Buffer.from(provided);
+  const right = Buffer.from(expected);
+  return left.length === right.length && timingSafeEqual(left, right);
+}
+
 /**
  * SUPER SMART DAILY OPTIMIZATION
  * Runs advanced AI analysis on all ad metrics
@@ -39,11 +51,7 @@ const anthropicClient = new Anthropic();
  * 12. Send comprehensive intelligence report
  */
 export async function GET(request) {
-  // Verify cron secret
-  const authHeader = request.headers.get("authorization");
-  const expectedToken = `Bearer ${process.env.CRON_SECRET}`;
-
-  if (authHeader !== expectedToken) {
+  if (!authorized(request)) {
     return new Response(
       JSON.stringify({ error: "Unauthorized" }),
       { status: 401 }

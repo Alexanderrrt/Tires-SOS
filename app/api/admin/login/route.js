@@ -1,11 +1,20 @@
 import { cookies } from "next/headers";
 import { checkPassword, signSession, authConfigured, SESSION_COOKIE } from "../../../../lib/auth";
+import { checkAdminLoginRateLimit, getClientIp } from "../../../../lib/chat-rate-limit";
 
 export async function POST(request) {
   if (!authConfigured()) {
     return Response.json(
       { error: "Admin auth is not configured (set ADMIN_PASSWORD and AUTH_SECRET)." },
       { status: 503 }
+    );
+  }
+
+  const rate = await checkAdminLoginRateLimit(getClientIp(request));
+  if (!rate.allowed) {
+    return Response.json(
+      { error: "Too many attempts. Please wait and try again." },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfter) } }
     );
   }
 
