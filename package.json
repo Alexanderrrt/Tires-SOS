@@ -7,7 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --ext .js,.jsx"
+    "lint": "eslint . --ext .js,.jsx",
+    "test:whatsapp": "node scripts/test-whatsapp-workflow.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.0",
