@@ -4,10 +4,20 @@ import { isExpectedWhatsAppWebhookRecipient, sendWhatsAppText } from "../../../.
 import { sendWhatsAppHandoffEmail } from "../../../../lib/whatsapp-handoff";
 import { callGroqChat, groqReplyText } from "../../../../lib/groq-client";
 import { captureChatRecord, extractChatFields, getAppointmentBySession, getLeadBySession, reserveAppointment, updateRecordStatus } from "../../../../lib/chat-records-store";
+import { deliverLeadNotification } from "../../../../lib/lead-notification-service";
 import { formatWhatsAppSlots, nextWhatsAppAppointmentSlots } from "../../../../lib/whatsapp-booking";
 import { detectWhatsAppHandoff, detectWhatsAppLanguage, hasWhatsAppAppointmentIntent, hasWhatsAppCancellationIntent, hasWhatsAppRescheduleIntent, nextWhatsAppBookingQuestion, whatsAppGreetingReply, whatsAppStaleSlotReply, withWhatsAppWelcome } from "../../../../lib/whatsapp-workflow";
 
 export const dynamic = "force-dynamic";
+
+async function notifyWhatsAppAppointment(sessionId) {
+  try {
+    return await deliverLeadNotification({ sessionId });
+  } catch (error) {
+    console.error("WhatsApp appointment email notification failed.", error);
+    return { accepted: false, status: "failed" };
+  }
+}
 
 export async function GET(request) {
   const url = new URL(request.url);
@@ -155,6 +165,7 @@ export async function POST(request) {
               const slot = offeredSlots[Number(choice[1]) - 1];
               if (slot) {
                 const reservation = await reserveAppointment(sessionId, slot.date, slot.time);
+                await notifyWhatsAppAppointment(sessionId);
                 const confirmation = lang === "es"
                   ? `Listo, tu cita está confirmada para ${slot.date} a las ${slot.time}. Te esperamos en Tires SOS Rescue.`
                   : `You're booked for ${slot.date} at ${slot.time}. We look forward to seeing you at Tires SOS Rescue.`;
