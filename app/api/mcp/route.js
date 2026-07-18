@@ -5,6 +5,7 @@ import { getPricing } from "../../../lib/pricing-store";
 import { runPriceEstimateTool, renderDeterministicEstimate } from "../../../lib/chat-price-tool";
 import { computeAvailableDays } from "../../../lib/availability";
 import { createManualAppointment } from "../../../lib/chat-records-store";
+import { deliverLeadNotification } from "../../../lib/lead-notification-service";
 import { verifyAccessToken } from "../../../lib/mcp-oauth";
 import { formatShopSlot } from "../../../lib/shop-time";
 import { SITE, SERVICES } from "../../site.config";
@@ -148,6 +149,12 @@ async function buildServer() {
       const lang = resolveLang(args.lang);
       try {
         const result = await createManualAppointment({ ...args, source: "Voice", lang });
+        let notification = { accepted: false, status: "pending", attempts: 0 };
+        try {
+          notification = await deliverLeadNotification({ id: result.lead?.id });
+        } catch {
+          // The appointment is durable even if Gmail is temporarily unavailable.
+        }
         const slot = formatShopSlot(args.scheduledDate, args.scheduledTime, lang);
         const say = lang === "es"
           ? `Listo. Tu cita en Tires SOS está confirmada para ${slot}.`
@@ -159,6 +166,7 @@ async function buildServer() {
               ok: true,
               appointmentId: result.appointment?.id,
               status: result.appointment?.status,
+              notification,
               say,
             }),
           }],
