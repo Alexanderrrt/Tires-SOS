@@ -21,6 +21,11 @@ const COPY = {
   loading: { en: "Loading connections…", es: "Cargando conexiones…" },
   leaveBlank: { en: "Leave blank to keep saved value", es: "Deja en blanco para mantener el valor guardado" },
   saved: { en: "saved", es: "guardado" },
+  connectedToast: { en: "connected", es: "conectado" },
+  connectedMemoryOnly: { en: "connected (saved in memory only — database table missing)", es: "conectado (guardado solo en memoria — falta la tabla en la base de datos)" },
+  couldNotConnect: { en: "Could not connect.", es: "No se pudo conectar." },
+  networkError: { en: "Network error — try again.", es: "Error de red — intenta de nuevo." },
+  disconnectedToast: { en: "disconnected", es: "desconectado" },
 };
 
 export default function AdsSettings({ t }) {
@@ -59,15 +64,15 @@ export default function AdsSettings({ t }) {
         setForms((prev) => ({ ...prev, [platform]: {} }));
         showToast(
           data.persisted
-            ? `${PLATFORM_META[platform].label} connected ✓`
-            : `${PLATFORM_META[platform].label} connected (saved in memory only — database table missing)`,
+            ? `${PLATFORM_META[platform].label} ${t(COPY.connectedToast)} ✓`
+            : `${PLATFORM_META[platform].label} ${t(COPY.connectedMemoryOnly)}`,
           data.persisted ? "ok" : "warn"
         );
       } else {
-        showToast(data.error || "Could not connect.", "error");
+        showToast(data.error || t(COPY.couldNotConnect), "error");
       }
     } catch {
-      showToast("Network error — try again.", "error");
+      showToast(t(COPY.networkError), "error");
     } finally {
       setBusyPlatform(null);
     }
@@ -83,9 +88,9 @@ export default function AdsSettings({ t }) {
       });
       const data = await res.json();
       if (data.platforms) setConnections(data.platforms);
-      showToast(`${PLATFORM_META[platform].label} disconnected`, "ok");
+      showToast(`${PLATFORM_META[platform].label} ${t(COPY.disconnectedToast)}`, "ok");
     } catch {
-      showToast("Network error — try again.", "error");
+      showToast(t(COPY.networkError), "error");
     } finally {
       setBusyPlatform(null);
     }

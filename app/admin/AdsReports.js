@@ -9,6 +9,8 @@ const PLATFORM_META = {
 };
 
 const COPY = {
+  platform: { en: "Platform", es: "Plataforma" },
+  date: { en: "Date", es: "Fecha" },
   spend: { en: "Spend", es: "Gasto" },
   conversions: { en: "Conversions", es: "Conversiones" },
   clicks: { en: "Clicks", es: "Clics" },
@@ -63,7 +65,7 @@ export default function AdsReports({ t }) {
           <section className="editor__group" style={{ marginTop: 14 }}>
             <h2>{t(COPY.byPlatform)}</h2>
             <table className="ads-table" style={{ marginTop: 10 }}>
-              <thead><tr><th>Platform</th><th className="num">{t(COPY.spend)}</th><th className="num">{t(COPY.clicks)}</th><th className="num">{t(COPY.conversions)}</th><th className="num">{t(COPY.roas)}</th></tr></thead>
+              <thead><tr><th>{t(COPY.platform)}</th><th className="num">{t(COPY.spend)}</th><th className="num">{t(COPY.clicks)}</th><th className="num">{t(COPY.conversions)}</th><th className="num">{t(COPY.roas)}</th></tr></thead>
               <tbody>
                 {Object.entries(reportData.byPlatform).map(([key, d]) => (
                   <tr key={key}>
@@ -84,7 +86,7 @@ export default function AdsReports({ t }) {
               <p className="editor__hint">{t(COPY.noDaily)}</p>
             ) : (
               <table className="ads-table" style={{ marginTop: 10 }}>
-                <thead><tr><th>Date</th><th className="num">{t(COPY.spend)}</th><th className="num">{t(COPY.clicks)}</th><th className="num">{t(COPY.conversions)}</th></tr></thead>
+                <thead><tr><th>{t(COPY.date)}</th><th className="num">{t(COPY.spend)}</th><th className="num">{t(COPY.clicks)}</th><th className="num">{t(COPY.conversions)}</th></tr></thead>
                 <tbody>
                   {reportData.daily.map((d) => (
                     <tr key={d.date}>

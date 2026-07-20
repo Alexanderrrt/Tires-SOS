@@ -22,6 +22,7 @@ const COPY = {
   deleteConfirm: { en: "Delete this report? This cannot be undone.", es: "¿Eliminar este reporte? Esta acción no se puede deshacer." },
   deleteFailed: { en: "Could not delete the report.", es: "No se pudo eliminar el reporte." },
   invalidRange: { en: "Enter a valid start and end date (end must be on or after start).", es: "Ingresa una fecha de inicio y fin válidas (el fin debe ser igual o posterior al inicio)." },
+  selectReport: { en: "Select analytics report", es: "Seleccionar reporte de analítica" },
 };
 
 function todayIso() {
@@ -119,7 +120,7 @@ export default function SiteAnalytics({ t }) {
           </div>
           <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
             {reports?.length > 0 && (
-              <select value={selected?.id || ""} onChange={(e) => setSelectedId(e.target.value)} aria-label="Select analytics report">
+              <select value={selected?.id || ""} onChange={(e) => setSelectedId(e.target.value)} aria-label={t(COPY.selectReport)}>
                 {reports.map((report) => <option key={report.id} value={report.id}>{report.period_label}</option>)}
               </select>
             )}

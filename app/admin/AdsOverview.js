@@ -10,6 +10,7 @@ const PLATFORM_META = {
 
 const COPY = {
   spend: { en: "Total Spend", es: "Gasto total" },
+  spendLabel: { en: "Spend", es: "Gasto" },
   spendSub: { en: "last 7 days", es: "últimos 7 días" },
   conversions: { en: "Conversions", es: "Conversiones" },
   conversionsSub: { en: "calls, bookings, leads", es: "llamadas, citas, clientes" },
@@ -88,7 +89,7 @@ export default function AdsOverview({ t, onNavigate }) {
                 </div>
                 {conn?.connected ? (
                   <div>
-                    <div className="ads-row"><span>Spend</span><strong>${data ? data.spend.toFixed(0) : 0}</strong></div>
+                    <div className="ads-row"><span>{t(COPY.spendLabel)}</span><strong>${data ? data.spend.toFixed(0) : 0}</strong></div>
                     <div className="ads-row"><span>{t(COPY.conversions)}</span><strong>{data ? data.conversions : 0}</strong></div>
                     <div className="ads-row"><span>{t(COPY.roas)}</span><strong>{data ? data.roas : 0}x</strong></div>
                   </div>
