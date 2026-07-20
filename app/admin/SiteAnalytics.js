@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const COPY = {
   heading: { en: "PostHog website analytics", es: "Analítica del sitio (PostHog)" },
@@ -23,6 +23,7 @@ const COPY = {
   deleteFailed: { en: "Could not delete the report.", es: "No se pudo eliminar el reporte." },
   invalidRange: { en: "Enter a valid start and end date (end must be on or after start).", es: "Ingresa una fecha de inicio y fin válidas (el fin debe ser igual o posterior al inicio)." },
   selectReport: { en: "Select analytics report", es: "Seleccionar reporte de analítica" },
+  downloadPdf: { en: "Download PDF", es: "Descargar PDF" },
 };
 
 function todayIso() {
@@ -37,6 +38,11 @@ export default function SiteAnalytics({ t }) {
   const [error, setError] = useState(null);
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState(todayIso());
+  const iframeRef = useRef(null);
+
+  function downloadPdf() {
+    iframeRef.current?.contentWindow?.print();
+  }
 
   const loadReports = useCallback(() => {
     setReports(null);
@@ -125,6 +131,11 @@ export default function SiteAnalytics({ t }) {
               </select>
             )}
             {selected && (
+              <button type="button" className="btn btn--ghost btn--small" onClick={downloadPdf}>
+                {t(COPY.downloadPdf)}
+              </button>
+            )}
+            {selected && (
               <button type="button" className="btn btn--danger btn--small" onClick={deleteSelected} disabled={deleting || busy}>
                 {deleting ? t(COPY.deleting) : t(COPY.delete)}
               </button>
@@ -166,6 +177,7 @@ export default function SiteAnalytics({ t }) {
       ) : (
         <div className="editor__group" style={{ marginTop: 14, padding: 0, overflow: "hidden" }}>
           <iframe
+            ref={iframeRef}
             title={selected.title}
             srcDoc={selected.html}
             sandbox=""
