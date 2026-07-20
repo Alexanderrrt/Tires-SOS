@@ -1,7 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { auth } from "@clerk/nextjs/server";
 import { isAdminUserAllowed } from "../../../../lib/admin-auth";
-import { listAnalyticsReports, saveAnalyticsReport } from "../../../../lib/analytics-reports-store";
+import { listAnalyticsReports, saveAnalyticsReport, deleteAnalyticsReport } from "../../../../lib/analytics-reports-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -61,5 +61,20 @@ export async function POST(request) {
   } catch (error) {
     console.error("Analytics report publish failed:", error);
     return Response.json({ error: "Could not publish analytics report." }, { status: 500 });
+  }
+}
+
+export async function DELETE(request) {
+  const { userId } = await auth();
+  if (!isAdminUserAllowed(userId)) return Response.json({ error: "Forbidden." }, { status: 403 });
+  const body = await request.json().catch(() => null);
+  const id = typeof body?.id === "string" ? body.id : "";
+  if (!id) return Response.json({ error: "Missing report id." }, { status: 400 });
+  try {
+    await deleteAnalyticsReport(id);
+    return Response.json({ ok: true });
+  } catch (error) {
+    console.error("Analytics report delete failed:", error);
+    return Response.json({ error: "Could not delete the report." }, { status: 500 });
   }
 }
