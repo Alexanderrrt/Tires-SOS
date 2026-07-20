@@ -16,7 +16,7 @@ import AdsOverview from "./AdsOverview";
 import AdsInsights from "./AdsInsights";
 import AdsAlerts from "./AdsAlerts";
 import AdsReports from "./AdsReports";
-import AdsBilling from "./AdsBilling";
+import AdsSpend from "./AdsSpend";
 import AdsSettings from "./AdsSettings";
 import SiteAnalytics from "./SiteAnalytics";
 import { adminServiceLabel, adminSourceLabel } from "./admin-display";
@@ -106,14 +106,14 @@ const ADS_ADMIN = {
   insightsTab: { en: "AI Insights", es: "IA" },
   alertsTab: { en: "Alerts", es: "Alertas" },
   reportsTab: { en: "Reports", es: "Reportes" },
-  billingTab: { en: "Billing", es: "Facturación" },
+  spendTab: { en: "Ad Spend", es: "Gasto en anuncios" },
   settingsTab: { en: "Connections", es: "Conexiones" },
   siteAnalyticsTab: { en: "Website Analytics", es: "Analítica del sitio" },
   overviewTitle: { en: "Ads Overview", es: "Resumen de anuncios" },
   insightsTitle: { en: "AI Insights", es: "IA" },
   alertsTitle: { en: "Alerts", es: "Alertas" },
   reportsTitle: { en: "Ad Performance Reports", es: "Reportes de anuncios" },
-  billingTitle: { en: "Billing", es: "Facturación" },
+  spendTitle: { en: "Ad Spend by Platform", es: "Gasto en anuncios por plataforma" },
   settingsTitle: { en: "Ad Platform Connections", es: "Conexiones de plataformas" },
   siteAnalyticsTitle: { en: "Website Analytics", es: "Analítica del sitio" },
 };
@@ -410,7 +410,7 @@ export default function PricingEditor({
     const requestedView = new URLSearchParams(window.location.search).get("view");
     if ([
       "overview", "leads", "appointments", "yelp", "whatsapp", "chat", "pricing", "api",
-      "ads-overview", "ads-insights", "ads-alerts", "ads-reports", "ads-billing", "ads-settings", "site-analytics",
+      "ads-overview", "ads-insights", "ads-alerts", "ads-reports", "ads-spend", "ads-settings", "site-analytics",
     ].includes(requestedView)) {
       setActiveTab(requestedView);
     }
@@ -751,7 +751,7 @@ export default function PricingEditor({
             : activeTab === "ads-insights" ? ADS_ADMIN.insightsTitle
             : activeTab === "ads-alerts" ? ADS_ADMIN.alertsTitle
             : activeTab === "ads-reports" ? ADS_ADMIN.reportsTitle
-            : activeTab === "ads-billing" ? ADS_ADMIN.billingTitle
+            : activeTab === "ads-spend" ? ADS_ADMIN.spendTitle
             : activeTab === "ads-settings" ? ADS_ADMIN.settingsTitle
             : activeTab === "site-analytics" ? ADS_ADMIN.siteAnalyticsTitle
             : E.title;
@@ -778,7 +778,7 @@ export default function PricingEditor({
       { id: "ads-insights", label: t(ADS_ADMIN.insightsTab), mark: "AI" },
       { id: "ads-alerts", label: t(ADS_ADMIN.alertsTab), mark: "AL" },
       { id: "ads-reports", label: t(ADS_ADMIN.reportsTab), mark: "RP" },
-      { id: "ads-billing", label: t(ADS_ADMIN.billingTab), mark: "BL" },
+      { id: "ads-spend", label: t(ADS_ADMIN.spendTab), mark: "SP" },
       { id: "ads-settings", label: t(ADS_ADMIN.settingsTab), mark: "CN" },
       { id: "site-analytics", label: t(ADS_ADMIN.siteAnalyticsTab), mark: "SA" },
     ] },
@@ -1262,8 +1262,8 @@ export default function PricingEditor({
           <AdsAlerts t={t} lang={lang} />
         ) : activeTab === "ads-reports" ? (
           <AdsReports t={t} lang={lang} />
-        ) : activeTab === "ads-billing" ? (
-          <AdsBilling t={t} lang={lang} />
+        ) : activeTab === "ads-spend" ? (
+          <AdsSpend t={t} lang={lang} />
         ) : activeTab === "ads-settings" ? (
           <AdsSettings t={t} lang={lang} />
         ) : activeTab === "site-analytics" ? (
