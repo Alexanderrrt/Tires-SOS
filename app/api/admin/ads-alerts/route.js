@@ -1,12 +1,12 @@
 import { detectAnomalies } from "../../../../lib/advanced-ai-engine";
-import { requireDashboardUser } from "../../../../lib/require-dashboard-user";
+import { requireAdminUser } from "../../../../lib/require-admin-user";
 
-// Computes alerts from the metrics summary the dashboard already holds.
-// Rule-based checks plus the AI engine's anomaly detection over the
-// daily series. Clerk middleware protects this route, re-checked in-handler.
+// Computes alerts from the metrics summary the Ads Overview tab already
+// holds. Rule-based checks plus the AI engine's anomaly detection over the
+// daily series.
 
 export async function POST(request) {
-  const denied = await requireDashboardUser();
+  const denied = await requireAdminUser();
   if (denied) return denied;
   let body;
   try {
@@ -23,7 +23,6 @@ export async function POST(request) {
   const budget = Number(body?.adBudget) || 500;
   const alerts = [];
 
-  // --- Rule-based checks ---
   const usage = budget > 0 ? (m.totalSpend / budget) * 100 : 0;
   if (usage >= 100) {
     alerts.push({ severity: "CRITICAL", icon: "💸", title: "Budget exhausted", detail: `Spend has hit $${m.totalSpend.toFixed(0)} of the $${budget} monthly budget. Pause campaigns or raise the budget.` });
@@ -49,7 +48,6 @@ export async function POST(request) {
     alerts.push({ severity: "WARNING", icon: "👀", title: "Low click-through rate", detail: `CTR is ${ctr}% across ${m.totalImpressions.toLocaleString()} impressions — ad creative may be fatigued.` });
   }
 
-  // --- AI anomaly detection over the daily series ---
   try {
     const daily = Array.isArray(m.daily) ? m.daily : [];
     if (daily.length >= 4) {

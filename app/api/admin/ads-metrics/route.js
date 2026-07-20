@@ -1,8 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
-import { requireDashboardUser } from "../../../../../../lib/require-dashboard-user";
+import { requireAdminUser } from "../../../../lib/require-admin-user";
+
+const DEFAULT_CLIENT_ID = "00000000-0000-4000-8000-000000000001";
 
 function cleanEnv(value) {
-  return typeof value === "string" ? value.replace(/^\uFEFF/, "").trim() : value;
+  return typeof value === "string" ? value.replace(/^﻿/, "").trim() : value;
 }
 
 function emptySummary() {
@@ -25,18 +27,16 @@ function emptySummary() {
 }
 
 /**
- * Get real-time metrics for a client
- * GET /api/dashboard/clients/[clientId]/metrics?days=7
+ * Ad performance metrics for the single Tires SOS ad account.
+ * GET /api/admin/ads-metrics?days=7
  */
-export async function GET(request, { params }) {
-  const denied = await requireDashboardUser();
+export async function GET(request) {
+  const denied = await requireAdminUser();
   if (denied) return denied;
   try {
-    const { clientId } = await params;
     const { searchParams } = new URL(request.url);
     const days = parseInt(searchParams.get("days")) || 7;
 
-    // Get metrics for last N days
     const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
       .toISOString()
       .split("T")[0];
@@ -54,16 +54,14 @@ export async function GET(request, { params }) {
         campaign:campaigns(campaign_name, platform)
       `
       )
-      .eq("client_id", clientId)
+      .eq("client_id", DEFAULT_CLIENT_ID)
       .gte("metric_date", startDate)
       .order("metric_date", { ascending: true });
 
     if (error) throw error;
 
-    // Aggregate metrics
     const summary = emptySummary();
 
-    // Process metrics
     metrics.forEach((m) => {
       summary.totalSpend += Number(m.spend) || 0;
       summary.totalClicks += Number(m.clicks) || 0;
@@ -77,7 +75,6 @@ export async function GET(request, { params }) {
       }
     });
 
-    // Calculate averages
     summary.avgROAS =
       summary.totalSpend > 0
         ? (summary.totalConversions / summary.totalSpend).toFixed(2)
@@ -91,14 +88,11 @@ export async function GET(request, { params }) {
         ? (summary.totalSpend / summary.totalClicks).toFixed(2)
         : 0;
 
-    // Calculate ROAS by platform
     Object.keys(summary.byPlatform).forEach((platform) => {
       const p = summary.byPlatform[platform];
-      p.roas =
-        p.spend > 0 ? (p.conversions / p.spend).toFixed(2) : 0;
+      p.roas = p.spend > 0 ? (p.conversions / p.spend).toFixed(2) : 0;
     });
 
-    // Group by day for charts
     const dailyMap = {};
     metrics.forEach((m) => {
       if (!dailyMap[m.metric_date]) {
@@ -120,7 +114,6 @@ export async function GET(request, { params }) {
       roas: day.spend > 0 ? day.conversions / day.spend : 0,
     }));
 
-    // Detect trend
     if (summary.daily.length > 3) {
       const recent = summary.daily.slice(-3);
       const older = summary.daily.slice(-6, -3);
@@ -140,10 +133,7 @@ export async function GET(request, { params }) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error fetching metrics:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500 }
-    );
+    console.error("Error fetching ads metrics:", error);
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }

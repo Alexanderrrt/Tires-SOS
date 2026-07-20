@@ -1,10 +1,9 @@
-// Dashboard-triggered optimization run. Clerk middleware protects this
-// route; it proxies to the cron endpoint with the server-side secret so
-// the secret never reaches the browser.
-import { requireDashboardUser } from "../../../../lib/require-dashboard-user";
+// Admin-triggered optimization run. Proxies to the cron endpoint with the
+// server-side secret so the secret never reaches the browser.
+import { requireAdminUser } from "../../../../lib/require-admin-user";
 
 export async function POST(request) {
-  const denied = await requireDashboardUser();
+  const denied = await requireAdminUser();
   if (denied) return denied;
   if (!process.env.CRON_SECRET) {
     return Response.json(

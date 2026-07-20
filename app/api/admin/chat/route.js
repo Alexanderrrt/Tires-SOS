@@ -1,11 +1,9 @@
-import { cookies } from "next/headers";
-import { verifySession, SESSION_COOKIE } from "../../../../lib/auth";
+import { isAdminAuthorized } from "../../../../lib/admin-auth";
 import { setChatSettings, chatStoreConfigured } from "../../../../lib/chat-settings-store";
 import { sanitizeChatSettings } from "../../../../lib/chat-settings-validate";
 
 async function requireAuth() {
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  return verifySession(token);
+  return isAdminAuthorized();
 }
 
 export async function PUT(request) {

@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { auth } from "@clerk/nextjs/server";
-import { isDashboardUserAllowed } from "../../../../lib/dashboard-auth";
+import { isAdminUserAllowed } from "../../../../lib/admin-auth";
 import { listAnalyticsReports, saveAnalyticsReport } from "../../../../lib/analytics-reports-store";
 
 export const runtime = "nodejs";
@@ -31,7 +31,7 @@ function validateReport(body) {
 
 export async function GET() {
   const { userId } = await auth();
-  if (!isDashboardUserAllowed(userId)) return Response.json({ error: "Forbidden." }, { status: 403 });
+  if (!isAdminUserAllowed(userId)) return Response.json({ error: "Forbidden." }, { status: 403 });
   try {
     const reports = await listAnalyticsReports();
     return Response.json({ ok: true, reports }, { headers: { "Cache-Control": "no-store" } });

@@ -1,12 +1,10 @@
-import { cookies } from "next/headers";
-import { verifySession, SESSION_COOKIE } from "../../../../lib/auth";
+import { isAdminAuthorized } from "../../../../lib/admin-auth";
 import { getGroqStatus, recordGroqResponse, recordGroqError } from "../../../../lib/groq-status";
 
 export const dynamic = "force-dynamic";
 
 async function requireAuth() {
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  return verifySession(token);
+  return isAdminAuthorized();
 }
 
 // A minimal, cheap live ping (max_tokens: 1) so the admin panel can refresh

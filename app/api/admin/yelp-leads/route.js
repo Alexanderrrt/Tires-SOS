@@ -1,12 +1,10 @@
-import { cookies } from "next/headers";
-import { verifySession, SESSION_COOKIE } from "../../../../lib/auth";
+import { isAdminAuthorized } from "../../../../lib/admin-auth";
 import { listRecentYelpLeads } from "../../../../lib/yelp-leads-store";
 import { gmailConfigured } from "../../../../lib/gmail-client";
 import { runYelpLeadResponder } from "../../../../lib/yelp-lead-responder";
 
 async function requireAuth() {
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  return verifySession(token);
+  return isAdminAuthorized();
 }
 
 export async function GET() {

@@ -1,5 +1,4 @@
-import { cookies } from "next/headers";
-import { verifySession, SESSION_COOKIE } from "../../../../lib/auth";
+import { isAdminAuthorized } from "../../../../lib/admin-auth";
 import {
   blockSlot,
   createManualAppointment,
@@ -16,8 +15,7 @@ import { validateShopSlot } from "../../../../lib/appointment-slots";
 import { isValidDateKey, isValidTimeKey } from "../../../../lib/shop-time";
 
 async function requireAuth() {
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  return verifySession(token);
+  return isAdminAuthorized();
 }
 
 export async function GET() {

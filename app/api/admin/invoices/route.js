@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { requireDashboardUser } from "../../../../lib/require-dashboard-user";
+import { requireAdminUser } from "../../../../lib/require-admin-user";
 
 // Invoice list for the Billing view. Reads the invoices table when
 // Supabase has one; otherwise returns an auto-generated draft for the
@@ -31,7 +31,7 @@ function draftInvoice() {
 }
 
 export async function GET() {
-  const denied = await requireDashboardUser();
+  const denied = await requireAdminUser();
   if (denied) return denied;
   const url = cleanEnv(process.env.SUPABASE_URL);
   const key = cleanEnv(process.env.SUPABASE_SERVICE_ROLE_KEY);

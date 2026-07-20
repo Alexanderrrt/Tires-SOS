@@ -1,5 +1,4 @@
-import { cookies } from "next/headers";
-import { authConfigured, verifySession, SESSION_COOKIE } from "../../../../lib/auth";
+import { isAdminAuthorized } from "../../../../lib/admin-auth";
 import { notifyLead, notifyConfigured } from "../../../../lib/lead-notify";
 
 const NO_STORE = { "Cache-Control": "no-store" };
@@ -9,12 +8,7 @@ function json(body, status = 200) {
 }
 
 export async function POST() {
-  if (!authConfigured()) {
-    return json({ ok: false, status: "auth_not_configured", error: "Admin authentication is not configured." }, 503);
-  }
-
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  if (!(await verifySession(token))) {
+  if (!(await isAdminAuthorized())) {
     return json({ ok: false, status: "unauthorized", error: "Unauthorized." }, 401);
   }
 

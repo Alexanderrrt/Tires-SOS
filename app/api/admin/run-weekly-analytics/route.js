@@ -1,12 +1,12 @@
 import { runWeeklyAnalyticsReport } from "../../../../lib/weekly-analytics-runner";
-import { requireDashboardUser } from "../../../../lib/require-dashboard-user";
+import { requireAdminUser } from "../../../../lib/require-admin-user";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 export async function POST(request) {
-  const denied = await requireDashboardUser();
+  const denied = await requireAdminUser();
   if (denied) return denied;
   try {
     const result = await runWeeklyAnalyticsReport(new URL(request.url).origin);

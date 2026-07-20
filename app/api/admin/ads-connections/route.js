@@ -4,20 +4,20 @@ import {
   setAdConnections,
   maskConnections,
 } from "../../../../lib/ad-connections-store";
-import { requireDashboardUser } from "../../../../lib/require-dashboard-user";
+import { requireAdminUser } from "../../../../lib/require-admin-user";
 
-// Clerk middleware protects /api/dashboard(.*); requireDashboardUser() re-checks
+// Clerk middleware protects /api/admin(.*); requireAdminUser() re-checks
 // in-handler as defense-in-depth because these routes handle ad credentials.
 
 export async function GET() {
-  const denied = await requireDashboardUser();
+  const denied = await requireAdminUser();
   if (denied) return denied;
   const connections = await getAdConnections();
   return Response.json({ platforms: maskConnections(connections) });
 }
 
 export async function PUT(request) {
-  const denied = await requireDashboardUser();
+  const denied = await requireAdminUser();
   if (denied) return denied;
   let body;
   try {
@@ -35,8 +35,6 @@ export async function PUT(request) {
   const connections = await getAdConnections();
   const entry = connections[platform];
 
-  // Merge only non-empty submitted values so masked/blank inputs keep
-  // whatever is already saved.
   for (const f of def.fields) {
     const value = fields?.[f.key];
     if (typeof value === "string" && value.trim() && !value.startsWith("••••")) {
@@ -66,7 +64,7 @@ export async function PUT(request) {
 }
 
 export async function DELETE(request) {
-  const denied = await requireDashboardUser();
+  const denied = await requireAdminUser();
   if (denied) return denied;
   let body;
   try {

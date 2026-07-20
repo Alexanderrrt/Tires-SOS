@@ -6,7 +6,7 @@ import { useCallback, useRef } from "react";
 const TAPS_REQUIRED = 5;
 const TAP_WINDOW_MS = 2200;
 
-// Five quick taps on the header logo → /admin/login. Invisible to normal visitors.
+// Five quick taps on the header logo → /admin. Invisible to normal visitors.
 export function useSecretAdminTap() {
   const router = useRouter();
   const countRef = useRef(0);
@@ -27,7 +27,7 @@ export function useSecretAdminTap() {
       if (countRef.current >= TAPS_REQUIRED) {
         countRef.current = 0;
         windowStartRef.current = 0;
-        router.push("/admin/login");
+        router.push("/admin");
       }
     },
     [router]

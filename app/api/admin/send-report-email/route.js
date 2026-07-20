@@ -1,11 +1,10 @@
 import { sendDailySummary } from "../../../../lib/send-report";
-import { requireDashboardUser } from "../../../../lib/require-dashboard-user";
+import { requireAdminUser } from "../../../../lib/require-admin-user";
 
-// Sends the daily performance summary email. Protected by Clerk
-// middleware, with an in-handler re-check as defense-in-depth.
+// Sends the daily ad performance summary email.
 
 export async function POST(request) {
-  const denied = await requireDashboardUser();
+  const denied = await requireAdminUser();
   if (denied) return denied;
   if (!process.env.RESEND_API_KEY || !process.env.NOTIFY_EMAIL_RECIPIENT) {
     return Response.json(

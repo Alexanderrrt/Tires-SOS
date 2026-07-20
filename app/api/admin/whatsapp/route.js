@@ -1,11 +1,10 @@
-import { cookies } from "next/headers";
-import { verifySession, SESSION_COOKIE } from "../../../../lib/auth";
+import { isAdminAuthorized } from "../../../../lib/admin-auth";
 import { sendWhatsAppMedia, sendWhatsAppText, uploadWhatsAppMedia, whatsappConfigured } from "../../../../lib/whatsapp-client";
 import { getWhatsAppConversation, getWhatsAppGlobalBotEnabled, getWhatsAppResetState, listWhatsAppConversations, resetWhatsAppConversation, saveOutboundWhatsAppMessage, setWhatsAppBotEnabled, setWhatsAppContextEnabled, setWhatsAppGlobalBotEnabled } from "../../../../lib/whatsapp-store";
 import { deleteRecord, getLeadBySession } from "../../../../lib/chat-records-store";
 
 async function authorized() {
-  return verifySession((await cookies()).get(SESSION_COOKIE)?.value);
+  return isAdminAuthorized();
 }
 
 export async function GET() {

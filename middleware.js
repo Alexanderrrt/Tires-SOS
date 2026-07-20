@@ -1,22 +1,21 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { isDashboardUserAllowed } from "./lib/dashboard-auth";
+import { isAdminUserAllowed } from "./lib/admin-auth";
 
-const isDashboardRoute = createRouteMatcher([
-  "/dashboard(.*)",
-  "/api/dashboard(.*)",
-  "/api/admin/analytics-reports",
+const isAdminRoute = createRouteMatcher([
+  "/admin(.*)",
+  "/api/admin(.*)",
 ]);
-const isPublicDashboardRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
+const isPublicAdminRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
   const isReportPublisher =
     request.method === "POST" && request.nextUrl.pathname === "/api/admin/analytics-reports";
 
-  if (isDashboardRoute(request) && !isPublicDashboardRoute(request) && !isReportPublisher) {
+  if (isAdminRoute(request) && !isPublicAdminRoute(request) && !isReportPublisher) {
     await auth.protect();
     const { userId } = await auth();
-    if (!isDashboardUserAllowed(userId)) {
+    if (!isAdminUserAllowed(userId)) {
       if (request.nextUrl.pathname.startsWith("/api/")) {
         return NextResponse.json({ error: "Forbidden." }, { status: 403 });
       }
@@ -27,9 +26,8 @@ export default clerkMiddleware(async (auth, request) => {
 
 export const config = {
   matcher: [
-    "/dashboard(.*)",
-    "/api/dashboard(.*)",
-    "/api/admin/analytics-reports",
+    "/admin(.*)",
+    "/api/admin(.*)",
     "/sign-in(.*)",
     "/sign-up(.*)",
     "/__clerk/:path*",

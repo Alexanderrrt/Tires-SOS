@@ -491,23 +491,6 @@ export const COPY = {
     followUs: { en: "Follow us", es: "Síganos" },
   },
   admin: {
-    login: {
-      title: { en: "Admin — Pricing", es: "Admin — Precios" },
-      intro: {
-        en: "Enter the admin password to edit quote pricing.",
-        es: "Ingresa la contraseña de administrador para editar los precios.",
-      },
-      passwordPlaceholder: { en: "Password", es: "Contraseña" },
-      passwordAria: { en: "Admin password", es: "Contraseña de administrador" },
-      signIn: { en: "Sign in", es: "Iniciar sesión" },
-      signingIn: { en: "Signing in…", es: "Iniciando sesión…" },
-      wrongPassword: { en: "Incorrect password.", es: "Contraseña incorrecta." },
-      notConfigured: {
-        en: "Admin auth is not configured (set ADMIN_PASSWORD and AUTH_SECRET).",
-        es: "La autenticación de admin no está configurada (define ADMIN_PASSWORD y AUTH_SECRET).",
-      },
-      failed: { en: "Login failed.", es: "No se pudo iniciar sesión." },
-    },
     editor: {
       title: { en: "Quote Pricing", es: "Precios del Cotizador" },
       storageWarn: {

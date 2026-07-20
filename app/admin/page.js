@@ -1,6 +1,6 @@
-import { cookies } from "next/headers";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { verifySession, authConfigured, SESSION_COOKIE } from "../../lib/auth";
+import { isAdminUserAllowed } from "../../lib/admin-auth";
 import { getPricing, storeConfigured } from "../../lib/pricing-store";
 import { getChatSettings, chatStoreConfigured } from "../../lib/chat-settings-store";
 import { getChatRecords, recordsStoreConfigured } from "../../lib/chat-records-store";
@@ -20,9 +20,9 @@ export const metadata = {
 };
 
 export default async function AdminPage() {
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  const ok = await verifySession(token);
-  if (!ok) redirect("/admin/login");
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in?redirect_url=/admin");
+  if (!isAdminUserAllowed(userId)) redirect("/");
 
   const [pricing, chatSettings, records, yelpLeads, whatsappConversations, whatsappGlobalBotEnabled] = await Promise.all([
     getPricing(),
@@ -47,7 +47,6 @@ export default async function AdminPage() {
         persistent={storeConfigured()}
         chatPersistent={chatStoreConfigured()}
         recordsPersistent={recordsStoreConfigured()}
-        authReady={authConfigured()}
       />
     </main>
   );

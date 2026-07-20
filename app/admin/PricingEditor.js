@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useClerk } from "@clerk/nextjs";
 import { useLanguage, useT } from "../i18n/LanguageContext";
 import { COPY } from "../site.config";
 import AdminLoader from "./AdminLoader";
@@ -11,6 +12,13 @@ import ApiStatus from "./ApiStatus";
 import AdminOverview from "./AdminOverview";
 import YelpLeads from "./YelpLeads";
 import WhatsAppInbox from "./WhatsAppInbox";
+import AdsOverview from "./AdsOverview";
+import AdsInsights from "./AdsInsights";
+import AdsAlerts from "./AdsAlerts";
+import AdsReports from "./AdsReports";
+import AdsBilling from "./AdsBilling";
+import AdsSettings from "./AdsSettings";
+import SiteAnalytics from "./SiteAnalytics";
 import { adminServiceLabel, adminSourceLabel } from "./admin-display";
 
 const E = COPY.admin.editor;
@@ -90,6 +98,24 @@ const CHAT_ADMIN = {
   allStatuses: { en: "All statuses", es: "Todos los estados" },
   results: { en: "results", es: "resultados" },
   exportCsv: { en: "Export CSV", es: "Exportar CSV" },
+};
+
+const ADS_ADMIN = {
+  ads: { en: "Ads", es: "Anuncios" },
+  overviewTab: { en: "Overview", es: "Resumen" },
+  insightsTab: { en: "AI Insights", es: "IA" },
+  alertsTab: { en: "Alerts", es: "Alertas" },
+  reportsTab: { en: "Reports", es: "Reportes" },
+  billingTab: { en: "Billing", es: "Facturación" },
+  settingsTab: { en: "Connections", es: "Conexiones" },
+  siteAnalyticsTab: { en: "Website Analytics", es: "Analítica del sitio" },
+  overviewTitle: { en: "Ads Overview", es: "Resumen de anuncios" },
+  insightsTitle: { en: "AI Insights", es: "IA" },
+  alertsTitle: { en: "Alerts", es: "Alertas" },
+  reportsTitle: { en: "Ad Performance Reports", es: "Reportes de anuncios" },
+  billingTitle: { en: "Billing", es: "Facturación" },
+  settingsTitle: { en: "Ad Platform Connections", es: "Conexiones de plataformas" },
+  siteAnalyticsTitle: { en: "Website Analytics", es: "Analítica del sitio" },
 };
 
 const RECORD_COPY = {
@@ -357,9 +383,9 @@ export default function PricingEditor({
   persistent,
   chatPersistent,
   recordsPersistent,
-  authReady,
 }) {
   const router = useRouter();
+  const { signOut } = useClerk();
   const { lang, toggleLang } = useLanguage();
   const t = useT();
   const [activeTab, setActiveTab] = useState("overview");
@@ -382,7 +408,10 @@ export default function PricingEditor({
 
   useEffect(() => {
     const requestedView = new URLSearchParams(window.location.search).get("view");
-    if (["overview", "leads", "appointments", "yelp", "whatsapp", "chat", "pricing", "api"].includes(requestedView)) {
+    if ([
+      "overview", "leads", "appointments", "yelp", "whatsapp", "chat", "pricing", "api",
+      "ads-overview", "ads-insights", "ads-alerts", "ads-reports", "ads-billing", "ads-settings", "site-analytics",
+    ].includes(requestedView)) {
       setActiveTab(requestedView);
     }
   }, []);
@@ -695,9 +724,7 @@ export default function PricingEditor({
 
   async function logout() {
     setLoggingOut(true);
-    await fetch("/api/admin/logout", { method: "POST" });
-    router.push("/admin/login");
-    router.refresh();
+    await signOut({ redirectUrl: "/" });
   }
 
   function navigate(nextTab) {
@@ -720,6 +747,13 @@ export default function PricingEditor({
             ? CHAT_ADMIN.chatTitle
             : activeTab === "whatsapp" ? { en: "WhatsApp Inbox", es: "Bandeja de WhatsApp" }
             : activeTab === "api" ? { en: "API & System Health", es: "API y estado del sistema" }
+            : activeTab === "ads-overview" ? ADS_ADMIN.overviewTitle
+            : activeTab === "ads-insights" ? ADS_ADMIN.insightsTitle
+            : activeTab === "ads-alerts" ? ADS_ADMIN.alertsTitle
+            : activeTab === "ads-reports" ? ADS_ADMIN.reportsTitle
+            : activeTab === "ads-billing" ? ADS_ADMIN.billingTitle
+            : activeTab === "ads-settings" ? ADS_ADMIN.settingsTitle
+            : activeTab === "site-analytics" ? ADS_ADMIN.siteAnalyticsTitle
             : E.title;
   const showSave = activeTab === "chat" || activeTab === "pricing";
   const recordsTab = activeTab === "leads" || activeTab === "appointments";
@@ -738,6 +772,15 @@ export default function PricingEditor({
     { label: CHAT_ADMIN.channels, items: [
       { id: "whatsapp", label: "WhatsApp", mark: "WA", count: initialWhatsAppConversations.length },
       { id: "yelp", label: t(CHAT_ADMIN.yelpTab), mark: "YP", count: yelpLeads.length },
+    ] },
+    { label: ADS_ADMIN.ads, items: [
+      { id: "ads-overview", label: t(ADS_ADMIN.overviewTab), mark: "OV" },
+      { id: "ads-insights", label: t(ADS_ADMIN.insightsTab), mark: "AI" },
+      { id: "ads-alerts", label: t(ADS_ADMIN.alertsTab), mark: "AL" },
+      { id: "ads-reports", label: t(ADS_ADMIN.reportsTab), mark: "RP" },
+      { id: "ads-billing", label: t(ADS_ADMIN.billingTab), mark: "BL" },
+      { id: "ads-settings", label: t(ADS_ADMIN.settingsTab), mark: "CN" },
+      { id: "site-analytics", label: t(ADS_ADMIN.siteAnalyticsTab), mark: "SA" },
     ] },
     { label: CHAT_ADMIN.configuration, items: [
       { id: "chat", label: t(CHAT_ADMIN.chatTab), mark: "CH" },
@@ -1211,6 +1254,20 @@ export default function PricingEditor({
               ))}
             </section>
           </>
+        ) : activeTab === "ads-overview" ? (
+          <AdsOverview t={t} lang={lang} onNavigate={navigate} />
+        ) : activeTab === "ads-insights" ? (
+          <AdsInsights t={t} lang={lang} onNavigate={navigate} />
+        ) : activeTab === "ads-alerts" ? (
+          <AdsAlerts t={t} lang={lang} />
+        ) : activeTab === "ads-reports" ? (
+          <AdsReports t={t} lang={lang} />
+        ) : activeTab === "ads-billing" ? (
+          <AdsBilling t={t} lang={lang} />
+        ) : activeTab === "ads-settings" ? (
+          <AdsSettings t={t} lang={lang} />
+        ) : activeTab === "site-analytics" ? (
+          <SiteAnalytics t={t} lang={lang} />
         ) : (
           <ApiStatus t={t} lang={lang} />
         )}
