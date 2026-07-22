@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import Anthropic from "@anthropic-ai/sdk";
+import { jsonAiClient } from "@/lib/ai-json-client";
 import { optimizeBudget, getDailyPerformanceSummary, identifyUnderperformers } from "@/lib/budget-optimizer";
 import { generateAdVariations } from "@/lib/ai-ad-generator";
 import {
@@ -19,7 +19,7 @@ import { getAdConnections } from "@/lib/ad-connections-store";
 import { getDeviceBreakdown as getGoogleDeviceBreakdown, getHourBreakdown, getTopKeywords } from "@/lib/google-ads-api";
 import { getDeviceBreakdown as getMetaDeviceBreakdown } from "@/lib/meta-ads-api";
 
-const anthropicClient = new Anthropic();
+const anthropicClient = jsonAiClient;
 
 // Fail closed: reject when CRON_SECRET is unset, and compare in constant time.
 function authorized(request) {

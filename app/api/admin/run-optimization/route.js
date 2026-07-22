@@ -15,7 +15,7 @@ export async function POST(request) {
   const origin = new URL(request.url).origin;
 
   try {
-    const res = await fetch(`${origin}/api/cron/optimize-ads`, {
+    const res = await fetch(`${origin}/api/cron/optimize-ads?dryRun=true`, {
       method: "GET",
       headers: { authorization: `Bearer ${process.env.CRON_SECRET}` },
       cache: "no-store",

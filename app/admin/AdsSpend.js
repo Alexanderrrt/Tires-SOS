@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import AdsDataState from "./AdsDataState";
+import AdsPlatformWarnings from "./AdsPlatformWarnings";
+import { useAdsMetrics } from "./useAdsData";
 
 const PLATFORM_META = {
   google_ads: { label: "Google Ads", icon: "🔍", color: "#4285F4" },
@@ -22,20 +25,15 @@ const COPY = {
 
 export default function AdsSpend({ t }) {
   const [days, setDays] = useState(7);
-  const [metrics, setMetrics] = useState(null);
-
-  useEffect(() => {
-    setMetrics(null);
-    fetch(`/api/admin/ads-metrics?days=${days}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => { if (data && typeof data.totalSpend === "number") setMetrics(data); })
-      .catch(() => {});
-  }, [days]);
+  const metricsState = useAdsMetrics(days);
+  const metrics = metricsState.data;
 
   const totalSpend = metrics?.totalSpend || 0;
 
   return (
     <>
+      <AdsDataState t={t} error={metricsState.error} onRetry={metricsState.retry} />
+      <AdsPlatformWarnings metrics={metrics} />
       <div className="editor__group" style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <div style={{ display: "flex", gap: 6, marginLeft: "auto" }}>
           {[7, 14, 30].map((d) => (
@@ -51,9 +49,9 @@ export default function AdsSpend({ t }) {
         </div>
       </div>
 
-      {!metrics ? (
+      {metricsState.loading ? (
         <div className="editor__group" style={{ marginTop: 14, textAlign: "center", color: "var(--admin-muted)" }}>{t(COPY.loading)}</div>
-      ) : (
+      ) : metrics ? (
         <>
           <div className="ads-stat" style={{ marginTop: 14 }}>
             <div className="ads-stat-label">{t(COPY.totalSpend)}</div>
@@ -92,7 +90,7 @@ export default function AdsSpend({ t }) {
             </div>
           </section>
         </>
-      )}
+      ) : null}
     </>
   );
 }

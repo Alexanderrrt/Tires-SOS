@@ -19,10 +19,8 @@
   min-height: 100dvh;
   margin: 0;
   padding: 0;
-  background-color: #101112;
-  background-image: url("/Background.png");
-  background-position: center top;
-  background-size: cover;
+  background-color: #101214;
+  background-image: radial-gradient(circle at 85% 5%, rgba(232, 93, 4, .08), transparent 30%), linear-gradient(180deg, #101214, #0b0d0f);
   background-attachment: fixed;
   color: var(--admin-text);
   color-scheme: dark;
@@ -145,6 +143,9 @@
 .admin-commandbar > button:disabled { opacity: .45; }
 
 .admin-content { width: 100%; min-width: 0; padding: 22px clamp(18px, 2.5vw, 34px) 48px; }
+.ads-data-error { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 14px; border-color: var(--admin-danger); background: var(--admin-danger-soft); }
+.ads-data-error strong { color: var(--admin-danger); font-size: .8rem; }
+.ads-data-error p { margin: 4px 0 0; overflow-wrap: anywhere; }
 
 /* Overview */
 .ops-overview { display: grid; gap: 18px; }
@@ -384,4 +385,20 @@ button.ops-metric:hover { border-color: #697583; background: #1b1f24; }
   .editor__row, .editor__row label, .editor__cell, .editor__row input { width: 100%; }
   .editor__bi-grid, .editor__prompt-grid, .editor__grid { grid-template-columns: minmax(0, 1fr); }
   .whatsapp-inbox { height: max(590px, calc(100dvh - 210px)); min-height: 590px; border-radius: 8px; }
+}
+
+.ads-analytics { display: grid; gap: 14px; }
+.ads-analytics__hero { display: flex; align-items: center; justify-content: space-between; gap: 20px; border-top: 3px solid var(--admin-accent); }
+.ads-analytics__eyebrow { display: block; margin-bottom: 5px; color: #ff8a43; font-size: .64rem; font-weight: 800; letter-spacing: .1em; }
+.ads-analytics__hero h2 { margin: 0 0 6px; font-size: 1.25rem; }
+.ads-analytics__actions, .ads-range-btns { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.ads-analytics__loading { color: var(--admin-muted); text-align: center; }
+.ads-analytics__stats .ads-stat { border-top: 3px solid var(--admin-accent); }
+.ads-analytics__platforms { overflow-x: auto; }
+.ads-analytics__platforms h2 { margin-bottom: 12px; }
+.ads-analytics__source { display: block; margin-top: 3px; color: var(--admin-muted); font-size: .62rem; }
+.ads-analytics__source.is-live { color: var(--admin-good); }
+
+@media (max-width: 600px) {
+  .ads-analytics__hero { align-items: stretch; flex-direction: column; }
 }

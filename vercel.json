@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron/super-smart-optimize",
+      "path": "/api/cron/optimize-ads",
       "schedule": "0 16 * * *"
     },
     {

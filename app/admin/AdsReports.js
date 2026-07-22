@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import AdsDataState from "./AdsDataState";
+import AdsPlatformWarnings from "./AdsPlatformWarnings";
+import { useAdsMetrics } from "./useAdsData";
 
 const PLATFORM_META = {
   google_ads: { label: "Google Ads", icon: "🔍" },
@@ -24,18 +27,13 @@ const COPY = {
 
 export default function AdsReports({ t }) {
   const [reportDays, setReportDays] = useState(7);
-  const [reportData, setReportData] = useState(null);
-
-  useEffect(() => {
-    setReportData(null);
-    fetch(`/api/admin/ads-metrics?days=${reportDays}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => { if (data && typeof data.totalSpend === "number") setReportData(data); })
-      .catch(() => {});
-  }, [reportDays]);
+  const reportState = useAdsMetrics(reportDays);
+  const reportData = reportState.data;
 
   return (
     <>
+      <AdsDataState t={t} error={reportState.error} onRetry={reportState.retry} />
+      <AdsPlatformWarnings metrics={reportData} />
       <div className="editor__group" style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <div className="ads-range-btns" style={{ display: "flex", gap: 6, marginLeft: "auto" }}>
           {[7, 14, 30].map((d) => (
@@ -51,9 +49,9 @@ export default function AdsReports({ t }) {
         </div>
       </div>
 
-      {!reportData ? (
+      {reportState.loading ? (
         <div className="editor__group" style={{ marginTop: 14, textAlign: "center", color: "var(--admin-muted)" }}>{t(COPY.loading)}</div>
-      ) : (
+      ) : reportData ? (
         <>
           <div className="ads-stats" style={{ marginTop: 14 }}>
             <div className="ads-stat"><div className="ads-stat-label">{t(COPY.spend)}</div><div className="ads-stat-value">${reportData.totalSpend.toFixed(0)}</div><div className="ads-stat-sub">last {reportDays} {t(COPY.days)}</div></div>
@@ -101,7 +99,7 @@ export default function AdsReports({ t }) {
             )}
           </section>
         </>
-      )}
+      ) : null}
     </>
   );
 }

@@ -18,7 +18,7 @@ import AdsAlerts from "./AdsAlerts";
 import AdsReports from "./AdsReports";
 import AdsSpend from "./AdsSpend";
 import AdsSettings from "./AdsSettings";
-import SiteAnalytics from "./SiteAnalytics";
+import AdsAnalytics from "./AdsAnalytics";
 import { adminServiceLabel, adminSourceLabel } from "./admin-display";
 
 const E = COPY.admin.editor;
@@ -108,14 +108,14 @@ const ADS_ADMIN = {
   reportsTab: { en: "Reports", es: "Reportes" },
   spendTab: { en: "Ad Spend", es: "Gasto en anuncios" },
   settingsTab: { en: "Connections", es: "Conexiones" },
-  siteAnalyticsTab: { en: "Website Analytics", es: "Analítica del sitio" },
+  siteAnalyticsTab: { en: "Ads Analytics", es: "Ads Analytics" },
   overviewTitle: { en: "Ads Overview", es: "Resumen de anuncios" },
   insightsTitle: { en: "AI Insights", es: "IA" },
   alertsTitle: { en: "Alerts", es: "Alertas" },
   reportsTitle: { en: "Ad Performance Reports", es: "Reportes de anuncios" },
   spendTitle: { en: "Ad Spend by Platform", es: "Gasto en anuncios por plataforma" },
   settingsTitle: { en: "Ad Platform Connections", es: "Conexiones de plataformas" },
-  siteAnalyticsTitle: { en: "Website Analytics", es: "Analítica del sitio" },
+  siteAnalyticsTitle: { en: "Ads Analytics", es: "Ads Analytics" },
 };
 
 const RECORD_COPY = {
@@ -410,7 +410,7 @@ export default function PricingEditor({
     const requestedView = new URLSearchParams(window.location.search).get("view");
     if ([
       "overview", "leads", "appointments", "yelp", "whatsapp", "chat", "pricing", "api",
-      "ads-overview", "ads-insights", "ads-alerts", "ads-reports", "ads-spend", "ads-settings", "site-analytics",
+      "ads-overview", "ads-insights", "ads-alerts", "ads-reports", "ads-spend", "ads-settings", "ads-analytics",
     ].includes(requestedView)) {
       setActiveTab(requestedView);
     }
@@ -753,7 +753,7 @@ export default function PricingEditor({
             : activeTab === "ads-reports" ? ADS_ADMIN.reportsTitle
             : activeTab === "ads-spend" ? ADS_ADMIN.spendTitle
             : activeTab === "ads-settings" ? ADS_ADMIN.settingsTitle
-            : activeTab === "site-analytics" ? ADS_ADMIN.siteAnalyticsTitle
+            : activeTab === "ads-analytics" ? ADS_ADMIN.siteAnalyticsTitle
             : E.title;
   const showSave = activeTab === "chat" || activeTab === "pricing";
   const recordsTab = activeTab === "leads" || activeTab === "appointments";
@@ -780,7 +780,7 @@ export default function PricingEditor({
       { id: "ads-reports", label: t(ADS_ADMIN.reportsTab), mark: "RP" },
       { id: "ads-spend", label: t(ADS_ADMIN.spendTab), mark: "SP" },
       { id: "ads-settings", label: t(ADS_ADMIN.settingsTab), mark: "CN" },
-      { id: "site-analytics", label: t(ADS_ADMIN.siteAnalyticsTab), mark: "SA" },
+      { id: "ads-analytics", label: t(ADS_ADMIN.siteAnalyticsTab), mark: "AA" },
     ] },
     { label: CHAT_ADMIN.configuration, items: [
       { id: "chat", label: t(CHAT_ADMIN.chatTab), mark: "CH" },
@@ -1266,8 +1266,8 @@ export default function PricingEditor({
           <AdsSpend t={t} lang={lang} />
         ) : activeTab === "ads-settings" ? (
           <AdsSettings t={t} lang={lang} />
-        ) : activeTab === "site-analytics" ? (
-          <SiteAnalytics t={t} lang={lang} />
+        ) : activeTab === "ads-analytics" ? (
+          <AdsAnalytics t={t} lang={lang} />
         ) : (
           <ApiStatus t={t} lang={lang} />
         )}
