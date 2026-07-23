@@ -1,5 +1,7 @@
 "use client";
 
+import YelpDebugPanel from "./YelpDebugPanel";
+
 const YELP_COPY = {
   empty: {
     en: "No Yelp leads yet. New \"Request a Quote\" messages will appear here automatically.",
@@ -77,25 +79,33 @@ function YelpLeadCard({ lead, t, lang }) {
 
 export default function YelpLeads({ leads, t, lang, gmailConfigured, running, onRunNow, lastRunResult }) {
   return (
-    <section className="record-list" aria-label="Yelp">
+    <div className="yelp-admin">
       {!gmailConfigured && <p className="editor__warn">{t(YELP_COPY.notConfigured)}</p>}
 
-      <div className="yelp-toolbar">
-        <button type="button" className="btn btn--primary btn--small" onClick={onRunNow} disabled={running || !gmailConfigured}>
-          {running ? t(YELP_COPY.running) : t(YELP_COPY.runNow)}
-        </button>
-        {lastRunResult ? (
-          <span className="editor__ok">{lastRunResult.checked} {t(YELP_COPY.checked)}</span>
-        ) : (
-          <span className="editor__hint">{t(YELP_COPY.runHint)}</span>
-        )}
-      </div>
+      <YelpDebugPanel t={t} lang={lang} gmailConfigured={gmailConfigured} />
 
-      {leads.length ? (
-        leads.map((lead) => <YelpLeadCard key={lead.id} lead={lead} t={t} lang={lang} />)
-      ) : (
-        <div className="record-empty">{t(YELP_COPY.empty)}</div>
-      )}
-    </section>
+      <section className="yelp-history" aria-label={lang === "es" ? "Historial del respondedor automático" : "Automatic responder history"}>
+        <div className="yelp-history__head">
+          <div>
+            <span>{lang === "es" ? "Flujo existente" : "Existing workflow"}</span>
+            <h2>{lang === "es" ? "Historial del respondedor automático" : "Automatic responder history"}</h2>
+            <p className="editor__hint">{t(YELP_COPY.runHint)}</p>
+          </div>
+          <div className="yelp-toolbar">
+            <button type="button" className="btn btn--ghost btn--small" onClick={onRunNow} disabled={running || !gmailConfigured}>
+              {running ? t(YELP_COPY.running) : t(YELP_COPY.runNow)}
+            </button>
+            {lastRunResult && <span className="editor__ok">{lastRunResult.checked} {t(YELP_COPY.checked)}</span>}
+          </div>
+        </div>
+        <div className="record-list">
+          {leads.length ? (
+            leads.map((lead) => <YelpLeadCard key={lead.id} lead={lead} t={t} lang={lang} />)
+          ) : (
+            <div className="record-empty">{t(YELP_COPY.empty)}</div>
+          )}
+        </div>
+      </section>
+    </div>
   );
 }
