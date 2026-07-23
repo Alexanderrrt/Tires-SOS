@@ -1592,6 +1592,18 @@ body { background: #050505; color: var(--paper); }
 .hero__kicker .icon { color: var(--orange); width: 18px; }
 .hero__title { margin: 0; font-size: clamp(4.5rem, 7.4vw, 7.2rem); line-height: .82; font-style: italic; color: #f7f7f7; text-shadow: 0 4px 18px #000; }
 .hero__title span { color: var(--orange); }
+.hero__title small {
+  display: block;
+  margin-top: 1.1rem;
+  color: #f7f7f7;
+  font-family: var(--font-body);
+  font-size: clamp(.9rem, 1.25vw, 1.15rem);
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: .12em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
 .hero__tagline { max-width: 470px; margin: 1.55rem 0 1.3rem; padding-left: 1rem; border-left: 3px solid var(--orange); color: #cfcfcf; font-size: 1.07rem; line-height: 1.35; }
 .hero__actions { display: flex; flex-wrap: wrap; gap: .75rem; }
 .hero__actions .btn--primary { min-width: 315px; }

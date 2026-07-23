@@ -29,14 +29,16 @@ const signatureFont = Caveat({
   variable: "--font-signature",
 });
 
-const TITLE = `${SITE.name} — Tire Shop in San José, CA | Llantas San José`;
+const TITLE = `Tire Shop & Llantas in San Jose, CA | ${SITE.name}`;
 const DESCRIPTION =
-  "Tire shop in San José, CA: new tires, flat repair, wheel alignment, brakes, oil changes, batteries and rims. Bilingual English/Spanish, best prices in the Bay Area, walk-ins welcome. Taller de llantas en San José.";
+  "Bilingual tire and auto shop in San Jose, CA offering new tires, flat repair, alignments, brakes, oil changes, batteries and rims. Walk-ins welcome.";
 
 export const metadata = {
   metadataBase: new URL(SITE.url),
+  applicationName: SITE.name,
   title: TITLE,
   description: DESCRIPTION,
+  category: "automotive",
   alternates: {
     canonical: "/",
   },
@@ -62,8 +64,8 @@ export const metadata = {
     images: [
       {
         url: "/og.png",
-        width: 1200,
-        height: 630,
+        width: 1659,
+        height: 948,
         alt: "Tires SOS Rescue — tire shop in San José, CA",
       },
     ],
@@ -77,6 +79,13 @@ export const metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
   icons: {
     icon: "/favicon.svg",

@@ -43,7 +43,7 @@ export default function Header() {
         </nav>
 
         <div className="header__actions">
-          <span className="header__hours"><Icon name="clock" /> LUN - SÁB 8AM - 6PM</span>
+          <span className="header__hours"><Icon name="clock" /> MON–FRI 9AM–6PM · SAT 9AM–5PM</span>
 
           <button
             type="button"

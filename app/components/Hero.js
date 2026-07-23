@@ -31,7 +31,11 @@ export default function Hero() {
       <div className="hero__inner">
         <div className="hero__text">
           <p className="hero__kicker"><Icon name="pin" /> {t(COPY.hero.kicker)}</p>
-          <h1 className="hero__title">TIRES <span> SOS</span><br />RESCUE</h1>
+          <h1 className="hero__title">
+            TIRES <span>SOS</span><br />
+            RESCUE
+            <small>Tire Shop in San José, CA</small>
+          </h1>
           <p className="hero__tagline">{t(SITE.tagline)}</p>
           <div className="hero__actions">
             <a href="/quote" className="btn btn--primary"><Icon name="chat" /> {t(COPY.quote.ctaFromHome)} <Icon name="arrow" /></a>

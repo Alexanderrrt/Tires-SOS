@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Get a Quote / Cotizar | Tires SOS Rescue",
   description:
-    "AI-assisted quote starter for tires, brakes, oil changes, alignment and more at Tires SOS Rescue in San Jose, CA. Ask the shop assistant for a quote and get guided from there.",
+    "Start a tire or auto service quote for new tires, brakes, oil changes, alignment and more at Tires SOS Rescue in San Jose, CA.",
   alternates: { canonical: "/quote" },
 };
 

@@ -1,5 +1,10 @@
 import { SignIn } from "@clerk/nextjs";
 
+export const metadata = {
+  title: "Admin Sign In | Tires SOS Rescue",
+  robots: { index: false, follow: false, noarchive: true },
+};
+
 export default function SignInPage() {
   return (
     <div
