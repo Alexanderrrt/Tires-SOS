@@ -140,15 +140,25 @@ export default function YelpDebugPanel({ t, lang, gmailConfigured }) {
   const [days, setDays] = useState(7);
   const [filter, setFilter] = useState("attention");
   const [query, setQuery] = useState("");
-  const [live, setLive] = useState(true);
+  const [live, setLive] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState("");
+  const [selectedDetail, setSelectedDetail] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [cooldownUntil, setCooldownUntil] = useState(0);
   const [replyText, setReplyText] = useState("");
   const [drafting, setDrafting] = useState(false);
   const [sending, setSending] = useState(false);
   const [notice, setNotice] = useState(null);
   const initialLoad = useRef(false);
   const requestInFlight = useRef(false);
+
+  useEffect(() => {
+    if (!cooldownUntil) return undefined;
+    const remaining = Math.max(0, cooldownUntil - Date.now());
+    const timer = setTimeout(() => setCooldownUntil(0), remaining);
+    return () => clearTimeout(timer);
+  }, [cooldownUntil]);
 
   const loadInbox = useCallback(async ({ quiet = false } = {}) => {
     if (!gmailConfigured || requestInFlight.current) return;
@@ -157,8 +167,12 @@ export default function YelpDebugPanel({ t, lang, gmailConfigured }) {
     try {
       const response = await fetch(`/api/admin/yelp-debug?days=${days}`, { cache: "no-store" });
       const body = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(body.error || t(COPY.loadFailed));
+      if (!response.ok) {
+        if (body.retryAfterSeconds) setCooldownUntil(Date.now() + body.retryAfterSeconds * 1_000);
+        throw new Error(body.error || t(COPY.loadFailed));
+      }
       setData(body);
+      setCooldownUntil(0);
       setNotice(null);
       initialLoad.current = true;
     } catch (error) {
@@ -175,12 +189,49 @@ export default function YelpDebugPanel({ t, lang, gmailConfigured }) {
 
   useEffect(() => {
     if (!live || !gmailConfigured) return undefined;
-    const timer = setInterval(() => loadInbox({ quiet: true }), 30_000);
-    return () => clearInterval(timer);
+    const refreshWhenVisible = () => {
+      if (!document.hidden) loadInbox({ quiet: true });
+    };
+    const timer = setInterval(refreshWhenVisible, 120_000);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
   }, [gmailConfigured, live, loadInbox]);
 
   const messages = useMemo(() => data?.messages || [], [data]);
-  const selected = messages.find((message) => message.gmailMessageId === selectedId) || null;
+  const selectedSummary = messages.find((message) => message.gmailMessageId === selectedId) || null;
+  const selected = selectedDetail?.gmailMessageId === selectedId ? selectedDetail : selectedSummary;
+  const detailReady = Boolean(selectedDetail?.gmailMessageId === selectedId);
+
+  useEffect(() => {
+    if (!selectedId || !gmailConfigured) {
+      setSelectedDetail(null);
+      return undefined;
+    }
+    const controller = new AbortController();
+    setDetailLoading(true);
+    fetch(`/api/admin/yelp-debug?messageId=${encodeURIComponent(selectedId)}`, {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          if (body.retryAfterSeconds) setCooldownUntil(Date.now() + body.retryAfterSeconds * 1_000);
+          throw new Error(body.error || t(COPY.loadFailed));
+        }
+        setSelectedDetail(body.message || null);
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") setNotice({ ok: false, text: error.message || t(COPY.loadFailed) });
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setDetailLoading(false);
+      });
+    return () => controller.abort();
+  }, [gmailConfigured, selectedId, t]);
   const visibleMessages = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return messages.filter((message) => {
@@ -198,6 +249,7 @@ export default function YelpDebugPanel({ t, lang, gmailConfigured }) {
 
   function selectMessage(message) {
     setSelectedId(message.gmailMessageId);
+    setSelectedDetail(null);
     setReplyText(message.storedLead?.status === "failed" ? message.storedLead.aiReply || "" : "");
     setNotice(null);
   }
@@ -267,9 +319,9 @@ export default function YelpDebugPanel({ t, lang, gmailConfigured }) {
           <label className="yelp-debug__live">
             <input type="checkbox" checked={live} onChange={(event) => setLive(event.target.checked)} />
             <i />
-            <span>{t(COPY.live)} · 30s</span>
+            <span>{t(COPY.live)} · 120s</span>
           </label>
-          <button type="button" className="btn btn--primary btn--small" onClick={() => loadInbox()} disabled={loading || !gmailConfigured}>
+          <button type="button" className="btn btn--primary btn--small" onClick={() => loadInbox()} disabled={loading || !gmailConfigured || Boolean(cooldownUntil)}>
             {loading ? t(COPY.refreshing) : t(COPY.refresh)}
           </button>
         </div>
@@ -344,6 +396,7 @@ export default function YelpDebugPanel({ t, lang, gmailConfigured }) {
         <div className="yelp-debug__detail">
           {selected ? (
             <>
+              {detailLoading && <div className="yelp-debug__notice">{t(COPY.refreshing)}</div>}
               <div className="yelp-debug__detail-head">
                 <div><span>Yelp lead</span><h3>{selected.customerName || "Yelp customer"}</h3><p>{selected.subject}</p></div>
                 <span className={`yelp-debug__status is-${selected.diagnosis?.code || "unknown"}`}>{diagnosisCopy(selected.diagnosis, lang).label}</span>
@@ -387,16 +440,16 @@ export default function YelpDebugPanel({ t, lang, gmailConfigured }) {
                 <textarea
                   value={replyText}
                   onChange={(event) => setReplyText(event.target.value.slice(0, 5000))}
-                  disabled={!selected.canSend || sending}
+                  disabled={!detailReady || !selected.canSend || sending}
                   placeholder={selected.canSend ? (lang === "es" ? "Escribe una respuesta o genera un borrador..." : "Write a reply or generate an AI draft...") : diagnosisCopy(selected.diagnosis, lang).label}
                   rows={8}
                 />
                 <div className="yelp-debug__composer-actions">
-                  <button type="button" className="btn btn--ghost btn--small" onClick={generateDraft} disabled={!selected.canDraft || drafting || sending}>
+                  <button type="button" className="btn btn--ghost btn--small" onClick={generateDraft} disabled={!detailReady || !selected.canDraft || drafting || sending}>
                     {drafting ? t(COPY.drafting) : t(COPY.draftAi)}
                   </button>
                   <button type="button" className="btn btn--ghost btn--small" onClick={() => setReplyText("")} disabled={!replyText || sending}>{t(COPY.clear)}</button>
-                  <button type="button" className="btn btn--primary btn--small" onClick={sendReply} disabled={!selected.canSend || !replyText.trim() || drafting || sending}>
+                  <button type="button" className="btn btn--primary btn--small" onClick={sendReply} disabled={!detailReady || !selected.canSend || !replyText.trim() || drafting || sending}>
                     {sending ? t(COPY.sending) : t(COPY.send)}
                   </button>
                 </div>
