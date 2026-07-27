@@ -240,6 +240,46 @@ export const SERVICES = [
   },
 ];
 
+// Crawlable service-page copy. Keep these pages specific to the work the shop
+// actually performs; the homepage cards remain a compact visual index.
+export const SERVICE_PAGES = {
+  "new-tires": {
+    title: { en: "New Tires in San Jose, CA", es: "Llantas nuevas en San Jose, CA" },
+    description: { en: "Shop new tires in San Jose from trusted brands with mounting, balancing, and in-store help.", es: "Compra llantas nuevas en San Jose con marcas confiables, montaje, balanceo y ayuda en el taller." },
+    body: { en: "We help drivers in San Jose find the right tire size, brand, and price for their car, SUV, or truck. Ask about current inventory, financing, and our four-tire offers.", es: "Ayudamos a conductores de San Jose a encontrar el tamaño, la marca y el precio adecuados para su carro, SUV o camioneta. Pregunta por inventario, financiamiento y ofertas de cuatro llantas." },
+  },
+  "flat-repair": {
+    title: { en: "Flat Tire Repair in San Jose", es: "Reparacion de llantas ponchadas en San Jose" },
+    description: { en: "Fast in-shop flat tire repair in San Jose. Walk-ins are welcome during shop hours.", es: "Reparacion rapida de llantas ponchadas en San Jose. Aceptamos visitas durante el horario del taller." },
+    body: { en: "Bring your vehicle to Tires SOS Rescue for a tire inspection and patch or plug repair when the damage is safely repairable. We do not provide roadside service or towing.", es: "Trae tu vehiculo a Tires SOS Rescue para inspeccionar y reparar la llanta con parche o tapon cuando sea seguro. No ofrecemos servicio en carretera ni remolque." },
+  },
+  alignment: {
+    title: { en: "Wheel Alignment in San Jose", es: "Alineacion de ruedas en San Jose" },
+    description: { en: "Computerized wheel alignment in San Jose to improve handling and help tires wear evenly.", es: "Alineacion computarizada en San Jose para mejorar el manejo y el desgaste parejo de las llantas." },
+    body: { en: "Our computerized alignment equipment measures each angle so your vehicle tracks straighter and your tires can last longer. Ask the shop about alignment service for sedans, SUVs, and trucks.", es: "Nuestro equipo computarizado mide cada angulo para que tu vehiculo vaya mas derecho y tus llantas duren mas. Pregunta por servicio para sedanes, SUVs y camionetas." },
+  },
+  brakes: {
+    title: { en: "Brake Service in San Jose", es: "Servicio de frenos en San Jose" },
+    description: { en: "Brake inspections, pads, and rotors at a local San Jose auto shop.", es: "Inspecciones de frenos, pastillas y discos en un taller local de San Jose." },
+    body: { en: "If you hear squealing, feel vibration, or notice a change in stopping performance, visit the shop for an inspection. We can review pads, rotors, and related brake needs before recommending work.", es: "Si escuchas chillidos, sientes vibracion o notas cambios al frenar, visita el taller para una inspeccion. Revisamos pastillas, discos y otras necesidades antes de recomendar el trabajo." },
+  },
+  "oil-change": {
+    title: { en: "Oil Change in San Jose, CA", es: "Cambio de aceite en San Jose, CA" },
+    description: { en: "Quick, affordable oil changes in San Jose with a fluid top-off, filter, and tire pressure check.", es: "Cambios de aceite rapidos y economicos en San Jose con revision de fluidos, filtro y presion de llantas." },
+    body: { en: "Keep your vehicle on schedule with an in-shop oil change. Every oil change includes a fluid top-off, filter, and tire pressure check. Walk-ins are welcome.", es: "Mantén tu vehiculo al dia con un cambio de aceite en el taller. Incluye revision de fluidos, filtro y presion de llantas. Aceptamos visitas sin cita." },
+  },
+  batteries: {
+    title: { en: "Car Battery Service in San Jose", es: "Servicio de baterias en San Jose" },
+    description: { en: "Free battery testing and same-day battery replacement in San Jose, when available.", es: "Prueba gratis y reemplazo de bateria el mismo dia en San Jose, cuando haya disponibilidad." },
+    body: { en: "Stop by for a battery test and talk with the shop about replacement options for your vehicle. Availability and final pricing depend on the exact battery and vehicle.", es: "Pasa por una prueba de bateria y conoce opciones de reemplazo para tu vehiculo. La disponibilidad y el precio final dependen de la bateria y el vehiculo." },
+  },
+  rims: {
+    title: { en: "Rims and Wheels in San Jose", es: "Rines y ruedas en San Jose" },
+    description: { en: "Shop new rims in San Jose to fit your vehicle and your budget.", es: "Compra rines nuevos en San Jose para tu vehiculo y presupuesto." },
+    body: { en: "Ask Tires SOS Rescue about rim styles, fitment, and pricing for your vehicle. Our team can help you compare practical options in the shop.", es: "Pregunta a Tires SOS Rescue por estilos, compatibilidad y precios de rines para tu vehiculo. Te ayudamos a comparar opciones en el taller." },
+  },
+};
+
 // Strings for the scrolling marquee strip. Deliberately mixed EN/ES —
 // it reads as one bilingual banner, so it does not switch with the toggle.
 export const MARQUEE_ITEMS = [

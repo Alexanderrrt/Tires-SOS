@@ -199,7 +199,7 @@ export const LEGAL_PAGES = {
         heading: { en: "No emergency or roadside service", es: "Sin servicio de emergencia o carretera" },
         items: {
           en: [
-            "This website does not provide emergency road service or towing.",
+            "Tires SOS Rescue is an in-shop tire and auto service business. This website and our chat do not provide emergency road service or towing.",
             "If you are in immediate danger, contact local emergency services.",
           ],
           es: [

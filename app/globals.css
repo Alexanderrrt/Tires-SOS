@@ -1604,6 +1604,18 @@ body { background: #050505; color: var(--paper); }
   line-height: 1.2;
   text-transform: uppercase;
 }
+
+.service-page { min-height: 70vh; padding: 8rem 1.25rem 5rem; background: var(--paper, #f4efe8); color: #211b16; }
+.service-page__inner { max-width: 760px; margin: 0 auto; }
+.service-page__eyebrow { color: #b33a24; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.service-page h1 { max-width: 680px; margin: .75rem 0 1rem; font-family: var(--font-display), sans-serif; font-size: clamp(3rem, 8vw, 6rem); line-height: .92; text-transform: uppercase; }
+.service-page__lead { font-size: 1.35rem; line-height: 1.45; max-width: 650px; }
+.service-page__inner > p:not(.service-page__eyebrow) { font-size: 1.08rem; line-height: 1.7; }
+.service-page__actions { display: flex; flex-wrap: wrap; gap: .75rem; margin: 2rem 0 3rem; }
+.service-page__locations { padding-top: 2rem; border-top: 1px solid rgba(33, 27, 22, .2); }
+.service-page__locations h2 { font-family: var(--font-display), sans-serif; text-transform: uppercase; }
+.service-page__locations p { line-height: 1.6; }
+.service-page__locations a { color: #b33a24; font-weight: 700; }
 .hero__tagline { max-width: 470px; margin: 1.55rem 0 1.3rem; padding-left: 1rem; border-left: 3px solid var(--orange); color: #cfcfcf; font-size: 1.07rem; line-height: 1.35; }
 .hero__actions { display: flex; flex-wrap: wrap; gap: .75rem; }
 .hero__actions .btn--primary { min-width: 315px; }

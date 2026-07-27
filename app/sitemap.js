@@ -1,4 +1,4 @@
-import { SITE } from "./site.config";
+import { SERVICE_PAGES, SITE } from "./site.config";
 
 export default function sitemap() {
   return [
@@ -12,5 +12,10 @@ export default function sitemap() {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    ...Object.keys(SERVICE_PAGES).map((slug) => ({
+      url: `${SITE.url}/services/${slug}`,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    })),
   ];
 }
