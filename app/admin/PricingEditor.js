@@ -12,13 +12,6 @@ import ApiStatus from "./ApiStatus";
 import AdminOverview from "./AdminOverview";
 import YelpLeads from "./YelpLeads";
 import WhatsAppInbox from "./WhatsAppInbox";
-import AdsOverview from "./AdsOverview";
-import AdsInsights from "./AdsInsights";
-import AdsAlerts from "./AdsAlerts";
-import AdsReports from "./AdsReports";
-import AdsSpend from "./AdsSpend";
-import AdsSettings from "./AdsSettings";
-import AdsAnalytics from "./AdsAnalytics";
 import { adminServiceLabel, adminSourceLabel } from "./admin-display";
 
 const E = COPY.admin.editor;
@@ -98,24 +91,6 @@ const CHAT_ADMIN = {
   allStatuses: { en: "All statuses", es: "Todos los estados" },
   results: { en: "results", es: "resultados" },
   exportCsv: { en: "Export CSV", es: "Exportar CSV" },
-};
-
-const ADS_ADMIN = {
-  ads: { en: "Ads", es: "Anuncios" },
-  overviewTab: { en: "Overview", es: "Resumen" },
-  insightsTab: { en: "AI Insights", es: "IA" },
-  alertsTab: { en: "Alerts", es: "Alertas" },
-  reportsTab: { en: "Reports", es: "Reportes" },
-  spendTab: { en: "Ad Spend", es: "Gasto en anuncios" },
-  settingsTab: { en: "Connections", es: "Conexiones" },
-  siteAnalyticsTab: { en: "Ads Analytics", es: "Ads Analytics" },
-  overviewTitle: { en: "Ads Overview", es: "Resumen de anuncios" },
-  insightsTitle: { en: "AI Insights", es: "IA" },
-  alertsTitle: { en: "Alerts", es: "Alertas" },
-  reportsTitle: { en: "Ad Performance Reports", es: "Reportes de anuncios" },
-  spendTitle: { en: "Ad Spend by Platform", es: "Gasto en anuncios por plataforma" },
-  settingsTitle: { en: "Ad Platform Connections", es: "Conexiones de plataformas" },
-  siteAnalyticsTitle: { en: "Ads Analytics", es: "Ads Analytics" },
 };
 
 const RECORD_COPY = {
@@ -409,8 +384,7 @@ export default function PricingEditor({
   useEffect(() => {
     const requestedView = new URLSearchParams(window.location.search).get("view");
     if ([
-      "overview", "leads", "appointments", "yelp", "whatsapp", "chat", "pricing", "api",
-      "ads-overview", "ads-insights", "ads-alerts", "ads-reports", "ads-spend", "ads-settings", "ads-analytics",
+    "overview", "leads", "appointments", "yelp", "whatsapp", "chat", "pricing", "api",
     ].includes(requestedView)) {
       setActiveTab(requestedView);
     }
@@ -747,13 +721,6 @@ export default function PricingEditor({
             ? CHAT_ADMIN.chatTitle
             : activeTab === "whatsapp" ? { en: "WhatsApp Inbox", es: "Bandeja de WhatsApp" }
             : activeTab === "api" ? { en: "API & System Health", es: "API y estado del sistema" }
-            : activeTab === "ads-overview" ? ADS_ADMIN.overviewTitle
-            : activeTab === "ads-insights" ? ADS_ADMIN.insightsTitle
-            : activeTab === "ads-alerts" ? ADS_ADMIN.alertsTitle
-            : activeTab === "ads-reports" ? ADS_ADMIN.reportsTitle
-            : activeTab === "ads-spend" ? ADS_ADMIN.spendTitle
-            : activeTab === "ads-settings" ? ADS_ADMIN.settingsTitle
-            : activeTab === "ads-analytics" ? ADS_ADMIN.siteAnalyticsTitle
             : E.title;
   const showSave = activeTab === "chat" || activeTab === "pricing";
   const recordsTab = activeTab === "leads" || activeTab === "appointments";
@@ -772,15 +739,6 @@ export default function PricingEditor({
     { label: CHAT_ADMIN.channels, items: [
       { id: "whatsapp", label: "WhatsApp", mark: "WA", count: initialWhatsAppConversations.length },
       { id: "yelp", label: t(CHAT_ADMIN.yelpTab), mark: "YP", count: yelpLeads.length },
-    ] },
-    { label: ADS_ADMIN.ads, items: [
-      { id: "ads-overview", label: t(ADS_ADMIN.overviewTab), mark: "OV" },
-      { id: "ads-insights", label: t(ADS_ADMIN.insightsTab), mark: "AI" },
-      { id: "ads-alerts", label: t(ADS_ADMIN.alertsTab), mark: "AL" },
-      { id: "ads-reports", label: t(ADS_ADMIN.reportsTab), mark: "RP" },
-      { id: "ads-spend", label: t(ADS_ADMIN.spendTab), mark: "SP" },
-      { id: "ads-settings", label: t(ADS_ADMIN.settingsTab), mark: "CN" },
-      { id: "ads-analytics", label: t(ADS_ADMIN.siteAnalyticsTab), mark: "AA" },
     ] },
     { label: CHAT_ADMIN.configuration, items: [
       { id: "chat", label: t(CHAT_ADMIN.chatTab), mark: "CH" },
@@ -1254,20 +1212,6 @@ export default function PricingEditor({
               ))}
             </section>
           </>
-        ) : activeTab === "ads-overview" ? (
-          <AdsOverview t={t} lang={lang} onNavigate={navigate} />
-        ) : activeTab === "ads-insights" ? (
-          <AdsInsights t={t} lang={lang} onNavigate={navigate} />
-        ) : activeTab === "ads-alerts" ? (
-          <AdsAlerts t={t} lang={lang} />
-        ) : activeTab === "ads-reports" ? (
-          <AdsReports t={t} lang={lang} />
-        ) : activeTab === "ads-spend" ? (
-          <AdsSpend t={t} lang={lang} />
-        ) : activeTab === "ads-settings" ? (
-          <AdsSettings t={t} lang={lang} />
-        ) : activeTab === "ads-analytics" ? (
-          <AdsAnalytics t={t} lang={lang} />
         ) : (
           <ApiStatus t={t} lang={lang} />
         )}
