@@ -41,6 +41,20 @@ export const SITE = {
         "https://www.google.com/maps?q=1407+N+10th+St,+San+Jose,+CA+95112&output=embed",
       postalCode: "95112",
     },
+    {
+      id: "hayward",
+      city: "Hayward, CA",
+      status: "mystery",
+      isPublic: false,
+      teaser: {
+        en: "Coming soon to Hayward, CA",
+        es: "Muy pronto en Hayward, CA",
+      },
+      teaserSub: {
+        en: "More details coming soon.",
+        es: "Más detalles próximamente.",
+      },
+    },
   ],
 
   social: {

@@ -9,6 +9,7 @@ import Reveal from "./Reveal";
 import PirelliBadge from "./PirelliBadge";
 
 function LocationCard({ loc, t }) {
+  if (loc.status === "mystery") return <div className="location-card location-card--mystery"><div className="location-card__details"><h3>{t(loc.teaser)}</h3><p>{t(loc.teaserSub)}</p></div></div>;
   return (
     <div className="location-card">
       <div className="location-card__map">
@@ -42,6 +43,7 @@ function LocationCard({ loc, t }) {
 export default function Location() {
   const t = useT();
   const [today, setToday] = useState(null);
+  const [locations, setLocations] = useState(SITE.locations.filter((loc) => loc.id !== "hayward"));
 
   useEffect(() => {
     const update = () => setToday(getShopDateTime().dayOfWeek);
@@ -49,6 +51,7 @@ export default function Location() {
     const timer = setInterval(update, 60 * 60 * 1000);
     return () => clearInterval(timer);
   }, []);
+  useEffect(() => { fetch("/api/locations", { cache: "no-store" }).then((r) => r.ok ? r.json() : null).then((data) => data?.locations && setLocations(data.locations)).catch(() => {}); }, []);
 
   return (
     <section id="location" className="section section--tread">
@@ -68,7 +71,7 @@ export default function Location() {
         </Reveal>
 
         <Reveal className="location-grid">
-          {SITE.locations.map((loc) => (
+          {locations.map((loc) => (
             <LocationCard key={loc.id} loc={loc} t={t} />
           ))}
         </Reveal>

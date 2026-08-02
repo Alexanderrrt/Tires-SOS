@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useT } from "../i18n/LanguageContext";
 import { COPY, SITE } from "../site.config";
 import Reveal from "./Reveal";
@@ -8,6 +9,8 @@ import PirelliBadge from "./PirelliBadge";
 export default function Footer() {
   const t = useT();
   const year = new Date().getFullYear();
+  const [locations, setLocations] = React.useState(SITE.locations.filter((loc) => loc.id !== "hayward"));
+  React.useEffect(() => { fetch("/api/locations", { cache: "no-store" }).then((r) => r.ok ? r.json() : null).then((data) => data?.locations && setLocations(data.locations)).catch(() => {}); }, []);
   const legalLinks = [
     { href: "/privacy", label: { en: "Privacy Policy", es: "Política de Privacidad" } },
     { href: "/terms", label: { en: "Terms of Use", es: "Términos de Uso" } },
@@ -45,7 +48,7 @@ export default function Footer() {
             </div>
           </div>
           <PirelliBadge compact className="footer__pirelli" />
-          {SITE.locations.map((loc) => (
+          {locations.filter((loc) => loc.status !== "mystery").map((loc) => (
             <p key={loc.id}>{loc.full}</p>
           ))}
           <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noreferrer">
