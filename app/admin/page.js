@@ -8,7 +8,9 @@ import { listRecentYelpLeads } from "../../lib/yelp-leads-store";
 import { gmailConfigured } from "../../lib/gmail-client";
 import { getWhatsAppGlobalBotEnabled, listWhatsAppConversations } from "../../lib/whatsapp-store";
 import { whatsappConfigured } from "../../lib/whatsapp-client";
+import { getHaywardRevealed, launchStoreConfigured } from "../../lib/location-launch-store";
 import PricingEditor from "./PricingEditor";
+import LocationLaunchPanel from "./LocationLaunchPanel";
 import "./whatsapp.css";
 import "./admin-shell.css";
 
@@ -24,13 +26,14 @@ export default async function AdminPage() {
   if (!userId) redirect("/sign-in?redirect_url=/admin");
   if (!isAdminUserAllowed(userId)) redirect("/");
 
-  const [pricing, chatSettings, records, yelpLeads, whatsappConversations, whatsappGlobalBotEnabled] = await Promise.all([
+  const [pricing, chatSettings, records, yelpLeads, whatsappConversations, whatsappGlobalBotEnabled, haywardRevealed] = await Promise.all([
     getPricing(),
     getChatSettings(),
     getChatRecords(),
     listRecentYelpLeads().catch(() => []),
     listWhatsAppConversations().catch(() => []),
     getWhatsAppGlobalBotEnabled().catch(() => false),
+    getHaywardRevealed(),
   ]);
 
   return (
@@ -48,6 +51,7 @@ export default async function AdminPage() {
         chatPersistent={chatStoreConfigured()}
         recordsPersistent={recordsStoreConfigured()}
       />
+      <LocationLaunchPanel initialRevealed={haywardRevealed} persistent={launchStoreConfigured()} />
     </main>
   );
 }

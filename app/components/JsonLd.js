@@ -1,4 +1,5 @@
 import { SITE } from "../site.config";
+import { getPublicSite } from "../../lib/location-config";
 
 const DAY_NAMES = [
   "Sunday",
@@ -11,6 +12,7 @@ const DAY_NAMES = [
 ];
 
 function locationSchema(loc) {
+  const city = loc.line2?.split(",")[0] || "San Jose";
   return {
     "@type": ["TireShop", "AutoRepair"],
     "@id": `${SITE.url}/#location-${loc.id}`,
@@ -25,7 +27,7 @@ function locationSchema(loc) {
     address: {
       "@type": "PostalAddress",
       streetAddress: loc.line1,
-      addressLocality: "San José",
+      addressLocality: city,
       addressRegion: "CA",
       postalCode: loc.postalCode,
       addressCountry: "US",
@@ -33,7 +35,7 @@ function locationSchema(loc) {
     hasMap: loc.mapsHref,
     areaServed: {
       "@type": "City",
-      name: "San Jose",
+      name: city,
       sameAs: "https://en.wikipedia.org/wiki/San_Jose,_California",
     },
     openingHoursSpecification: SITE.hours
@@ -72,7 +74,8 @@ function locationSchema(loc) {
 
 // schema.org LocalBusiness markup so Google can surface name, hours,
 // phone and address in local search results and the map pack.
-export default function JsonLd() {
+export default async function JsonLd() {
+  const publicSite = await getPublicSite();
   const data = {
     "@context": "https://schema.org",
     "@graph": [
@@ -97,7 +100,7 @@ export default function JsonLd() {
           "@id": `${SITE.url}/#organization`,
         },
       },
-      ...SITE.locations.map(locationSchema),
+      ...publicSite.locations.filter((location) => location.status !== "mystery").map(locationSchema),
     ],
   };
 

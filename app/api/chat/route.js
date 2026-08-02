@@ -30,7 +30,7 @@ const MAX_TOTAL_MESSAGE_CHARS = 24_000;
 const BUSINESS_FACTS = [
   `WhatsApp: ${SITE.phone}`,
   `WhatsApp: ${SITE.whatsapp}`,
-  `Locations: ${SITE.locations.map((location) => location.full).join("; ")}`,
+  `Locations: ${SITE.locations.filter((location) => location.status !== "mystery").map((location) => location.full).join("; ")}; Coming soon to Hayward, CA. More details coming soon.`,
   `Hours: ${SITE.hours
     .map((hour) => `${hour.label.en}: ${hour.open && hour.close ? `${hour.open}-${hour.close}` : "Closed"}`)
     .join("; ")}`,

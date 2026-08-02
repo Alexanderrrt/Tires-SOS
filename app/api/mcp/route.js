@@ -9,6 +9,7 @@ import { deliverLeadNotification } from "../../../lib/lead-notification-service"
 import { verifyAccessToken } from "../../../lib/mcp-oauth";
 import { formatShopSlot } from "../../../lib/shop-time";
 import { SITE, SERVICES } from "../../site.config";
+import { getPublicSite } from "../../../lib/location-config";
 
 const MAX_SPOKEN_SLOTS = 6;
 
@@ -193,7 +194,7 @@ async function buildServer() {
       const info = {
         phone: SITE.phone,
         whatsapp: SITE.whatsapp,
-        locations: SITE.locations.map((location) => location.full),
+        locations: (await getPublicSite()).locations.map((location) => location.status === "mystery" ? "Coming soon to Hayward, CA; more details coming soon." : location.full),
         hours: SITE.hours,
         services: SERVICES.map((service) => service.title[lang]),
         say: spokenHours(lang),

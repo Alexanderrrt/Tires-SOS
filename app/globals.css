@@ -1813,6 +1813,9 @@ body { background: #050505; color: var(--paper); }
   border: 1px solid var(--line);
   padding: 1.25rem;
 }
+.location-card--mystery { display: grid; min-height: 230px; place-items: center; text-align: center; background: radial-gradient(circle at 50% 0, rgba(255, 194, 43, .16), transparent 60%), #111; }
+.location-card--mystery .location-card__details { padding: 2rem; }
+.location-card--mystery h3 { color: #ffc22b; }
 
 .location-card__map {
   border-radius: var(--r-md);
