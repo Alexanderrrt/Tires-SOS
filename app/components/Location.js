@@ -9,7 +9,7 @@ import Reveal from "./Reveal";
 import PirelliBadge from "./PirelliBadge";
 
 function LocationCard({ loc, t }) {
-  if (loc.status === "mystery") return <div className="location-card location-card--mystery"><div className="location-card__details"><h3>{t(loc.teaser)}</h3><p>{t(loc.teaserSub)}</p></div></div>;
+  if (loc.status === "mystery") return <div className="location-card location-card--mystery"><div className="location-card__map location-card__map--mystery" aria-hidden="true"><span>TIRES SOS</span><i /></div><div className="location-card__details"><span className="location-card__eyebrow">{t({ en: "New location", es: "Nueva ubicación" })}</span><h3>{t(loc.teaser)}</h3><p>{t(loc.teaserSub)}</p></div></div>;
   return (
     <div className="location-card">
       <div className="location-card__map">
