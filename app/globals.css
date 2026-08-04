@@ -1452,6 +1452,8 @@ h3 {
 .reel-card__badge svg,
 .reel-card__badge .icon { width: 16px; height: 16px; flex: none; }
 
+.reel-card--driver-promo .reel-card__play { top: 36%; }
+
 .gallery-cta {
   width: fit-content;
 }
