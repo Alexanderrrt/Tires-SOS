@@ -140,14 +140,18 @@ function ReelCard({ permalink, index, onPlay }) {
   const [src, setSrc] = useState(undefined); // undefined = still probing, null = nothing worked
 
   useEffect(() => {
-    const candidates = [`/reels/reel-${index + 1}.jpg`, FALLBACK_POSTERS[index % FALLBACK_POSTERS.length]];
+    const candidates = [
+      `/reels/reel-${index + 1}.png`,
+      `/reels/reel-${index + 1}.jpg`,
+      FALLBACK_POSTERS[index % FALLBACK_POSTERS.length],
+    ];
     return resolveFirstWorkingImage(candidates, setSrc);
   }, [index]);
 
   return (
     <button
       type="button"
-      className="reel-card reveal-item"
+      className={`reel-card reveal-item${index === 0 ? " reel-card--driver-promo" : ""}`}
       style={{ "--d": `${index * 80}ms` }}
       onClick={() => onPlay(permalink)}
     >
