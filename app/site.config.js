@@ -11,13 +11,13 @@ export const SITE = {
     en: "Tire specialists. Fast service, actual brands, and WhatsApp-first support. We speak your language.",
     es: "Especialistas en llantas. Servicio rápido, marcas reales y atención primero por WhatsApp. Aquí te atendemos como en casa.",
   },
-  phone: "(408) 332-8962",
-  phoneHref: "https://wa.me/14083328962",
-  whatsappHref: "https://wa.me/14083328962",
-  smsHref: "sms:+14083328962",
+  phone: "(408) 759-2435",
+  phoneHref: "https://wa.me/14087592435",
+  whatsappHref: "https://wa.me/14087592435",
+  smsHref: "sms:+14087592435",
   // WhatsApp number in international format, digits only (used by wa.me).
   // Confirm this line is WhatsApp-enabled, or replace with the shop's WhatsApp.
-  whatsapp: "14083328962",
+  whatsapp: "14087592435",
   locations: [
     {
       id: "taylor",

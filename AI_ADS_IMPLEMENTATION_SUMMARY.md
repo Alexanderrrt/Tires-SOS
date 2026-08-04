@@ -188,7 +188,7 @@ const variations = await generateAdVariations("tire-sales", "local-searchers");
     es_headline: "Venta de Llantas: 40% DESCUENTO",
     en_description: "Best prices in San José. Professional installation...",
     es_description: "Los mejores precios. Instalación profesional...",
-    cta: "Call Now: (408) 332-8962",
+    cta: "Call Now: (408) 759-2435",
     audience: "Price-conscious shoppers"
   },
   // ... 4 more variations

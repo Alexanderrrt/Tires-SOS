@@ -29,7 +29,7 @@ export default function Footer() {
         >
           <img
             src="/M3Servicecard.png"
-            alt="Tires SOS Rescue — tires and auto services: llantas, cambio de aceite, frenos, alineación, balanceo, diagnóstico básico. 408-332-8962, @tiressosrescue, 623 E Taylor St, San José, CA"
+            alt="Tires SOS Rescue — tires and auto services: llantas, cambio de aceite, frenos, alineación, balanceo, diagnóstico básico. 408-759-2435, @tiressosrescue, 623 E Taylor St, San José, CA"
           />
         </a>
       </Reveal>

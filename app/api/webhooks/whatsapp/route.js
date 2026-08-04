@@ -102,8 +102,8 @@ export async function POST(request) {
                 await setWhatsAppBotEnabled(conversation.id, true).catch(() => {});
                 console.error("WhatsApp handoff email failed; the bot remains active.", error);
                 const fallbackReply = welcome(lang === "es"
-                  ? "Sigo aquí contigo. No pude avisar al equipo por correo en este momento; si necesitas atención inmediata, llama al (408) 332-8962. Puedes seguir escribiéndome mientras tanto."
-                  : "I'm still here with you. I couldn't notify the team by email right now; for immediate help, call (408) 332-8962. You can keep messaging me in the meantime.");
+                  ? "Sigo aquí contigo. No pude avisar al equipo por correo en este momento; si necesitas atención inmediata, llama al (408) 759-2435. Puedes seguir escribiéndome mientras tanto."
+                  : "I'm still here with you. I couldn't notify the team by email right now; for immediate help, call (408) 759-2435. You can keep messaging me in the meantime.");
                 try {
                   const sent = await sendWhatsAppText(message.from, fallbackReply);
                   await saveOutboundWhatsAppMessage({ conversationId: conversation.id, messageId: sent.messages?.[0]?.id, body: fallbackReply });
@@ -179,7 +179,7 @@ export async function POST(request) {
               const slots = await nextWhatsAppAppointmentSlots();
               const reply = slots.length
                 ? formatWhatsAppSlots(slots, lang)
-                : (lang === "es" ? "No hay otros horarios disponibles en los próximos 7 días. Puedes pedir un representante aquí o llamar al (408) 332-8962." : "There are no other times available in the next 7 days. You can ask for a representative here or call (408) 332-8962.");
+                : (lang === "es" ? "No hay otros horarios disponibles en los próximos 7 días. Puedes pedir un representante aquí o llamar al (408) 759-2435." : "There are no other times available in the next 7 days. You can ask for a representative here or call (408) 759-2435.");
               await setWhatsAppBookingState(conversation.id, { offeredSlots: slots, leadSessionId: sessionId, appointmentId: appointmentBeforeReply?.id });
               const sent = await sendWhatsAppText(message.from, reply);
               await saveOutboundWhatsAppMessage({ conversationId: conversation.id, messageId: sent.messages?.[0]?.id, body: reply });

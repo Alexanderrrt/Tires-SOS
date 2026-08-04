@@ -72,20 +72,20 @@ export const LEGAL_PAGES = {
           en: [
             "We keep chat, lead, and appointment information only as long as reasonably needed to respond, maintain business records, resolve disputes, and meet legal obligations.",
             "Service providers may retain copies according to their own retention policies.",
-            "To request access, correction, or deletion of your information, call (408) 332-8962. We will address applicable requests subject to legal and business record obligations.",
+            "To request access, correction, or deletion of your information, call (408) 759-2435. We will address applicable requests subject to legal and business record obligations.",
           ],
           es: [
             "Conservamos la información de chats, clientes potenciales y citas solo durante el tiempo razonablemente necesario para responder, mantener registros comerciales, resolver disputas y cumplir obligaciones legales.",
             "Los proveedores de servicios pueden conservar copias de acuerdo con sus propias políticas de retención.",
-            "Para solicitar acceso, corrección o eliminación de tu información, llama al (408) 332-8962. Atenderemos las solicitudes aplicables sujetas a obligaciones legales y de registros comerciales.",
+            "Para solicitar acceso, corrección o eliminación de tu información, llama al (408) 759-2435. Atenderemos las solicitudes aplicables sujetas a obligaciones legales y de registros comerciales.",
           ],
         },
       },
       {
         heading: { en: "Contact", es: "Contacto" },
         items: {
-          en: ["Tires SOS Rescue", "623 E Taylor St, San Jose, CA 95112", "(408) 332-8962"],
-          es: ["Tires SOS Rescue", "623 E Taylor St, San José, CA 95112", "(408) 332-8962"],
+          en: ["Tires SOS Rescue", "623 E Taylor St, San Jose, CA 95112", "(408) 759-2435"],
+          es: ["Tires SOS Rescue", "623 E Taylor St, San José, CA 95112", "(408) 759-2435"],
         },
       },
     ],
@@ -169,8 +169,8 @@ export const LEGAL_PAGES = {
       {
         heading: { en: "Contact", es: "Contacto" },
         items: {
-          en: ["Tires SOS Rescue", "623 E Taylor St, San Jose, CA 95112", "(408) 332-8962"],
-          es: ["Tires SOS Rescue", "623 E Taylor St, San José, CA 95112", "(408) 332-8962"],
+          en: ["Tires SOS Rescue", "623 E Taylor St, San Jose, CA 95112", "(408) 759-2435"],
+          es: ["Tires SOS Rescue", "623 E Taylor St, San José, CA 95112", "(408) 759-2435"],
         },
       },
     ],
@@ -224,8 +224,8 @@ export const LEGAL_PAGES = {
       {
         heading: { en: "Contact", es: "Contacto" },
         items: {
-          en: ["Tires SOS Rescue", "623 E Taylor St, San Jose, CA 95112", "(408) 332-8962"],
-          es: ["Tires SOS Rescue", "623 E Taylor St, San José, CA 95112", "(408) 332-8962"],
+          en: ["Tires SOS Rescue", "623 E Taylor St, San Jose, CA 95112", "(408) 759-2435"],
+          es: ["Tires SOS Rescue", "623 E Taylor St, San José, CA 95112", "(408) 759-2435"],
         },
       },
     ],

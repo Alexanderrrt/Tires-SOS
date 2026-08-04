@@ -17,7 +17,7 @@ function locationSchema(loc) {
     "@type": ["TireShop", "AutoRepair"],
     name: SITE.name,
     url: SITE.url,
-    telephone: "+1-408-332-8962",
+    telephone: "+1-408-759-2435",
     priceRange: "$$",
     image: `${SITE.url}/og.png`,
     address: {
