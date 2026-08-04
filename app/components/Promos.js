@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useT } from "../i18n/LanguageContext";
 import { COPY, SITE } from "../site.config";
 import Reveal from "./Reveal";
@@ -8,40 +7,9 @@ import PirelliBadge from "./PirelliBadge";
 import Icon from "./Icons";
 
 const DRIVER_REEL = "https://www.instagram.com/reel/DbmVbtWSK-k/";
-const INSTAGRAM_EMBED_SCRIPT = "https://www.instagram.com/embed.js";
 
 export default function Promos() {
   const t = useT();
-  const [reelStatus, setReelStatus] = useState("loading");
-
-  useEffect(() => {
-    let cancelled = false;
-    const processEmbed = () => {
-      if (cancelled) return;
-      try {
-        window.instgrm?.Embeds?.process();
-        setReelStatus(window.instgrm ? "ready" : "error");
-      } catch {
-        setReelStatus("error");
-      }
-    };
-
-    if (window.instgrm) {
-      requestAnimationFrame(processEmbed);
-      return () => { cancelled = true; };
-    }
-
-    let script = document.querySelector(`script[src="${INSTAGRAM_EMBED_SCRIPT}"]`);
-    if (!script) {
-      script = document.createElement("script");
-      script.src = INSTAGRAM_EMBED_SCRIPT;
-      script.async = true;
-      document.body.appendChild(script);
-    }
-    script.addEventListener("load", processEmbed, { once: true });
-    script.addEventListener("error", () => !cancelled && setReelStatus("error"), { once: true });
-    return () => { cancelled = true; };
-  }, []);
 
   function waMsg(text) {
     return `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(text)}`;
@@ -114,19 +82,10 @@ export default function Promos() {
 
         <Reveal className="driver-benefit-feature">
           <div className="driver-benefit-feature__reel">
-            {reelStatus === "loading" && <span className="driver-benefit-feature__loading">Loading reel…</span>}
-            {reelStatus !== "error" ? (
-              <blockquote
-                className="instagram-media"
-                data-instgrm-permalink={DRIVER_REEL}
-                data-instgrm-version="14"
-                style={{ margin: 0 }}
-              />
-            ) : (
-              <a href={DRIVER_REEL} target="_blank" rel="noopener noreferrer" className="btn btn--ghost btn--small">
-                <Icon name="instagram" /> Open reel on Instagram
-              </a>
-            )}
+            <a href={DRIVER_REEL} target="_blank" rel="noopener noreferrer" className="driver-benefit-feature__poster" aria-label="Watch the Driver Program reel on Instagram">
+              <img src="/reels/reel-1.png" alt="Driver Program customers receive free tire patches at Tires SOS" loading="lazy" />
+              <span className="driver-benefit-feature__play" aria-hidden="true"><Icon name="instagram" /></span>
+            </a>
           </div>
           <div className="driver-benefit-feature__content">
             <p className="driver-benefit-feature__eyebrow">{t(COPY.promos.driverTitle)}</p>
