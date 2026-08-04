@@ -2749,8 +2749,9 @@ body { background: #050505; color: var(--paper); }
 .promo-card__actions { display: flex; flex-wrap: wrap; gap: .65rem; align-items: center; }
 .promo-card__actions .btn { margin-top: .25rem; }
 .driver-benefit-feature { display: grid; grid-template-columns: minmax(320px, .78fr) minmax(0, 1.22fr); overflow: hidden; margin: 2rem 0; border: 1px solid rgba(255, 194, 43, .55); border-radius: var(--r-lg); background: #111; box-shadow: 0 18px 46px rgba(0, 0, 0, .34); }
-.driver-benefit-feature__reel { display: grid; min-height: 600px; place-items: center; overflow: hidden; padding: 1rem; background: linear-gradient(145deg, #211b12, #080808); }
-.driver-benefit-feature__reel iframe { width: min(100%, 350px); height: 580px; border: 0; border-radius: 12px; background: #fff; }
+.driver-benefit-feature__reel { position: relative; display: grid; min-height: 600px; place-items: center; overflow: hidden; padding: 1rem; background: linear-gradient(145deg, #211b12, #080808); }
+.driver-benefit-feature__reel .instagram-media { width: min(100%, 350px) !important; min-width: 0 !important; max-width: 350px !important; }
+.driver-benefit-feature__loading { position: absolute; color: var(--paper-dim); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; }
 .driver-benefit-feature__content { display: flex; flex-direction: column; justify-content: center; gap: .75rem; padding: clamp(1.5rem, 4vw, 3.5rem); }
 .driver-benefit-feature__eyebrow { margin: 0; color: var(--orange); font-size: .72rem; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
 .driver-benefit-feature__content h3 { max-width: 16ch; margin: 0; color: #fff; font: 800 clamp(2rem, 5vw, 3.6rem)/.94 var(--font-display); text-transform: uppercase; }
