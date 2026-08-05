@@ -14,6 +14,7 @@ import PirelliBadge from "./PirelliBadge";
 // (N = 1-indexed position in REELS below) — it's tried first automatically.
 // Until then, real shop photography is used as an on-brand poster.
 const FALLBACK_POSTERS = ["/storefront.jpg", "/owners-m3.jpg", "/owner.jpg", "/services/new-tires.jpg"];
+const POSTER_FOCAL_POINTS = ["center", "52% center", "28% center", "center"];
 
 // Resolves the first candidate URL that actually loads. Runs entirely
 // client-side via a plain Image() probe — deliberately never rendered as a
@@ -61,7 +62,10 @@ function ReelCard({ permalink, index }) {
       target="_blank"
       rel="noopener noreferrer"
       className={`reel-card reveal-item${index === 0 ? " reel-card--driver-promo" : ""}`}
-      style={{ "--d": `${index * 80}ms` }}
+      style={{
+        "--d": `${index * 80}ms`,
+        "--reel-poster-position": POSTER_FOCAL_POINTS[index % POSTER_FOCAL_POINTS.length],
+      }}
     >
       {src ? (
         <img className="reel-card__thumb" src={src} alt="Tires SOS Rescue Instagram reel" decoding="async" />
