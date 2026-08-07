@@ -79,7 +79,12 @@ export const metadata = {
     follow: true,
   },
   icons: {
-    icon: "/favicon.svg",
+    // Keep a raster icon first for Googlebot and older search/browser clients.
+    // The SVG remains available as a sharper fallback for modern browsers.
+    icon: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
       { url: "/apple-touch-icon-152.png", sizes: "152x152", type: "image/png" },
