@@ -256,8 +256,12 @@ export default function QuoteCalculator({ pricing }) {
                 data-analytics-location="quote_calculator"
                 onClick={() => captureAnalytics("quote_sent_whatsapp", {
                   vehicle_class: vehicleClass,
-                  estimate_low: result.low,
-                  estimate_high: result.high,
+                  service_type: result.lines[0]?.id || "multiple_services",
+                  service_types: result.lines.map((line) => line.id),
+                  quoted_price: `${result.low}-${result.high}`,
+                  quoted_price_low: result.low,
+                  quoted_price_high: result.high,
+                  quoted_price_currency: cur,
                   services: result.lines.map((line) => line.id),
                 })}
               >

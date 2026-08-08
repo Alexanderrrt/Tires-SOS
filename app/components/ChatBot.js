@@ -564,6 +564,8 @@ export default function ChatBot({
       const persisted = data?.persisted === true;
       captureAnalytics("appointment_requested", {
         chat_mode: mode,
+        service_type: data?.appointment?.serviceType || "unknown",
+        preferred_date: selection.date,
         persisted,
         notification_status: notificationStatus,
         scheduled_date: selection.date,

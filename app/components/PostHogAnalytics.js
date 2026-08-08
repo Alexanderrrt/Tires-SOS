@@ -3,6 +3,36 @@
 import { useEffect } from "react";
 import posthog from "posthog-js";
 
+const ATTRIBUTION_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
+const ATTRIBUTION_STORAGE_KEY = "tires_sos_campaign_attribution";
+
+function currentAttribution() {
+  if (typeof window === "undefined") return {};
+  const params = new URLSearchParams(window.location.search);
+  const incoming = Object.fromEntries(
+    ATTRIBUTION_KEYS.map((key) => [key, params.get(key)?.trim() || ""]).filter(([, value]) => value),
+  );
+
+  let stored = {};
+  try {
+    stored = JSON.parse(window.localStorage.getItem(ATTRIBUTION_STORAGE_KEY) || "{}") || {};
+  } catch {
+    stored = {};
+  }
+
+  const attribution = Object.keys(incoming).length ? incoming : stored;
+  if (Object.keys(incoming).length) {
+    try {
+      window.localStorage.setItem(ATTRIBUTION_STORAGE_KEY, JSON.stringify(incoming));
+    } catch {}
+  }
+  return attribution;
+}
+
+function sourceChannel(attribution) {
+  return attribution.utm_source || attribution.utm_medium || "direct_or_organic";
+}
+
 function contactLocation(link) {
   if (link.dataset.analyticsLocation) return link.dataset.analyticsLocation;
   const section = link.closest("[id]");
@@ -29,20 +59,38 @@ function initializePostHog() {
 }
 
 export function captureAnalytics(event, properties = {}) {
-  if (initializePostHog()) posthog.capture(event, properties);
+  if (!initializePostHog()) return;
+  const attribution = currentAttribution();
+  posthog.capture(event, {
+    ...attribution,
+    source_channel: properties.source_channel || sourceChannel(attribution),
+    page_path: window.location.pathname || "/",
+    ...properties,
+  });
 }
 
 export default function PostHogAnalytics() {
   useEffect(() => {
     if (!initializePostHog()) return undefined;
 
+    const attribution = currentAttribution();
+    if (Object.keys(attribution).length) {
+      posthog.register({ ...attribution, source_channel: sourceChannel(attribution) });
+    }
+
     const trackContact = (event) => {
       const link = event.target.closest("a[href]");
       if (!link) return;
       const href = link.getAttribute("href") || "";
-      const channel = href.startsWith("sms:") ? "sms" : href.includes("wa.me/") ? "whatsapp" : "";
+      const channel = href.startsWith("tel:")
+        ? "telephone"
+        : href.startsWith("sms:")
+          ? "sms"
+          : href.includes("wa.me/")
+            ? "whatsapp"
+            : "";
       if (!channel) return;
-      posthog.capture("contact_click", { channel, location: contactLocation(link) });
+      captureAnalytics("contact_click", { channel, location: contactLocation(link) });
     };
 
     document.addEventListener("click", trackContact, true);

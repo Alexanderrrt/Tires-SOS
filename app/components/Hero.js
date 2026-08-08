@@ -36,6 +36,7 @@ export default function Hero() {
           <div className="hero__actions">
             <a href="/quote" className="btn btn--primary"><Icon name="chat" /> {t(COPY.quote.ctaFromHome)} <Icon name="arrow" /></a>
             <a href={SITE.whatsappHref} target="_blank" rel="noreferrer" className="btn btn--ghost"><Icon name="chat" /> WhatsApp</a>
+            <a href={SITE.phoneHref} className="btn btn--ghost" data-analytics-location="hero"><Icon name="phone" /> Call (408) 759-2435</a>
             <a href={SITE.locations[0].mapsHref} target="_blank" rel="noopener noreferrer" className="btn btn--ghost"><Icon name="pin" /> {t(COPY.hero.directions)}</a>
           </div>
           <p className="hero__afterpay"><span className="afterpay-label">ACEPTAMOS:</span><span className="afterpay-chip">SNAP FINANCE</span><span className="afterpay-chip afterpay-chip--mint">AFTERPAY</span> Pagos flexibles a tu manera</p>

@@ -142,6 +142,7 @@ export async function POST(request) {
       status: reservation.appointment?.status || "requested",
       scheduledDate: date,
       scheduledTime: time,
+      serviceType: lead.service,
     },
     notification,
   });
