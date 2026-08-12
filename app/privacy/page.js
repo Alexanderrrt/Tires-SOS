@@ -4,6 +4,7 @@ import { LEGAL_PAGES } from "../legal/legal-content";
 export const metadata = {
   title: "Privacy Policy | Tires SOS Rescue",
   description: "Privacy policy for Tires SOS Rescue in San Jose, CA.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPolicyPage() {
