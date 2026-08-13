@@ -26,7 +26,7 @@ function LocationCard({ loc, t }) {
         <h3>{SITE.name}</h3>
         <p>{loc.line1}</p>
         <p>{loc.line2}</p>
-        {loc.phone && <a className="location-card__phone" href={loc.whatsappHref || SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noreferrer">{loc.phone}</a>}
+        {loc.phone && <a className="location-card__phone" href={loc.phoneHref || SITE.phoneHref}>{loc.phone}</a>}
         <a href={loc.whatsappHref || SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noreferrer" className="btn btn--ghost btn--small location-whatsapp">
           <Icon name="chat" /> WhatsApp
         </a>
