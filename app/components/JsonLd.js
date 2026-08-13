@@ -57,11 +57,18 @@ export default async function JsonLd() {
     "@graph": [
       {
         "@type": "Organization",
+        "@id": `${SITE.url}/#organization`,
         name: SITE.name,
         url: SITE.url,
         description:
           "Tire specialists in San José, CA: new tires, flat repair, wheel alignment, brakes, oil changes, batteries and rims. Bilingual English/Spanish service.",
-        logo: `${SITE.url}/logo-mark.png`,
+        logo: {
+          "@type": "ImageObject",
+          url: `${SITE.url}/logo-mark.png`,
+          contentUrl: `${SITE.url}/logo-mark.png`,
+          width: 1600,
+          height: 840,
+        },
         sameAs: [SITE.social.instagram, SITE.social.tiktok, SITE.social.facebook],
         knowsLanguage: ["en", "es"],
       },
