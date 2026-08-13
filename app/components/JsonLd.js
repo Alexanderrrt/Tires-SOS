@@ -13,11 +13,15 @@ const DAY_NAMES = [
 
 function locationSchema(loc) {
   const city = loc.line2?.split(",")[0] || "San Jose";
+  const citySlug = city.toLowerCase().includes("hayward")
+    ? "Hayward,_California"
+    : "San_Jose,_California";
+  const hours = loc.hours || SITE.hours;
   return {
     "@type": ["TireShop", "AutoRepair"],
     name: SITE.name,
     url: SITE.url,
-    telephone: "+1-408-759-2435",
+    telephone: loc.phone || SITE.phone,
     priceRange: "$$",
     image: `${SITE.url}/og.png`,
     address: {
@@ -32,9 +36,9 @@ function locationSchema(loc) {
     areaServed: {
       "@type": "City",
       name: city,
-      sameAs: "https://en.wikipedia.org/wiki/San_Jose,_California",
+      sameAs: `https://en.wikipedia.org/wiki/${citySlug}`,
     },
-    openingHoursSpecification: SITE.hours
+    openingHoursSpecification: hours
       .filter((h) => h.open && h.close)
       .map((h) => ({
         "@type": "OpeningHoursSpecification",
@@ -61,7 +65,7 @@ export default async function JsonLd() {
         name: SITE.name,
         url: SITE.url,
         description:
-          "Tire specialists in San José, CA: new tires, flat repair, wheel alignment, brakes, oil changes, batteries and rims. Bilingual English/Spanish service.",
+          "Tire specialists serving San José and Hayward, CA: new tires, flat repair, wheel alignment, brakes, oil changes, batteries and rims. Bilingual English/Spanish service.",
         logo: {
           "@type": "ImageObject",
           url: `${SITE.url}/logo-mark.png`,

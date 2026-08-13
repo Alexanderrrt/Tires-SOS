@@ -89,7 +89,7 @@ Node >= 18.17 required (`.nvmrc` locks to 20).
 │   └── pricing-schema.sql        # Supabase table DDL + seed data
 ├── public/                       # Static assets
 │   ├── brands/                   # Tire brand logos
-│   ├── services/                 # Service card images
+│   ├── service-media/            # Service card images
 │   ├── vehicles/                 # Vehicle photos
 │   ├── logo.jpg / logo-mark.png  # Logo variants
 │   ├── og.png                    # Open Graph share image
@@ -286,7 +286,7 @@ be answered by hand in the Yelp app/dashboard.
 ### Add/edit a service in "What We Do"
 1. Edit `SERVICES` array in `app/site.config.js` (add/remove/modify objects).
 2. Each service needs: `id`, `icon` (name from `Icons.js`), `image` (path in
-   `/public/services/` or null), `title` and `desc` (both `{ en, es }`).
+   `/public/service-media/` or null), `title` and `desc` (both `{ en, es }`).
 3. If you need a new icon, add its SVG path to the `GLYPHS` map in
    `app/components/Icons.js`.
 

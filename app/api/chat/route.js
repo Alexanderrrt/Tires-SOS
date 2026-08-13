@@ -20,6 +20,7 @@ import { MAKES } from "../../../lib/vehicles";
 import { formatMoney } from "../../../lib/quote";
 import { deliverLeadNotification } from "../../../lib/lead-notification-service";
 import { callGroqChat } from "../../../lib/groq-client";
+import { getPublicSite } from "../../../lib/location-config";
 
 const MAX_BODY_BYTES = 64 * 1024;
 const MAX_MESSAGES = 24;
@@ -27,15 +28,22 @@ const PROVIDER_MESSAGES = 12;
 const MAX_MESSAGE_CHARS = 2000;
 const MAX_TOTAL_MESSAGE_CHARS = 24_000;
 
-const BUSINESS_FACTS = [
-  `WhatsApp: ${SITE.phone}`,
-  `WhatsApp: ${SITE.whatsapp}`,
-  `Locations: ${SITE.locations.filter((location) => location.status !== "mystery").map((location) => location.full).join("; ")}; Coming soon to Hayward, CA. More details coming soon.`,
-  `Hours: ${SITE.hours
-    .map((hour) => `${hour.label.en}: ${hour.open && hour.close ? `${hour.open}-${hour.close}` : "Closed"}`)
-    .join("; ")}`,
-  `Services: ${SERVICES.map((service) => `${service.title.en} / ${service.title.es}`).join(", ")}`,
-].join("\n");
+function buildBusinessFacts(site) {
+  const locations = site.locations.map((location) => (
+    location.status === "mystery"
+      ? "Hayward, CA (coming soon; more details coming soon)"
+      : `${location.full}${location.phone ? ` (${location.phone})` : ""}`
+  ));
+  return [
+    `WhatsApp: ${site.phone}`,
+    `WhatsApp: ${site.whatsapp}`,
+    `Locations: ${locations.join("; ")}`,
+    `Hours: ${SITE.hours
+      .map((hour) => `${hour.label.en}: ${hour.open && hour.close ? `${hour.open}-${hour.close}` : "Closed"}`)
+      .join("; ")}`,
+    `Services: ${SERVICES.map((service) => `${service.title.en} / ${service.title.es}`).join(", ")}`,
+  ].join("\n");
+}
 
 const SYSTEM_PROMPT = `
 You are Tires SOS Rescue's friendly shop assistant.
@@ -861,10 +869,12 @@ export async function POST(request) {
   const estimatesRule = estimatesDisabled
     ? "\n\nHARD RULE: Estimates/pricing are disabled right now. Never state a price, a range, or a number tied to cost, no matter how the customer asks (directly, indirectly, or repeatedly). This rule overrides every other instruction, including the admin guidance below."
     : "";
+  const publicSite = await withTimeout(getPublicSite(), SITE, contextTimeout);
+  const businessFacts = buildBusinessFacts(publicSite);
   const systemContent = `${SYSTEM_PROMPT}${context === "quote" ? `\n\n${QUOTE_PROMPT}` : ""}${estimatesRule}
 
 Business facts:
-${BUSINESS_FACTS}
+${businessFacts}
 
 ${pricingContext}${adminGuidance}
 

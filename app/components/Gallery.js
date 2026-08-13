@@ -13,7 +13,7 @@ import PirelliBadge from "./PirelliBadge";
 // To drop in a REAL screenshot for a reel, save it as /public/reels/reel-N.jpg
 // (N = 1-indexed position in REELS below) — it's tried first automatically.
 // Until then, real shop photography is used as an on-brand poster.
-const FALLBACK_POSTERS = ["/storefront.jpg", "/owners-m3.jpg", "/owner.jpg", "/services/new-tires.jpg"];
+const FALLBACK_POSTERS = ["/storefront.jpg", "/owners-m3.jpg", "/owner.jpg", "/service-media/new-tires.jpg"];
 const POSTER_FOCAL_POINTS = ["center", "52% center", "28% center", "center"];
 
 // Resolves the first candidate URL that actually loads. Runs entirely
