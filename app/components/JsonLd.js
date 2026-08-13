@@ -63,6 +63,7 @@ export default async function JsonLd() {
         "@type": "Organization",
         "@id": `${SITE.url}/#organization`,
         name: SITE.name,
+        alternateName: SITE.nameShort,
         url: SITE.url,
         description:
           "Tire specialists serving San José and Hayward, CA: new tires, flat repair, wheel alignment, brakes, oil changes, batteries and rims. Bilingual English/Spanish service.",
@@ -81,6 +82,7 @@ export default async function JsonLd() {
         "@id": `${SITE.url}/#website`,
         url: SITE.url,
         name: SITE.name,
+        alternateName: SITE.nameShort,
         inLanguage: ["en-US", "es-US"],
         publisher: {
           "@id": `${SITE.url}/#organization`,
