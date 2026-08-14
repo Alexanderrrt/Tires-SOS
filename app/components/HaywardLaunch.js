@@ -33,13 +33,13 @@ export default function HaywardLaunch() {
     <aside id="hayward-launch" className="hayward-launch" aria-labelledby="hayward-launch-title">
       <figure className="hayward-launch__media">
         <Image
-          src="/owners-m3.jpg"
+          src="/hayward-storefront.png"
           alt={t({
-            en: "Orange BMW photographed for Tires SOS Rescue",
-            es: "BMW naranja fotografiado para Tires SOS Rescue",
+            en: "Tires SOS Rescue 3 storefront at 905 W A Street in Hayward",
+            es: "Fachada de Tires SOS Rescue 3 en 905 W A Street, Hayward",
           })}
-          width="1280"
-          height="1440"
+          width="1448"
+          height="1086"
           loading="lazy"
           decoding="async"
         />
