@@ -2,10 +2,12 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { EMAIL_LOGO_CID } from "../lib/email-branding.js";
-import { buildEmailMime } from "../lib/email-mime.js";
+import { buildEmailMime, htmlToPlainText } from "../lib/email-mime.js";
 import { renderBrandedEmail } from "../lib/email-template.js";
+import { isYelpRelayRejectionEmail } from "../lib/gmail-client.js";
 import { detectStoreContact, getStoreContact } from "../lib/store-contact.js";
 import { parseYelpLeadEmail } from "../lib/yelp-lead-parser.js";
+import { renderYelpRelayHtml } from "../lib/yelp-relay-message.js";
 
 function decodePart(mime, contentType) {
   const escaped = contentType.replace("/", "\\/");
@@ -55,7 +57,7 @@ test("branded Gmail MIME is multipart UTF-8 with an inline logo and text fallbac
   assert.doesNotMatch(decodedText, /<[^>]+>/);
 });
 
-test("text-only Gmail MIME stays text-only for email-to-chat relays", () => {
+test("text-only Gmail MIME stays text-only when HTML is omitted", () => {
   const text = [
     "Hi Jessie,",
     "",
@@ -79,6 +81,52 @@ test("text-only Gmail MIME stays text-only for email-to-chat relays", () => {
 
   const encodedBody = mime.split("\r\n\r\n").at(-1).replace(/\s+/g, "");
   assert.equal(Buffer.from(encodedBody, "base64").toString("utf8"), text);
+});
+
+test("Yelp relay MIME is compatible multipart with clean matching chat copy", () => {
+  const text = [
+    "Hi Saerom,",
+    "",
+    "Thanks for reaching out about your tire request. What vehicle are we helping with?",
+    "",
+    "Tires SOS Rescue 3 | (669) 877-4279",
+    "905 W A Street, Hayward, CA 94541",
+  ].join("\n");
+  const html = renderYelpRelayHtml(text);
+  const mime = buildEmailMime({
+    to: "reply+abc@messaging.yelp.com",
+    fromEmail: "tires@example.com",
+    fromName: "Tires SOS Rescue",
+    subject: "Re: Message from Saerom N. for Tires SOS Rescue 3",
+    text,
+    html,
+    inReplyToMessageId: "<message@example.com>",
+  });
+
+  assert.match(mime, /Content-Type: multipart\/alternative/);
+  assert.doesNotMatch(mime, /multipart\/related/);
+  assert.equal(decodePart(mime, "text/plain"), text);
+  assert.equal(htmlToPlainText(decodePart(mime, "text/html")), htmlToPlainText(html));
+  assert.match(html, /Tires SOS Rescue 3 \| \(669\) 877-4279/);
+  assert.match(html, /905 W A Street, Hayward, CA 94541/);
+  assert.doesNotMatch(html, /<img|cid:|WhatsApp us|Replying to your Yelp|Customer Service Team/i);
+});
+
+test("Yelp unsupported-client bounce is recognized as a delivery rejection", () => {
+  assert.equal(
+    isYelpRelayRejectionEmail({
+      subject: "RE: Message from Saerom N. for Tires SOS Rescue 3",
+      html: "<p>Sorry, we were not able to process your reply.</p><p>You may be using an email client that we do not yet support.</p>",
+    }),
+    true,
+  );
+  assert.equal(
+    isYelpRelayRejectionEmail({
+      subject: "New Lead: Reply to Ana's tire request",
+      text: "Ana needs two tires.",
+    }),
+    false,
+  );
 });
 
 test("store detection maps Yelp listings and addresses to the correct contact", () => {
