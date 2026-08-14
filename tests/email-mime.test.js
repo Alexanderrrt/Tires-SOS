@@ -55,6 +55,32 @@ test("branded Gmail MIME is multipart UTF-8 with an inline logo and text fallbac
   assert.doesNotMatch(decodedText, /<[^>]+>/);
 });
 
+test("text-only Gmail MIME stays text-only for email-to-chat relays", () => {
+  const text = [
+    "Hi Jessie,",
+    "",
+    "Thanks for reaching out about your wheel repair. What vehicle are we helping with?",
+    "",
+    "Tires SOS Rescue 3 | (669) 877-4279",
+    "905 W A Street, Hayward, CA 94541",
+  ].join("\n");
+  const mime = buildEmailMime({
+    to: "reply+abc@messaging.yelp.com",
+    fromEmail: "tires@example.com",
+    fromName: "Tires SOS Rescue",
+    subject: "Re: Auto wheel and tire repair",
+    text,
+    inReplyToMessageId: "<message@example.com>",
+  });
+
+  assert.match(mime, /Content-Type: text\/plain; charset="UTF-8"/);
+  assert.doesNotMatch(mime, /multipart\/alternative/);
+  assert.doesNotMatch(mime, /Content-Type: text\/html/);
+
+  const encodedBody = mime.split("\r\n\r\n").at(-1).replace(/\s+/g, "");
+  assert.equal(Buffer.from(encodedBody, "base64").toString("utf8"), text);
+});
+
 test("store detection maps Yelp listings and addresses to the correct contact", () => {
   assert.equal(detectStoreContact({ subject: "Message from Ana for Tires SOS Rescue 1" }).id, "taylor");
   assert.equal(detectStoreContact({ subject: "Message from Ana for Tires SOS Rescue 2" }).id, "tenth");
