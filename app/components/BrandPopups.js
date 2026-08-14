@@ -47,12 +47,39 @@ export default function BrandPopups() {
   const [visible, setVisible] = useState(false);
   const [brandIndex, setBrandIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
+  const [launchInView, setLaunchInView] = useState(false);
 
   useEffect(() => {
     const idx = Math.floor(Math.random() * BRAND_SHOWCASE.length);
     setBrandIndex(idx);
     const timer = setTimeout(() => setVisible(true), 8000);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return undefined;
+    let observer;
+    let retryTimer;
+    let active = true;
+    const observeLaunch = () => {
+      if (!active) return;
+      const launch = document.getElementById("hayward-launch");
+      if (!launch) {
+        retryTimer = window.setTimeout(observeLaunch, 250);
+        return;
+      }
+      observer = new IntersectionObserver(
+        ([entry]) => setLaunchInView(entry.isIntersecting),
+        { threshold: 0.18 },
+      );
+      observer.observe(launch);
+    };
+    observeLaunch();
+    return () => {
+      active = false;
+      window.clearTimeout(retryTimer);
+      observer?.disconnect();
+    };
   }, []);
 
   const nextBrand = useCallback(() => {
@@ -83,7 +110,7 @@ export default function BrandPopups() {
     setVisible(false);
   };
 
-  if (!visible || dismissed) return null;
+  if (!visible || dismissed || launchInView) return null;
 
   const brand = BRAND_SHOWCASE[brandIndex];
 

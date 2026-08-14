@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useT } from "../i18n/LanguageContext";
 import { COPY, SITE } from "../site.config";
 import Icon from "./Icons";
@@ -26,13 +27,30 @@ export default function HaywardLaunch() {
 
   if (!location) return null;
 
-  const contactHref = location.whatsappHref || SITE.whatsappHref || SITE.phoneHref;
+  const contactHref = location.phoneHref || SITE.phoneHref;
 
   return (
-    <aside className="hayward-launch" aria-labelledby="hayward-launch-title">
-      <div className="hayward-launch__route" aria-hidden="true">
-        <span>01</span><i /><span>02</span><i /><strong>03</strong>
-      </div>
+    <aside id="hayward-launch" className="hayward-launch" aria-labelledby="hayward-launch-title">
+      <figure className="hayward-launch__media">
+        <Image
+          src="/owners-m3.jpg"
+          alt={t({
+            en: "Orange BMW photographed for Tires SOS Rescue",
+            es: "BMW naranja fotografiado para Tires SOS Rescue",
+          })}
+          width="1280"
+          height="1440"
+          loading="lazy"
+          decoding="async"
+        />
+        <div className="hayward-launch__route" aria-label={t({ en: "Three store locations", es: "Tres tiendas" })}>
+          <span>01</span><i /><span>02</span><i /><strong>03</strong>
+        </div>
+        <figcaption>
+          <span>{t({ en: "Now serving Hayward", es: "Ya atendemos en Hayward" })}</span>
+          <strong>{location.line1}</strong>
+        </figcaption>
+      </figure>
       <div className="hayward-launch__content">
         <p className="hayward-launch__eyebrow">
           <span className="hayward-launch__pulse" /> {t(COPY.launch.eyebrow)}
@@ -49,8 +67,8 @@ export default function HaywardLaunch() {
           <a className="btn btn--primary" href={location.mapsHref} target="_blank" rel="noopener noreferrer">
             <Icon name="pin" /> {t(COPY.launch.directions)}
           </a>
-          <a className="btn btn--ghost" href={contactHref} target="_blank" rel="noopener noreferrer">
-            <Icon name="chat" /> {t(COPY.launch.contact)}
+          <a className="btn btn--ghost" href={contactHref}>
+            <Icon name="phone" /> {location.phone || t(COPY.launch.contact)}
           </a>
         </div>
       </div>
