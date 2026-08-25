@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint . --ext .js,.jsx",
     "test:ads": "node --experimental-default-type=module --test tests/ads-*.test.js",
+    "test:email": "node --experimental-default-type=module --test tests/email-mime.test.js",
     "test:whatsapp": "node scripts/test-whatsapp-workflow.mjs"
   },
   "dependencies": {

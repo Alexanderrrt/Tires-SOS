@@ -47,7 +47,7 @@ export default function Promos() {
         <Reveal className="promo-collab">
           <div className="promo-collab__inner">
             <div className="promo-collab__visual" aria-hidden="true">
-              <img src="/services/new-tires.jpg" alt="" />
+              <img src="/service-media/new-tires.jpg" alt="" />
               <span className="promo-collab__number">01</span>
             </div>
             <div className="promo-collab__content">

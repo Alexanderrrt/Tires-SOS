@@ -29,12 +29,13 @@ const signatureFont = Caveat({
   variable: "--font-signature",
 });
 
-const TITLE = `${SITE.name} — Tire Shop in San José, CA | Llantas San José`;
+const TITLE = `${SITE.name} | Tire Shops in San José & Hayward`;
 const DESCRIPTION =
-  "Tire shop in San José, CA: new tires, flat repair, wheel alignment, brakes, oil changes, batteries and rims. Bilingual English/Spanish, best prices in the Bay Area, walk-ins welcome. Taller de llantas en San José.";
+  "Three Tires SOS Rescue shops serving San José and Hayward. New tires, flat repair, alignment, brakes, oil changes and bilingual English/Spanish service.";
 
 export const metadata = {
   metadataBase: new URL(SITE.url),
+  applicationName: SITE.name,
   title: TITLE,
   description: DESCRIPTION,
   alternates: {
@@ -48,6 +49,9 @@ export const metadata = {
     "brakes San Jose",
     "oil change San Jose",
     "rims San Jose",
+    "tire shop Hayward",
+    "llantas Hayward",
+    "wheel alignment Hayward",
     "taller de llantas",
     "Tires SOS Rescue",
   ],
@@ -64,7 +68,7 @@ export const metadata = {
         url: "/og.png",
         width: 1200,
         height: 630,
-        alt: "Tires SOS Rescue — tire shop in San José, CA",
+        alt: "Tires SOS Rescue — tire shops in San José and Hayward, CA",
       },
     ],
   },

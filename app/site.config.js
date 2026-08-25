@@ -186,7 +186,7 @@ export const SERVICES = [
   {
     id: "new-tires",
     icon: "tire",
-    image: "/services/new-tires.jpg",
+    image: "/service-media/new-tires.jpg",
     title: { en: "New Tires", es: "Llantas Nuevas" },
     desc: {
       en: "Continental, Dunlop, Falken, General, GT Radial, Hankook, Ironman, Kumho, Laufenn, Nexen, Nokian, and Toyo.",
@@ -196,7 +196,7 @@ export const SERVICES = [
   {
     id: "flat-repair",
     icon: "wrench",
-    image: "/services/flat-repair.jpg",
+    image: "/service-media/flat-repair.jpg",
     title: { en: "Flat Repair", es: "Reparación de Ponchaduras" },
     desc: {
       en: "Fast, reliable patch and plug repairs while you wait.",
@@ -206,7 +206,7 @@ export const SERVICES = [
   {
     id: "alignment",
     icon: "alignment",
-    image: "/services/alignment.jpg",
+    image: "/service-media/alignment.jpg",
     title: { en: "Wheel Alignment", es: "Alineación" },
     desc: {
       en: "Precise alignment to extend tire life and improve handling.",
@@ -216,7 +216,7 @@ export const SERVICES = [
   {
     id: "brakes",
     icon: "brakes",
-    image: "/services/brakes.jpg",
+    image: "/service-media/brakes.jpg",
     title: { en: "Brakes", es: "Frenos" },
     desc: {
       en: "Pads, rotors, and full brake inspections done right.",
@@ -226,7 +226,7 @@ export const SERVICES = [
   {
     id: "oil-change",
     icon: "oil",
-    image: "/services/oil-change.jpg",
+    image: "/service-media/oil-change.jpg",
     title: { en: "Oil Change", es: "Cambio de Aceite" },
     desc: {
       en: "Quick, affordable oil changes to keep your engine healthy.",
@@ -236,7 +236,7 @@ export const SERVICES = [
   {
     id: "batteries",
     icon: "battery",
-    image: "/services/batteries.jpg",
+    image: "/service-media/batteries.jpg",
     title: { en: "Batteries", es: "Baterías" },
     desc: {
       en: "Free testing and same-day battery replacement.",
@@ -246,7 +246,7 @@ export const SERVICES = [
   {
     id: "rims",
     icon: "rim",
-    image: "/services/rims.jpg",
+    image: "/service-media/rims.jpg",
     title: { en: "Rims", es: "Rines" },
     desc: {
       en: "New rims to fit your ride and your budget.",
@@ -361,6 +361,18 @@ export const TESTIMONIALS = [
 ];
 
 export const COPY = {
+  launch: {
+    eyebrow: { en: "Now open — our third location", es: "Ya abrimos — nuestra tercera ubicación" },
+    title: { en: "Tires SOS has arrived in", es: "Tires SOS llegó a" },
+    titleAccent: { en: "Hayward", es: "Hayward" },
+    body: {
+      en: "The same fast, bilingual service you know from San José is now serving Hayward. Tires, alignments, brakes, oil changes and more — walk-ins welcome.",
+      es: "El mismo servicio rápido y bilingüe que conoces de San José ya está en Hayward. Llantas, alineación, frenos, cambios de aceite y más — sin cita está bien.",
+    },
+    directions: { en: "Directions to Hayward", es: "Cómo llegar a Hayward" },
+    contact: { en: "Message the shop", es: "Escríbenos" },
+    storeLabel: { en: "Store", es: "Tienda" },
+  },
   nav: {
     services: { en: "Services", es: "Servicios" },
     gallery: { en: "Gallery", es: "Galería" },

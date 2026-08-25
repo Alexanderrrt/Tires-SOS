@@ -11,6 +11,7 @@ import Footer from "./components/Footer";
 import BrandPopups from "./components/BrandPopups";
 import ChatBot from "./components/ChatBot";
 import CinematicVideo from "./components/CinematicVideo";
+import HaywardLaunch from "./components/HaywardLaunch";
 
 export default function HomePage() {
   return (
@@ -18,6 +19,7 @@ export default function HomePage() {
       <Header />
       <main>
         <Hero />
+        <HaywardLaunch />
         <Marquee />
         <CinematicVideo />
         <Services />

@@ -1,0 +1,156 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+import { EMAIL_LOGO_CID } from "../lib/email-branding.js";
+import { buildEmailMime, htmlToPlainText } from "../lib/email-mime.js";
+import { renderBrandedEmail } from "../lib/email-template.js";
+import { isYelpRelayRejectionEmail } from "../lib/gmail-client.js";
+import { detectStoreContact, getStoreContact } from "../lib/store-contact.js";
+import { parseYelpLeadEmail } from "../lib/yelp-lead-parser.js";
+import { renderYelpRelayHtml } from "../lib/yelp-relay-message.js";
+
+function decodePart(mime, contentType) {
+  const escaped = contentType.replace("/", "\\/");
+  const match = mime.match(
+    new RegExp(`Content-Type: ${escaped}[^\\r\\n]*\\r\\nContent-Transfer-Encoding: base64\\r\\n\\r\\n([A-Za-z0-9+/=\\r\\n]+?)\\r\\n--`),
+  );
+  assert.ok(match, `${contentType} MIME part should exist`);
+  return Buffer.from(match[1].replace(/\s+/g, ""), "base64").toString("utf8");
+}
+
+test("branded Gmail MIME is multipart UTF-8 with an inline logo and text fallback", async () => {
+  const store = getStoreContact("hayward");
+  const html = renderBrandedEmail({
+    title: "Solicitud de José",
+    intro: "Necesita alineación y llantas.",
+    content: "<p>Atención rápida.</p>",
+    location: store,
+  });
+  const logo = await readFile(new URL("../public/favicon-96x96.png", import.meta.url));
+  const mime = buildEmailMime({
+    to: "customer@example.com",
+    fromEmail: "tires@example.com",
+    fromName: "Tires SOS Rescue",
+    subject: "Respuesta para José",
+    html,
+    inlineImages: [{
+      cid: EMAIL_LOGO_CID,
+      filename: "tires-sos-logo.png",
+      contentType: "image/png",
+      content: logo,
+    }],
+  });
+
+  assert.match(mime, /Content-Type: multipart\/related/);
+  assert.match(mime, /Content-Type: multipart\/alternative/);
+  assert.match(mime, /Content-ID: <tires-sos-logo@tiressosrescue\.com>/);
+  assert.ok(mime.split("\r\n").every((line) => line.length < 998));
+
+  const decodedHtml = decodePart(mime, "text/html");
+  const decodedText = decodePart(mime, "text/plain");
+  assert.match(decodedHtml, /Solicitud de José/);
+  assert.match(decodedHtml, /cid:tires-sos-logo@tiressosrescue\.com/);
+  assert.match(decodedHtml, /Tires SOS Rescue 3/);
+  assert.match(decodedHtml, /\(669\) 877-4279/);
+  assert.match(decodedHtml, /905 W A Street, Hayward, CA 94541/);
+  assert.match(decodedText, /Solicitud de José/);
+  assert.doesNotMatch(decodedText, /<[^>]+>/);
+});
+
+test("text-only Gmail MIME stays text-only when HTML is omitted", () => {
+  const text = [
+    "Hi Jessie,",
+    "",
+    "Thanks for reaching out about your wheel repair. What vehicle are we helping with?",
+    "",
+    "Tires SOS Rescue 3 | (669) 877-4279",
+    "905 W A Street, Hayward, CA 94541",
+  ].join("\n");
+  const mime = buildEmailMime({
+    to: "reply+abc@messaging.yelp.com",
+    fromEmail: "tires@example.com",
+    fromName: "Tires SOS Rescue",
+    subject: "Re: Auto wheel and tire repair",
+    text,
+    inReplyToMessageId: "<message@example.com>",
+  });
+
+  assert.match(mime, /Content-Type: text\/plain; charset="UTF-8"/);
+  assert.doesNotMatch(mime, /multipart\/alternative/);
+  assert.doesNotMatch(mime, /Content-Type: text\/html/);
+
+  const encodedBody = mime.split("\r\n\r\n").at(-1).replace(/\s+/g, "");
+  assert.equal(Buffer.from(encodedBody, "base64").toString("utf8"), text);
+});
+
+test("Yelp relay MIME is compatible multipart with clean matching chat copy", () => {
+  const text = [
+    "Hi Saerom,",
+    "",
+    "Thanks for reaching out about your tire request. What vehicle are we helping with?",
+    "",
+    "Tires SOS Rescue 3 | (669) 877-4279",
+    "905 W A Street, Hayward, CA 94541",
+  ].join("\n");
+  const html = renderYelpRelayHtml(text);
+  const mime = buildEmailMime({
+    to: "reply+abc@messaging.yelp.com",
+    fromEmail: "tires@example.com",
+    fromName: "Tires SOS Rescue",
+    subject: "Re: Message from Saerom N. for Tires SOS Rescue 3",
+    text,
+    html,
+    inReplyToMessageId: "<message@example.com>",
+  });
+
+  assert.match(mime, /Content-Type: multipart\/alternative/);
+  assert.doesNotMatch(mime, /multipart\/related/);
+  assert.equal(decodePart(mime, "text/plain"), text);
+  assert.equal(htmlToPlainText(decodePart(mime, "text/html")), htmlToPlainText(html));
+  assert.match(html, /Tires SOS Rescue 3 \| \(669\) 877-4279/);
+  assert.match(html, /905 W A Street, Hayward, CA 94541/);
+  assert.doesNotMatch(html, /<img|cid:|WhatsApp us|Replying to your Yelp|Customer Service Team/i);
+});
+
+test("Yelp unsupported-client bounce is recognized as a delivery rejection", () => {
+  assert.equal(
+    isYelpRelayRejectionEmail({
+      subject: "RE: Message from Saerom N. for Tires SOS Rescue 3",
+      html: "<p>Sorry, we were not able to process your reply.</p><p>You may be using an email client that we do not yet support.</p>",
+    }),
+    true,
+  );
+  assert.equal(
+    isYelpRelayRejectionEmail({
+      subject: "New Lead: Reply to Ana's tire request",
+      text: "Ana needs two tires.",
+    }),
+    false,
+  );
+});
+
+test("store detection maps Yelp listings and addresses to the correct contact", () => {
+  assert.equal(detectStoreContact({ subject: "Message from Ana for Tires SOS Rescue 1" }).id, "taylor");
+  assert.equal(detectStoreContact({ subject: "Message from Ana for Tires SOS Rescue 2" }).id, "tenth");
+  assert.equal(detectStoreContact({ subject: "Message from Ana for Tires SOS Rescue 3" }).id, "hayward");
+  assert.equal(detectStoreContact({ text: "Request sent to 1407 N 10th Street" }).storeNumber, 2);
+  assert.equal(detectStoreContact({ text: "Request sent to 905 W A Street" }).storeNumber, 3);
+});
+
+test("Yelp parser carries the detected store into the reply workflow", () => {
+  const lead = parseYelpLeadEmail({
+    gmailMessageId: "gmail-1",
+    threadId: "thread-1",
+    messageIdHeader: "<message@example.com>",
+    subject: "Message from Maria for Tires SOS Rescue 3",
+    from: "Yelp <reply+abc@messaging.yelp.com>",
+    to: "tires@example.com",
+    replyTo: "",
+    text: "I need two tires.\n\nYelp footer",
+    html: "",
+  });
+
+  assert.equal(lead.storeId, "hayward");
+  assert.equal(lead.storeNumber, 3);
+  assert.equal(lead.businessName, "Tires SOS Rescue 3");
+});

@@ -1,0 +1,82 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import { useT } from "../i18n/LanguageContext";
+import { COPY, SITE } from "../site.config";
+import Icon from "./Icons";
+
+export default function HaywardLaunch() {
+  const t = useT();
+  const [location, setLocation] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/locations", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!active) return;
+        const hayward = data?.locations?.find(
+          (item) => item.id === "hayward" && item.status === "revealed",
+        );
+        if (hayward) setLocation(hayward);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  if (!location) return null;
+
+  const contactHref = location.phoneHref || SITE.phoneHref;
+
+  return (
+    <aside id="hayward-launch" className="hayward-launch" aria-labelledby="hayward-launch-title">
+      <figure className="hayward-launch__media">
+        <Image
+          src="/hayward-storefront.png"
+          alt={t({
+            en: "Tires SOS Rescue 3 storefront at 905 W A Street in Hayward",
+            es: "Fachada de Tires SOS Rescue 3 en 905 W A Street, Hayward",
+          })}
+          width="1448"
+          height="1086"
+          loading="lazy"
+          decoding="async"
+        />
+        <div className="hayward-launch__route" aria-label={t({ en: "Three store locations", es: "Tres tiendas" })}>
+          <span>01</span><i /><span>02</span><i /><strong>03</strong>
+        </div>
+        <figcaption>
+          <span>{t({ en: "Now serving Hayward", es: "Ya atendemos en Hayward" })}</span>
+          <strong>{location.line1}</strong>
+        </figcaption>
+      </figure>
+      <div className="hayward-launch__content">
+        <p className="hayward-launch__eyebrow">
+          <span className="hayward-launch__pulse" /> {t(COPY.launch.eyebrow)}
+        </p>
+        <h2 id="hayward-launch-title">
+          {t(COPY.launch.title)} <span>{t(COPY.launch.titleAccent)}</span>
+        </h2>
+        <p className="hayward-launch__body">{t(COPY.launch.body)}</p>
+        <p className="hayward-launch__address">
+          <Icon name="pin" />
+          <span><strong>{location.line1}</strong>{location.line2}</span>
+        </p>
+        <div className="hayward-launch__actions">
+          <a className="btn btn--primary" href={location.mapsHref} target="_blank" rel="noopener noreferrer">
+            <Icon name="pin" /> {t(COPY.launch.directions)}
+          </a>
+          <a className="btn btn--ghost" href={contactHref}>
+            <Icon name="phone" /> {location.phone || t(COPY.launch.contact)}
+          </a>
+        </div>
+      </div>
+      <div className="hayward-launch__stamp" aria-hidden="true">
+        <small>{t(COPY.launch.storeLabel)}</small>
+        <strong>03</strong>
+        <span>HAYWARD</span>
+      </div>
+    </aside>
+  );
+}

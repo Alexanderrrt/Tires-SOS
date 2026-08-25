@@ -10,8 +10,9 @@ import PirelliBadge from "./PirelliBadge";
 
 function LocationCard({ loc, t }) {
   if (loc.status === "mystery") return <div className="location-card location-card--mystery"><div className="location-card__map location-card__map--mystery" aria-hidden="true"><span>TIRES SOS</span><i /></div><div className="location-card__details"><span className="location-card__eyebrow">{t({ en: "New location", es: "Nueva ubicación" })}</span><h3>{t(loc.teaser)}</h3><p>{t(loc.teaserSub)}</p></div></div>;
+  const isNewStore = loc.id === "hayward" && loc.status === "revealed";
   return (
-    <div className="location-card">
+    <div className={`location-card${isNewStore ? " location-card--new" : ""}`}>
       <div className="location-card__map">
         <iframe
           title={`Tires SOS Rescue — ${loc.line1}`}
@@ -21,10 +22,12 @@ function LocationCard({ loc, t }) {
         />
       </div>
       <div className="location-card__details">
+        {isNewStore && <span className="location-card__eyebrow">{t({ en: "Now open — Store 03", es: "Ya abrimos — Tienda 03" })}</span>}
         <h3>{SITE.name}</h3>
         <p>{loc.line1}</p>
         <p>{loc.line2}</p>
-        <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noreferrer" className="btn btn--ghost btn--small location-whatsapp">
+        {loc.phone && <a className="location-card__phone" href={loc.phoneHref || SITE.phoneHref}>{loc.phone}</a>}
+        <a href={loc.whatsappHref || SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noreferrer" className="btn btn--ghost btn--small location-whatsapp">
           <Icon name="chat" /> WhatsApp
         </a>
         <a
@@ -64,8 +67,8 @@ export default function Location() {
         <Reveal className="location-storefront">
           <img
             className="location-storefront__img"
-            src="/storefront.jpg"
-            alt="Tires SOS Rescue storefront at 623 E Taylor St, San Jose, CA"
+            src="/storefront-3-locations.png"
+            alt="Tires SOS Rescue — three locations in San José and Hayward, California"
             loading="lazy"
           />
         </Reveal>
