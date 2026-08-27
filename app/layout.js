@@ -36,7 +36,10 @@ const DESCRIPTION =
 export const metadata = {
   metadataBase: new URL(SITE.url),
   applicationName: SITE.name,
-  title: TITLE,
+  title: {
+    default: TITLE,
+    template: `%s | ${SITE.name}`,
+  },
   description: DESCRIPTION,
   alternates: {
     canonical: "/",
@@ -105,6 +108,14 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${displayFont.variable} ${bodyFont.variable} ${signatureFont.variable}`}>
+      <head>
+        <meta name="google-adsense-account" content="ca-pub-4451891804409193" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4451891804409193"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body>
         <Script
           async

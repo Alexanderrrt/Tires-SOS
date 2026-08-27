@@ -35,10 +35,10 @@ export default function Header() {
         <PirelliBadge compact className="header__pirelli" />
 
         <nav className="header__nav">
-          <a href="/#services">{t(COPY.nav.services)}</a>
+          <a href="/services">{t(COPY.nav.services)}</a>
           <a href="/quote">{t(COPY.nav.quote)}</a>
           <a href="/#gallery">{t(COPY.nav.gallery)}</a>
-          <a href="/#location">{t(COPY.nav.location)}</a>
+          <a href="/locations">{t(COPY.nav.location)}</a>
           <a href="/#reviews">{t(COPY.nav.reviews)}</a>
         </nav>
 

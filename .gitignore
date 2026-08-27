@@ -36,3 +36,6 @@ TIRES_SOS_CONTRACT_UPDATED.html
 .codex-dev-3002.log
 .codex-dev-3002.log
 .codex-dev-3004.log
+
+# clerk configuration (can include secrets)
+/.clerk/

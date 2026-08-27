@@ -19,8 +19,9 @@ function locationSchema(loc) {
   const hours = loc.hours || SITE.hours;
   return {
     "@type": ["TireShop", "AutoRepair"],
-    name: SITE.name,
-    url: SITE.url,
+    "@id": `${SITE.url}/#location-${loc.id}`,
+    name: `${SITE.name} — ${loc.line1}`,
+    url: `${SITE.url}/locations/${loc.id === "taylor" ? "east-taylor-san-jose" : loc.id === "tenth" ? "north-10th-san-jose" : loc.id}`,
     telephone: loc.phone || SITE.phone,
     priceRange: "$$",
     image: `${SITE.url}/og.png`,
@@ -49,6 +50,7 @@ function locationSchema(loc) {
     sameAs: [SITE.social.instagram, SITE.social.tiktok, SITE.social.facebook],
     knowsLanguage: ["en", "es"],
     paymentAccepted: "Cash, Credit Card, Afterpay",
+    parentOrganization: { "@id": `${SITE.url}/#organization` },
   };
 }
 

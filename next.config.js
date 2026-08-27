@@ -9,6 +9,7 @@ const CLERK = "https://*.clerk.accounts.dev https://clerk-telemetry.com";
 const POSTHOG = "https://us.i.posthog.com https://us-assets.i.posthog.com https://us.posthog.com";
 const TURNSTILE = "https://challenges.cloudflare.com";
 const GOOGLE_TAG = "https://www.googletagmanager.com";
+const GOOGLE_ADSENSE = "https://pagead2.googlesyndication.com";
 const GOOGLE_CONN =
   "https://www.google-analytics.com https://region1.google-analytics.com https://googleads.g.doubleclick.net https://stats.g.doubleclick.net";
 const GOOGLE_MAPS = "https://www.google.com"; // maps embed iframe
@@ -24,7 +25,7 @@ const contentSecurityPolicyProd = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  `script-src 'self' 'unsafe-inline' ${CLERK} ${TURNSTILE} ${GOOGLE_TAG} https://us-assets.i.posthog.com`,
+  `script-src 'self' 'unsafe-inline' ${CLERK} ${TURNSTILE} ${GOOGLE_TAG} ${GOOGLE_ADSENSE} https://us-assets.i.posthog.com`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
@@ -76,15 +77,6 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
-  async redirects() {
-    return [
-      {
-        source: "/services/:path*",
-        destination: "/#services",
-        permanent: true,
-      },
-    ];
-  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

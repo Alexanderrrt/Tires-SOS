@@ -74,6 +74,12 @@ export default function Footer() {
               Facebook
             </a>
           </div>
+          <p className="footer__label footer__label--legal">Explore</p>
+          <div className="footer__legal">
+            <a href="/services">Services</a>
+            <a href="/locations">Locations</a>
+            <a href="/quote">Request a quote</a>
+          </div>
           <p className="footer__label footer__label--legal">Legal</p>
           <div className="footer__legal">
             {legalLinks.map((link) => (
