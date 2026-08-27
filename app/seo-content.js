@@ -89,11 +89,22 @@ export const LOCATION_PAGES = {
   "east-taylor-san-jose": {
     locationId: "taylor",
     label: "East Taylor Street",
+    labelEs: "East Taylor Street",
     title: "Tire Shop on East Taylor St in San Jose",
+    titleEs: "Taller de llantas en East Taylor St, San José",
   },
   "north-10th-san-jose": {
     locationId: "tenth",
     label: "North 10th Street",
+    labelEs: "North 10th Street",
     title: "Tire Shop on North 10th St in San Jose",
+    titleEs: "Taller de llantas en North 10th St, San José",
+  },
+  "west-a-street-hayward": {
+    locationId: "hayward",
+    label: "West A Street, Hayward",
+    labelEs: "West A Street, Hayward",
+    title: "Tire Shop on West A Street in Hayward",
+    titleEs: "Taller de llantas en West A Street, Hayward",
   },
 };
