@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useT } from "../i18n/LanguageContext";
+import { SITE } from "../site.config";
 import Reveal from "./Reveal";
 
 const COPY = {
@@ -19,6 +20,14 @@ const COPY = {
   alignmentLabel: { en: "Precision alignment", es: "Alineación de precisión" },
   cta: { en: "Get a van quote", es: "Cotiza tu van" },
   mediaLabel: { en: "Built for the workday", es: "Listas para el trabajo" },
+  division: { en: "Commercial division", es: "División comercial" },
+  specOne: { en: "High-roof vans", es: "Vans de techo alto" },
+  specOneSub: { en: "Sprinter-class fitment", es: "Servicio tipo Sprinter" },
+  specTwo: { en: "Load-rated tires", es: "Llantas de carga" },
+  specTwoSub: { en: "Matched to your work van", es: "Correctas para tu van" },
+  specThree: { en: "Alignment-ready", es: "Alineación especializada" },
+  specThreeSub: { en: "Commercial geometry", es: "Geometría comercial" },
+  whatsapp: { en: "Talk to the shop", es: "Habla con el taller" },
 };
 
 export default function CommercialVans() {
@@ -38,6 +47,10 @@ export default function CommercialVans() {
             fill
             sizes="(max-width: 820px) calc(100vw - 2.5rem), 55vw"
           />
+          <div className="commercial-vans__division">
+            <span aria-hidden="true" />
+            {t(COPY.division)}
+          </div>
           <div className="commercial-vans__media-copy">
             <span>{t(COPY.mediaLabel)}</span>
             <strong>SPRINTER <i>•</i> TRANSIT <i>•</i> PROMASTER</strong>
@@ -45,6 +58,11 @@ export default function CommercialVans() {
         </div>
 
         <div className="commercial-vans__copy">
+          <div className="commercial-vans__topline">
+            <span>TIRES SOS</span>
+            <i aria-hidden="true" />
+            <span>FLEET CARE</span>
+          </div>
           <p className="commercial-vans__kicker">{t(COPY.kicker)}</p>
           <h2 id="commercial-vans-title">{t(COPY.title)}</h2>
           <p className="commercial-vans__body">{t(COPY.body)}</p>
@@ -52,9 +70,19 @@ export default function CommercialVans() {
             <span>{t(COPY.tireLabel)}</span>
             <span>{t(COPY.alignmentLabel)}</span>
           </div>
-          <Link className="btn btn--primary commercial-vans__cta" href="/quote">
-            {t(COPY.cta)}
-          </Link>
+          <div className="commercial-vans__specs">
+            <div><strong>01</strong><span><b>{t(COPY.specOne)}</b><small>{t(COPY.specOneSub)}</small></span></div>
+            <div><strong>02</strong><span><b>{t(COPY.specTwo)}</b><small>{t(COPY.specTwoSub)}</small></span></div>
+            <div><strong>03</strong><span><b>{t(COPY.specThree)}</b><small>{t(COPY.specThreeSub)}</small></span></div>
+          </div>
+          <div className="commercial-vans__actions">
+            <Link className="btn btn--primary commercial-vans__cta" href="/quote">
+              {t(COPY.cta)} <span aria-hidden="true">→</span>
+            </Link>
+            <a className="commercial-vans__contact" href={SITE.whatsappHref} target="_blank" rel="noreferrer">
+              {t(COPY.whatsapp)}
+            </a>
+          </div>
         </div>
       </Reveal>
     </section>
