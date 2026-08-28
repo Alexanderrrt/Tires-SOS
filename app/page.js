@@ -12,6 +12,7 @@ import BrandPopups from "./components/BrandPopups";
 import ChatBot from "./components/ChatBot";
 import CinematicVideo from "./components/CinematicVideo";
 import HaywardLaunch from "./components/HaywardLaunch";
+import CommercialVans from "./components/CommercialVans";
 
 export default function HomePage() {
   return (
@@ -23,6 +24,7 @@ export default function HomePage() {
         <Marquee />
         <CinematicVideo />
         <Services />
+        <CommercialVans />
         <Gallery />
         <Promos />
         <OwnersRide />
