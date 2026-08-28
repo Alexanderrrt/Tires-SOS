@@ -12,6 +12,7 @@ import BrandPopups from "./components/BrandPopups";
 import ChatBot from "./components/ChatBot";
 import CinematicVideo from "./components/CinematicVideo";
 import CommercialVans from "./components/CommercialVans";
+import CommercialVanPopup from "./components/CommercialVanPopup";
 
 export default function HomePage() {
   return (
@@ -30,6 +31,7 @@ export default function HomePage() {
         <Reviews />
       </main>
       <Footer />
+      <CommercialVanPopup />
       <BrandPopups />
       <ChatBot mode="shop" turnstileSiteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""} />
     </>

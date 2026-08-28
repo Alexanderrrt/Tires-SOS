@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useT } from "../i18n/LanguageContext";
 import Reveal from "./Reveal";
 
@@ -27,7 +28,16 @@ export default function CommercialVans() {
     <section className="commercial-vans" aria-labelledby="commercial-vans-title">
       <Reveal className="commercial-vans__inner">
         <div className="commercial-vans__media" aria-label={t(COPY.mediaLabel)}>
-          <span className="commercial-vans__track" aria-hidden="true" />
+          <Image
+            className="commercial-vans__image"
+            src="/commercial-vans/commercial-van-alignment-hero.webp"
+            alt={t({
+              en: "Commercial cargo van receiving a precision wheel alignment at Tires SOS Rescue",
+              es: "Van comercial recibiendo una alineación de precisión en Tires SOS Rescue",
+            })}
+            fill
+            sizes="(max-width: 820px) calc(100vw - 2.5rem), 55vw"
+          />
           <div className="commercial-vans__media-copy">
             <span>{t(COPY.mediaLabel)}</span>
             <strong>SPRINTER <i>•</i> TRANSIT <i>•</i> PROMASTER</strong>
