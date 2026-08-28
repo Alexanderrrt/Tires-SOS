@@ -17,7 +17,9 @@ const COPY = {
   cta: { en: "Get a van quote", es: "Cotiza tu van" },
 };
 
-const DISMISSED_KEY = "tsr-commercial-van-popup-dismissed";
+// Version the campaign key so visitors who dismissed the older, oversized
+// creative still receive the redesigned compact popup once.
+const DISMISSED_KEY = "tsr-commercial-van-popup-v2-dismissed";
 const VISIBILITY_EVENT = "commercial-van-popup:visibility";
 
 export default function CommercialVanPopup() {
