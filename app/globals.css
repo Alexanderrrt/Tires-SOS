@@ -6215,6 +6215,47 @@ body { background: #050505; color: var(--paper); }
   background: linear-gradient(rgba(12, 10, 8, .94), rgba(12, 10, 8, .98)), url("/Background.png") center top / 900px auto;
   color: var(--paper);
 }
+
+.brand-popup__van-art {
+  position: relative;
+  height: 112px;
+  margin-bottom: .7rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 90, 0, .55);
+  border-radius: var(--r-sm);
+  background: radial-gradient(circle at 76% 22%, rgba(255, 90, 0, .28), transparent 36%), linear-gradient(145deg, #292929, #080808);
+}
+
+.brand-popup__van-shape {
+  position: absolute;
+  top: 20px;
+  left: 52px;
+  width: 205px;
+  height: 58px;
+  border: 2px solid rgba(255, 255, 255, .2);
+  border-radius: 45% 8% 10% 18%;
+  transform: skewX(-10deg);
+}
+
+.brand-popup__van-shape::before,
+.brand-popup__van-shape::after {
+  content: "";
+  position: absolute;
+  bottom: -13px;
+  width: 27px;
+  height: 27px;
+  border: 5px solid #060606;
+  border-radius: 50%;
+  background: #555;
+}
+
+.brand-popup__van-shape::before { left: 28px; }
+.brand-popup__van-shape::after { right: 30px; }
+.brand-popup__van-art strong { position: absolute; inset: auto .75rem .55rem; color: #fff; font: italic 800 .78rem var(--display); text-align: center; }
+.brand-popup__van-art i { color: var(--orange); font-style: normal; }
+.brand-popup__van-services { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .85rem; }
+.brand-popup__van-services span { padding: .35rem .55rem; border: 1px solid #3a3a3a; border-radius: 999px; color: #ddd; font-size: .67rem; font-weight: 800; text-transform: uppercase; }
+.brand-popup__van-services span::before { content: "✓"; margin-right: .3rem; color: var(--orange); }
 .seo-page::before { content: ""; position: absolute; inset: 0 0 auto; height: 480px; pointer-events: none; background: radial-gradient(circle at 72% 18%, rgba(248, 96, 0, .16), transparent 42%); }
 .seo-page__inner { position: relative; z-index: 1; }
 .breadcrumbs { margin-bottom: 2rem; color: #90877c; font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
