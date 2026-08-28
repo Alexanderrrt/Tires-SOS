@@ -24,29 +24,7 @@ const AFTERPAY_LINE = {
   es: "Aceptamos Afterpay y Snap Finance",
 };
 
-const COMMERCIAL_VAN_PROMO = {
-  name: "Commercial vans",
-  kind: "commercial-vans",
-  kicker: { en: "Commercial van specialists", es: "Especialistas en vans comerciales" },
-  tagline: {
-    en: "Tires and precision alignments for Sprinter, Transit, ProMaster, and other work vans.",
-    es: "Llantas y alineación de precisión para Sprinter, Transit, ProMaster y otras vans de trabajo.",
-  },
-  cta: { en: "Get a van quote", es: "Cotiza tu van" },
-};
-
-const POPUP_ITEMS = [COMMERCIAL_VAN_PROMO, ...BRAND_SHOWCASE];
-
 function BrandLogo({ brand }) {
-  if (brand.kind === "commercial-vans") {
-    return (
-      <div className="brand-popup__van-art" aria-hidden="true">
-        <span className="brand-popup__van-shape" />
-        <strong>SPRINTER <i>•</i> TRANSIT <i>•</i> PROMASTER</strong>
-      </div>
-    );
-  }
-
   if (Array.isArray(brand.logos)) {
     return (
       <div className="brand-popup__logo brand-popup__logo--collab">
@@ -70,12 +48,19 @@ export default function BrandPopups() {
   const [brandIndex, setBrandIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
   const [launchInView, setLaunchInView] = useState(false);
+  const [vanPopupVisible, setVanPopupVisible] = useState(false);
 
   useEffect(() => {
-    const idx = Math.floor(Math.random() * POPUP_ITEMS.length);
+    const idx = Math.floor(Math.random() * BRAND_SHOWCASE.length);
     setBrandIndex(idx);
     const timer = setTimeout(() => setVisible(true), 8000);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const handleVisibility = (event) => setVanPopupVisible(event.detail?.visible === true);
+    window.addEventListener("commercial-van-popup:visibility", handleVisibility);
+    return () => window.removeEventListener("commercial-van-popup:visibility", handleVisibility);
   }, []);
 
   useEffect(() => {
@@ -105,11 +90,11 @@ export default function BrandPopups() {
   }, []);
 
   const nextBrand = useCallback(() => {
-    setBrandIndex((prev) => (prev + 1) % POPUP_ITEMS.length);
+    setBrandIndex((prev) => (prev + 1) % BRAND_SHOWCASE.length);
   }, []);
 
   const prevBrand = useCallback(() => {
-    setBrandIndex((prev) => (prev - 1 + POPUP_ITEMS.length) % POPUP_ITEMS.length);
+    setBrandIndex((prev) => (prev - 1 + BRAND_SHOWCASE.length) % BRAND_SHOWCASE.length);
   }, []);
 
   const intervalRef = useRef(null);
@@ -132,36 +117,28 @@ export default function BrandPopups() {
     setVisible(false);
   };
 
-  if (!visible || dismissed || launchInView) return null;
+  if (!visible || dismissed || launchInView || vanPopupVisible) return null;
 
-  const brand = POPUP_ITEMS[brandIndex];
-  const isVanPromo = brand.kind === "commercial-vans";
+  const brand = BRAND_SHOWCASE[brandIndex];
 
   return (
-    <div className="brand-popup" role="dialog" aria-label={isVanPromo ? t(brand.kicker) : t(WE_CARRY)}>
+    <div className="brand-popup" role="dialog" aria-label={t(WE_CARRY)}>
       <div className="brand-popup__inner">
         <button type="button" className="brand-popup__close" onClick={dismiss} aria-label={t(CLOSE_LABEL)}>
           &times;
         </button>
 
-        <p className="brand-popup__kicker">{isVanPromo ? t(brand.kicker) : t(WE_CARRY)}</p>
+        <p className="brand-popup__kicker">{t(WE_CARRY)}</p>
         <BrandLogo brand={brand} />
         <p className={`brand-popup__tagline ${brand.featured ? "brand-popup__tagline--featured" : ""}`}>
           {t(brand.tagline)}
         </p>
 
-        {isVanPromo ? (
-          <div className="brand-popup__van-services">
-            <span>{t({ en: "Commercial tires", es: "Llantas comerciales" })}</span>
-            <span>{t({ en: "Wheel alignment", es: "Alineación" })}</span>
-          </div>
-        ) : (
-          <div className="brand-popup__afterpay">
-            <span className="afterpay-chip afterpay-chip--mint">Afterpay</span>
-            <span className="afterpay-chip">Snap Finance</span>
-            <span className="brand-popup__afterpay-text">{t(AFTERPAY_LINE)}</span>
-          </div>
-        )}
+        <div className="brand-popup__afterpay">
+          <span className="afterpay-chip afterpay-chip--mint">Afterpay</span>
+          <span className="afterpay-chip">Snap Finance</span>
+          <span className="brand-popup__afterpay-text">{t(AFTERPAY_LINE)}</span>
+        </div>
 
         <div className="brand-popup__nav" aria-label="Brand navigation">
           <button
@@ -188,12 +165,12 @@ export default function BrandPopups() {
           </button>
         </div>
 
-        <a href={isVanPromo ? "/quote" : SITE.whatsappHref} target={isVanPromo ? undefined : "_blank"} rel={isVanPromo ? undefined : "noreferrer"} className="btn btn--primary btn--small brand-popup__cta">
-          {isVanPromo ? t(brand.cta) : t(CTA)}
+        <a href={SITE.whatsappHref} target="_blank" rel="noreferrer" className="btn btn--primary btn--small brand-popup__cta">
+          {t(CTA)}
         </a>
 
         <div className="brand-popup__dots">
-          {POPUP_ITEMS.map((b, i) => (
+          {BRAND_SHOWCASE.map((b, i) => (
             <button
               key={b.name}
               type="button"
