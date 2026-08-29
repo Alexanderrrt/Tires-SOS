@@ -3,6 +3,7 @@ import { Barlow, Barlow_Condensed, Caveat } from "next/font/google";
 import "./globals.css";
 import JsonLd from "./components/JsonLd";
 import PostHogAnalytics from "./components/PostHogAnalytics";
+import PageTransition from "./components/PageTransition";
 import { LanguageProvider } from "./i18n/LanguageContext";
 import { SITE } from "./site.config";
 
@@ -108,6 +109,7 @@ export default function RootLayout({ children }) {
           <JsonLd />
           <LanguageProvider>
             <PostHogAnalytics />
+            <PageTransition />
             {children}
           </LanguageProvider>
         </ClerkProvider>

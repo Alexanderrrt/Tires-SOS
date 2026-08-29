@@ -1,7 +1,6 @@
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import Marquee from "./components/Marquee";
-import Services from "./components/Services";
 import Gallery from "./components/Gallery";
 import Promos from "./components/Promos";
 import OwnersRide from "./components/OwnersRide";
@@ -23,7 +22,6 @@ export default function HomePage() {
         <CommercialVans placement="mobile" />
         <Marquee />
         <CinematicVideo />
-        <Services />
         <CommercialVans placement="desktop" />
         <Gallery />
         <Promos />

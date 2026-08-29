@@ -12,6 +12,7 @@ export default function Header() {
   const t = useT();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
   const onSecretAdminTap = useSecretAdminTap();
 
   useEffect(() => {
@@ -47,11 +48,28 @@ export default function Header() {
         <PirelliBadge compact className="header__pirelli" />
 
         <nav className="header__nav">
-          <a href="/#services">{t(COPY.nav.services)}</a>
+          <div className="site-menu">
+            <button type="button" className="site-menu__toggle" onClick={() => setDesktopMenuOpen((open) => !open)} aria-expanded={desktopMenuOpen}>
+              {lang === "es" ? "Menú" : "Menu"} <span aria-hidden="true">⌄</span>
+            </button>
+            <div className={`site-menu__panel ${desktopMenuOpen ? "site-menu__panel--open" : ""}`}>
+              <a href="/">{lang === "es" ? "Inicio" : "Home"}</a>
+              <a href="/services/new-tires">{lang === "es" ? "Llantas nuevas" : "New tires"}</a>
+              <a href="/services/flat-repair">{lang === "es" ? "Ponchaduras" : "Flat repair"}</a>
+              <a href="/services/alignment">{lang === "es" ? "Alineación" : "Alignment"}</a>
+              <a href="/services/brakes">{lang === "es" ? "Frenos" : "Brakes"}</a>
+              <a href="/services/oil-change">{lang === "es" ? "Cambio de aceite" : "Oil change"}</a>
+              <a href="/services/batteries">{lang === "es" ? "Baterías" : "Batteries"}</a>
+              <a href="/services/rims">{lang === "es" ? "Rines" : "Rims"}</a>
+              <a href="/#gallery">{t(COPY.nav.gallery)}</a>
+              <a href="/#location">{t(COPY.nav.location)}</a>
+              <a href="/#reviews">{t(COPY.nav.reviews)}</a>
+              <a href="/privacy">{lang === "es" ? "Privacidad" : "Privacy"}</a>
+              <a href="/terms">{lang === "es" ? "Términos" : "Terms"}</a>
+              <a href="/disclaimer">{lang === "es" ? "Aviso legal" : "Disclaimer"}</a>
+            </div>
+          </div>
           <a href="/quote">{t(COPY.nav.quote)}</a>
-          <a href="/#gallery">{t(COPY.nav.gallery)}</a>
-          <a href="/#location">{t(COPY.nav.location)}</a>
-          <a href="/#reviews">{t(COPY.nav.reviews)}</a>
         </nav>
 
         <div className="header__actions">
@@ -94,11 +112,21 @@ export default function Header() {
       />
       <nav id="mobile-navigation" className={`mobile-menu ${mobileMenuOpen ? "mobile-menu--open" : ""}`} aria-hidden={!mobileMenuOpen}>
         <div className="mobile-menu__topline"><span>TIRES SOS</span><i />{lang === "es" ? "MENÚ" : "MENU"}</div>
-        <a href="/#services" onClick={closeMobileMenu}>{t(COPY.nav.services)}</a>
+        <a href="/" onClick={closeMobileMenu}>{lang === "es" ? "Inicio" : "Home"}</a>
         <a href="/quote" onClick={closeMobileMenu}>{t(COPY.nav.quote)}</a>
+        <a href="/services/new-tires" onClick={closeMobileMenu}>{lang === "es" ? "Llantas nuevas" : "New tires"}</a>
+        <a href="/services/flat-repair" onClick={closeMobileMenu}>{lang === "es" ? "Ponchaduras" : "Flat repair"}</a>
+        <a href="/services/alignment" onClick={closeMobileMenu}>{lang === "es" ? "Alineación" : "Alignment"}</a>
+        <a href="/services/brakes" onClick={closeMobileMenu}>{lang === "es" ? "Frenos" : "Brakes"}</a>
+        <a href="/services/oil-change" onClick={closeMobileMenu}>{lang === "es" ? "Cambio de aceite" : "Oil change"}</a>
+        <a href="/services/batteries" onClick={closeMobileMenu}>{lang === "es" ? "Baterías" : "Batteries"}</a>
+        <a href="/services/rims" onClick={closeMobileMenu}>{lang === "es" ? "Rines" : "Rims"}</a>
         <a href="/#gallery" onClick={closeMobileMenu}>{t(COPY.nav.gallery)}</a>
         <a href="/#location" onClick={closeMobileMenu}>{t(COPY.nav.location)}</a>
         <a href="/#reviews" onClick={closeMobileMenu}>{t(COPY.nav.reviews)}</a>
+        <a href="/privacy" onClick={closeMobileMenu}>{lang === "es" ? "Privacidad" : "Privacy"}</a>
+        <a href="/terms" onClick={closeMobileMenu}>{lang === "es" ? "Términos" : "Terms"}</a>
+        <a href="/disclaimer" onClick={closeMobileMenu}>{lang === "es" ? "Aviso legal" : "Disclaimer"}</a>
         <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noreferrer" className="btn btn--primary mobile-menu__cta" onClick={closeMobileMenu}>
           <Icon name="chat" /> {t(COPY.nav.callNow)}
         </a>
