@@ -76,6 +76,15 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
+  async redirects() {
+    return [
+      { source: "/services/flat-repair", destination: "/services/flat-tire-repair", permanent: true },
+      { source: "/services/alignment", destination: "/services/wheel-alignment", permanent: true },
+      { source: "/services/brakes", destination: "/services/brake-service", permanent: true },
+      { source: "/services/batteries", destination: "/services/car-batteries", permanent: true },
+      { source: "/services/rims", destination: "/services/custom-wheels", permanent: true },
+    ];
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

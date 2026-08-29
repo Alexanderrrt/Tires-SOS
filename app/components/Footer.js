@@ -76,6 +76,10 @@ export default function Footer() {
           </div>
           <p className="footer__label footer__label--legal">Legal</p>
           <div className="footer__legal">
+            <a href="/services">{t({ en: "All services", es: "Todos los servicios" })}</a>
+            <a href="/locations">{t({ en: "All locations", es: "Todas las ubicaciones" })}</a>
+          </div>
+          <div className="footer__legal">
             {legalLinks.map((link) => (
               <a key={link.href} href={link.href}>
                 {t(link.label)}

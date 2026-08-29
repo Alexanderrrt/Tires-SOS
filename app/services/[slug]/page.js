@@ -1,50 +1,25 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
-import ChatBot from "../../components/ChatBot";
-import { SERVICE_PAGES, SITE } from "../../site.config";
+import SeoJsonLd from "../../components/SeoJsonLd";
+import { ServiceLandingView } from "../../components/SeoViews";
+import { SITE } from "../../site.config";
+import { SERVICE_PAGES } from "../../seo-content";
 
-export function generateStaticParams() {
-  return Object.keys(SERVICE_PAGES).map((slug) => ({ slug }));
+export function generateStaticParams() { return Object.keys(SERVICE_PAGES).map((slug) => ({ slug })); }
+export async function generateMetadata({ params }) {
+  const { slug } = await params; const service = SERVICE_PAGES[slug];
+  if (!service) return {};
+  return { title: service.title, description: service.description, alternates: { canonical: `/services/${slug}` }, openGraph: { title: `${service.title} | ${SITE.name}`, description: service.description, url: `/services/${slug}`, type: "website" } };
 }
 
-export function generateMetadata({ params }) {
-  const page = SERVICE_PAGES[params.slug];
-  if (!page) return {};
-  return {
-    title: `${page.title.en} | ${SITE.name}`,
-    description: page.description.en,
-    alternates: { canonical: `/services/${params.slug}` },
-    openGraph: { title: page.title.en, description: page.description.en, url: `/services/${params.slug}` },
-  };
-}
-
-export default function ServicePage({ params }) {
-  const page = SERVICE_PAGES[params.slug];
-  if (!page) notFound();
-  return (
-    <>
-      <Header />
-      <main className="service-page">
-        <div className="service-page__inner">
-          <p className="service-page__eyebrow">Tires SOS Rescue · San Jose, CA</p>
-          <h1>{page.title.en}</h1>
-          <p className="service-page__lead">{page.description.en}</p>
-          <p>{page.body.en}</p>
-          <div className="service-page__actions">
-            <a className="btn btn--primary" href={SITE.whatsappHref} target="_blank" rel="noreferrer">Ask on WhatsApp</a>
-            <Link className="btn btn--ghost" href="/#services">See all services</Link>
-          </div>
-          <div className="service-page__locations">
-            <h2>Visit either San Jose location</h2>
-            {SITE.locations.map((location) => <p key={location.id}><strong>{location.line1}</strong><br />{location.line2} · <a href={location.mapsHref} target="_blank" rel="noreferrer">Get directions</a></p>)}
-            <p>Walk-ins welcome during shop hours. Shop service only; no roadside service or towing.</p>
-          </div>
-        </div>
-      </main>
-      <Footer />
-      <ChatBot mode="shop" turnstileSiteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""} />
-    </>
-  );
+export default async function ServicePage({ params }) {
+  const { slug } = await params; const service = SERVICE_PAGES[slug]; if (!service) notFound();
+  const url = `${SITE.url}/services/${slug}`;
+  const schema = { "@context": "https://schema.org", "@graph": [
+    { "@type": "Service", "@id": `${url}#service`, name: service.name, description: service.description, serviceType: service.name, areaServed: { "@type": "City", name: "San Jose" }, provider: { "@id": `${SITE.url}/#organization` }, url },
+    { "@type": "FAQPage", "@id": `${url}#faq`, mainEntity: service.faq.map(([name, text]) => ({ "@type": "Question", name, acceptedAnswer: { "@type": "Answer", text } })) },
+    { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE.url }, { "@type": "ListItem", position: 2, name: "Services", item: `${SITE.url}/services` }, { "@type": "ListItem", position: 3, name: service.name, item: url }] }
+  ] };
+  return <><Header /><SeoJsonLd data={schema} /><ServiceLandingView slug={slug} service={service} /><Footer /></>;
 }
