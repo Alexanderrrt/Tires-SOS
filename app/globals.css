@@ -1871,6 +1871,7 @@ body { background: #050505; color: var(--paper); }
 .commercial-vans__contact:hover { color: #fff; text-decoration-color: var(--orange); }
 
 @media (max-width: 820px) {
+  .header__actions > .site-menu { display: none; }
   .commercial-vans--desktop { display: none; }
   .commercial-vans--mobile { display: block; }
   .commercial-vans { padding-inline: .8rem; }

@@ -48,6 +48,12 @@ export default function Header() {
         <PirelliBadge compact className="header__pirelli" />
 
         <nav className="header__nav">
+          <a href="/quote">{t(COPY.nav.quote)}</a>
+        </nav>
+
+        <div className="header__actions">
+          <span className="header__hours"><Icon name="clock" /> MON–FRI 9AM–6PM · SAT 9AM–5PM</span>
+
           <div className="site-menu">
             <button type="button" className="site-menu__toggle" onClick={() => setDesktopMenuOpen((open) => !open)} aria-expanded={desktopMenuOpen}>
               {lang === "es" ? "Menú" : "Menu"} <span aria-hidden="true">⌄</span>
@@ -69,11 +75,6 @@ export default function Header() {
               <a href="/disclaimer">{lang === "es" ? "Aviso legal" : "Disclaimer"}</a>
             </div>
           </div>
-          <a href="/quote">{t(COPY.nav.quote)}</a>
-        </nav>
-
-        <div className="header__actions">
-          <span className="header__hours"><Icon name="clock" /> MON–FRI 9AM–6PM · SAT 9AM–5PM</span>
 
           <button
             type="button"

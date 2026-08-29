@@ -42,17 +42,14 @@ export const SITE = {
     },
     {
       id: "hayward",
-      city: "Hayward, CA",
-      status: "mystery",
-      isPublic: false,
-      teaser: {
-        en: "Coming soon to Hayward, CA",
-        es: "Muy pronto en Hayward, CA",
-      },
-      teaserSub: {
-        en: "More details coming soon.",
-        es: "Más detalles próximamente.",
-      },
+      line1: "905 W A Street",
+      line2: "Hayward, CA 94541",
+      full: "905 W A Street, Hayward, CA 94541",
+      mapsHref: "https://www.google.com/maps/dir/?api=1&destination=905+W+A+Street,+Hayward,+CA+94541",
+      mapsEmbedSrc: "https://www.google.com/maps?q=905+W+A+Street,+Hayward,+CA+94541&output=embed",
+      postalCode: "94541",
+      status: "revealed",
+      isPublic: true,
     },
   ],
 
