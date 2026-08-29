@@ -78,7 +78,15 @@ export default function Header() {
                     <a href="/services/custom-wheels">{lang === "es" ? "Rines" : "Rims"}</a>
                   </div>
                 </details>
-                <a href="/locations">{lang === "es" ? "Ubicaciones" : "Locations"}</a>
+                <details className="site-menu__submenu">
+                  <summary>{lang === "es" ? "Ubicaciones" : "Locations"}</summary>
+                  <div>
+                    <a href="/locations">{lang === "es" ? "Ver todas" : "View all"}</a>
+                    <a href="/locations/east-taylor-san-jose">East Taylor</a>
+                    <a href="/locations/north-10th-san-jose">North 10th</a>
+                    <a href="/locations/west-a-street-hayward">Hayward</a>
+                  </div>
+                </details>
               </div>
               <div className="site-menu__group">
                 <span>{lang === "es" ? "Explorar" : "Explore"}</span>
@@ -146,7 +154,15 @@ export default function Header() {
             <a href="/services/custom-wheels" onClick={closeMobileMenu}>{lang === "es" ? "Rines" : "Rims"}</a>
           </div>
         </details>
-        <a href="/locations" onClick={closeMobileMenu}>{lang === "es" ? "Todas las ubicaciones" : "All locations"}</a>
+        <details className="mobile-menu__submenu">
+          <summary>{lang === "es" ? "Ubicaciones" : "Locations"}</summary>
+          <div>
+            <a href="/locations" onClick={closeMobileMenu}>{lang === "es" ? "Ver todas" : "View all"}</a>
+            <a href="/locations/east-taylor-san-jose" onClick={closeMobileMenu}>East Taylor</a>
+            <a href="/locations/north-10th-san-jose" onClick={closeMobileMenu}>North 10th</a>
+            <a href="/locations/west-a-street-hayward" onClick={closeMobileMenu}>Hayward</a>
+          </div>
+        </details>
         <a href="/#gallery" onClick={closeMobileMenu}>{t(COPY.nav.gallery)}</a>
         <a href="/#reviews" onClick={closeMobileMenu}>{t(COPY.nav.reviews)}</a>
         <a href="/privacy" onClick={closeMobileMenu}>{lang === "es" ? "Privacidad" : "Privacy"}</a>

@@ -64,8 +64,8 @@ export default function Location() {
         <Reveal className="location-storefront">
           <img
             className="location-storefront__img"
-            src="/storefront.jpg"
-            alt="Tires SOS Rescue storefront at 623 E Taylor St, San Jose, CA"
+            src="/storefront-3-locations.png"
+            alt="Tires SOS Rescue — three locations in San José and Hayward, California"
             loading="lazy"
           />
         </Reveal>
