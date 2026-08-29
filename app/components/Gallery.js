@@ -14,6 +14,7 @@ import PirelliBadge from "./PirelliBadge";
 // (N = 1-indexed position in REELS below) — it's tried first automatically.
 // Until then, real shop photography is used as an on-brand poster.
 const FALLBACK_POSTERS = ["/storefront.jpg", "/owners-m3.jpg", "/owner.jpg", "/services/new-tires.jpg"];
+const POSTER_FOCAL_POINTS = ["center", "52% center", "28% center", "center"];
 
 // Resolves the first candidate URL that actually loads. Runs entirely
 // client-side via a plain Image() probe — deliberately never rendered as a
@@ -43,113 +44,28 @@ function resolveFirstWorkingImage(candidates, onResolved) {
   };
 }
 
-const EMBED_SCRIPT_SRC = "https://www.instagram.com/embed.js";
-
-// Loads Instagram's official embed script once, on first use, instead of on
-// every page load — we only need it when someone actually opens a reel.
-function loadEmbedScript() {
-  return new Promise((resolve, reject) => {
-    if (window.instgrm) {
-      resolve();
-      return;
-    }
-    const existing = document.querySelector(`script[src="${EMBED_SCRIPT_SRC}"]`);
-    if (existing) {
-      existing.addEventListener("load", () => resolve(), { once: true });
-      existing.addEventListener("error", () => reject(new Error("embed script failed")), { once: true });
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = EMBED_SCRIPT_SRC;
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("embed script failed"));
-    document.body.appendChild(script);
-  });
-}
-
-function ReelModal({ permalink, onClose }) {
-  const [status, setStatus] = useState("loading"); // "loading" | "ready" | "error"
-
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    const onKeyDown = (e) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKeyDown);
-
-    let cancelled = false;
-    loadEmbedScript()
-      .then(() => {
-        if (cancelled) return;
-        // The blockquote must already be in the DOM before Embeds.process()
-        // runs, so wait a tick for React's render to commit it.
-        requestAnimationFrame(() => {
-          if (cancelled) return;
-          try {
-            window.instgrm.Embeds.process();
-            setStatus("ready");
-          } catch {
-            setStatus("error");
-          }
-        });
-      })
-      .catch(() => !cancelled && setStatus("error"));
-
-    return () => {
-      cancelled = true;
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [permalink, onClose]);
-
-  return (
-    <div className="reel-modal" onClick={onClose}>
-      <div className="reel-modal__panel" onClick={(e) => e.stopPropagation()}>
-        <button className="reel-modal__close" onClick={onClose} aria-label="Close">
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-            <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </button>
-        {status !== "error" ? (
-          <>
-            {status === "loading" && (
-              <div className="reel-modal__loading">
-                <span className="reel-modal__spinner" />
-              </div>
-            )}
-            <blockquote
-              className="instagram-media"
-              data-instgrm-permalink={permalink}
-              data-instgrm-version="14"
-              style={{ margin: 0 }}
-            />
-          </>
-        ) : (
-          <div className="reel-modal__fallback">
-            <p>We couldn&apos;t load this reel here.</p>
-            <a href={permalink} target="_blank" rel="noopener noreferrer" className="btn btn--primary">
-              <Icon name="instagram" /> Open on Instagram
-            </a>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function ReelCard({ permalink, index, onPlay }) {
+function ReelCard({ permalink, index }) {
   const [src, setSrc] = useState(undefined); // undefined = still probing, null = nothing worked
 
   useEffect(() => {
-    const candidates = [`/reels/reel-${index + 1}.jpg`, FALLBACK_POSTERS[index % FALLBACK_POSTERS.length]];
+    const candidates = [
+      `/reels/reel-${index + 1}.png`,
+      `/reels/reel-${index + 1}.jpg`,
+      FALLBACK_POSTERS[index % FALLBACK_POSTERS.length],
+    ];
     return resolveFirstWorkingImage(candidates, setSrc);
   }, [index]);
 
   return (
-    <button
-      type="button"
-      className="reel-card reveal-item"
-      style={{ "--d": `${index * 80}ms` }}
-      onClick={() => onPlay(permalink)}
+    <a
+      href={permalink}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`reel-card reveal-item${index === 0 ? " reel-card--driver-promo" : ""}`}
+      style={{
+        "--d": `${index * 80}ms`,
+        "--reel-poster-position": POSTER_FOCAL_POINTS[index % POSTER_FOCAL_POINTS.length],
+      }}
     >
       {src ? (
         <img className="reel-card__thumb" src={src} alt="Tires SOS Rescue Instagram reel" decoding="async" />
@@ -168,14 +84,13 @@ function ReelCard({ permalink, index, onPlay }) {
         <Icon name="instagram" />
         Watch on Instagram
       </span>
-    </button>
+    </a>
   );
 }
 
 export default function Gallery() {
   const t = useT();
   const trackRef = useRef(null);
-  const [playing, setPlaying] = useState(null);
 
   const scroll = (dir) => {
     const track = trackRef.current;
@@ -200,7 +115,7 @@ export default function Gallery() {
           </button>
           <div className="reels-track" ref={trackRef}>
             {REELS.map((permalink, i) => (
-              <ReelCard key={permalink} permalink={permalink} index={i} onPlay={setPlaying} />
+              <ReelCard key={permalink} permalink={permalink} index={i} />
             ))}
           </div>
           <button className="reels-arrow reels-arrow--right" onClick={() => scroll(1)} aria-label="Next reel">
@@ -220,7 +135,6 @@ export default function Gallery() {
         </Reveal>
       </div>
 
-      {playing && <ReelModal permalink={playing} onClose={() => setPlaying(null)} />}
     </section>
   );
 }

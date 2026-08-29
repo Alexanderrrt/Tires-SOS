@@ -47,12 +47,19 @@ export default function BrandPopups() {
   const [visible, setVisible] = useState(false);
   const [brandIndex, setBrandIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
+  const [vanPopupVisible, setVanPopupVisible] = useState(false);
 
   useEffect(() => {
     const idx = Math.floor(Math.random() * BRAND_SHOWCASE.length);
     setBrandIndex(idx);
     const timer = setTimeout(() => setVisible(true), 8000);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const handleVisibility = (event) => setVanPopupVisible(event.detail?.visible === true);
+    window.addEventListener("commercial-van-popup:visibility", handleVisibility);
+    return () => window.removeEventListener("commercial-van-popup:visibility", handleVisibility);
   }, []);
 
   const nextBrand = useCallback(() => {
@@ -83,7 +90,7 @@ export default function BrandPopups() {
     setVisible(false);
   };
 
-  if (!visible || dismissed) return null;
+  if (!visible || dismissed || vanPopupVisible) return null;
 
   const brand = BRAND_SHOWCASE[brandIndex];
 

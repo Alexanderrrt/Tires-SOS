@@ -316,6 +316,7 @@ export const MARQUEE_ITEMS = [
 // Instagram reels featured in the "From the Shop" section.
 // Paste new reel permalinks here to rotate the featured content.
 export const REELS = [
+  "https://www.instagram.com/reel/DbmVbtWSK-k/",
   "https://www.instagram.com/reel/DaQ2UFdSpnK/",
   "https://www.instagram.com/reel/DZ7-m7PztjQ/",
   "https://www.instagram.com/reel/DZsjXNexI8I/",
@@ -535,6 +536,12 @@ export const COPY = {
       es: ["4 llantas nuevas", "Montaje y balanceo", "Alineación"],
     },
     driverCta: { en: "Claim this deal", es: "Aprovecha esta oferta" },
+    patchTitle: { en: "Driver Program tire care", es: "Cuidado de llantas del Programa del Conductor" },
+    patchSub: {
+      en: "Driver Program customers get tire patches FREE. Keep moving with a little extra protection from the shop.",
+      es: "Los clientes del Programa del Conductor reciben parches de llanta GRATIS. Sigue avanzando con protección extra del taller.",
+    },
+    patchCta: { en: "Ask about the program", es: "Pregunta por el programa" },
   },
   footer: {
     rights: {

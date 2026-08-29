@@ -61,6 +61,8 @@ assert.equal(hasWhatsAppCancellationIntent("Delete my message"), false);
 
 assert.equal(assistantAskedForName("What is your name?"), true);
 assert.equal(assistantAskedForName("¿Cuál es tu nombre?"), true);
+assert.equal(assistantAskedForName("Gracias. ¿A nombre de quién hacemos la cita?"), true);
+assert.equal(assistantAskedForName("Thanks. What name should I put on the appointment?"), true);
 assert.equal(assistantAskedForName("No necesitas saber el nombre del servicio."), false);
 for (const text of ["Gracias", "Thank you", "Okay", "Perfecto"]) {
   assert.equal(isWhatsAppNonNameReply(text), true, `non-name reply: ${text}`);

@@ -6,6 +6,8 @@ import Reveal from "./Reveal";
 import PirelliBadge from "./PirelliBadge";
 import Icon from "./Icons";
 
+const DRIVER_REEL = "https://www.instagram.com/reel/DbmVbtWSK-k/";
+
 export default function Promos() {
   const t = useT();
 
@@ -24,6 +26,12 @@ export default function Promos() {
     t({
       en: "Hi, I'd like a loyalty card!",
       es: "Hola, quiero una tarjeta de fidelidad!",
+    })
+  );
+  const driverPatchWa = waMsg(
+    t({
+      en: "Hi, I'd like to learn about the Driver Program and the free tire patch benefit.",
+      es: "Hola, quiero conocer el Programa del Conductor y el beneficio de parche gratis.",
     })
   );
 
@@ -70,6 +78,25 @@ export default function Promos() {
             />
             <span className="promo-flyer__cta"><Icon name="chat" /> Ask on WhatsApp</span>
           </a>
+        </Reveal>
+
+        <Reveal className="driver-benefit-feature">
+          <div className="driver-benefit-feature__reel">
+            <a href={DRIVER_REEL} target="_blank" rel="noopener noreferrer" className="driver-benefit-feature__poster" aria-label="Watch the Driver Program reel on Instagram">
+              <img src="/reels/reel-1.png" alt="Driver Program customers receive free tire patches at Tires SOS" loading="lazy" />
+              <span className="driver-benefit-feature__play" aria-hidden="true"><Icon name="instagram" /></span>
+            </a>
+          </div>
+          <div className="driver-benefit-feature__content">
+            <p className="driver-benefit-feature__eyebrow">{t(COPY.promos.driverTitle)}</p>
+            <h3>{t(COPY.promos.patchTitle)}</h3>
+            <p>{t(COPY.promos.patchSub)}</p>
+            <div className="promo-card__actions">
+              <a href={driverPatchWa} target="_blank" rel="noopener noreferrer" className="btn btn--primary btn--small">
+                <Icon name="chat" /> {t(COPY.promos.patchCta)}
+              </a>
+            </div>
+          </div>
         </Reveal>
 
         <Reveal className="promos-grid">
