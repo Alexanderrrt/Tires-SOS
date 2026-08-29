@@ -36,7 +36,9 @@ function locationSchema(loc) {
     areaServed: {
       "@type": "City",
       name: city,
-      sameAs: "https://en.wikipedia.org/wiki/San_Jose,_California",
+      sameAs: city.toLowerCase().includes("hayward")
+        ? "https://en.wikipedia.org/wiki/Hayward,_California"
+        : "https://en.wikipedia.org/wiki/San_Jose,_California",
     },
     openingHoursSpecification: SITE.hours
       .filter((h) => h.open && h.close)
@@ -65,7 +67,7 @@ function locationSchema(loc) {
         itemOffered: {
           "@type": "Service",
           name,
-          areaServed: "San Jose, CA",
+          areaServed: `${city}, CA`,
         },
       })),
     },
@@ -85,7 +87,7 @@ export default async function JsonLd() {
         name: SITE.name,
         url: SITE.url,
         description:
-          "Tire specialists in San José, CA: new tires, flat repair, wheel alignment, brakes, oil changes, batteries and rims. Bilingual English/Spanish service.",
+          "Tire specialists serving San José and Hayward, CA: new tires, flat repair, wheel alignment, brakes, oil changes, batteries and rims. Bilingual English/Spanish service.",
         logo: `${SITE.url}/logo-mark.png`,
         sameAs: [SITE.social.instagram, SITE.social.tiktok, SITE.social.facebook],
         knowsLanguage: ["en", "es"],

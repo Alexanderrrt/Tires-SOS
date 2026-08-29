@@ -1,9 +1,9 @@
-import {ClerkProvider} from "@clerk/nextjs";
 import { Barlow, Barlow_Condensed, Caveat } from "next/font/google";
 import "./globals.css";
 import JsonLd from "./components/JsonLd";
 import PostHogAnalytics from "./components/PostHogAnalytics";
 import PageTransition from "./components/PageTransition";
+import AuthProviderScope from "./components/AuthProviderScope";
 import { LanguageProvider } from "./i18n/LanguageContext";
 import { SITE } from "./site.config";
 
@@ -105,14 +105,14 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${displayFont.variable} ${bodyFont.variable} ${signatureFont.variable}`}>
       <body>
-        <ClerkProvider>
+        <AuthProviderScope>
           <JsonLd />
           <LanguageProvider>
             <PostHogAnalytics />
             <PageTransition />
             {children}
           </LanguageProvider>
-        </ClerkProvider>
+        </AuthProviderScope>
       </body>
     </html>
   );

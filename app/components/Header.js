@@ -23,13 +23,16 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    if (!mobileMenuOpen) return undefined;
+    if (!mobileMenuOpen && !desktopMenuOpen) return undefined;
     const closeOnEscape = (event) => {
-      if (event.key === "Escape") setMobileMenuOpen(false);
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+        setDesktopMenuOpen(false);
+      }
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [mobileMenuOpen]);
+  }, [desktopMenuOpen, mobileMenuOpen]);
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
@@ -55,10 +58,10 @@ export default function Header() {
           <span className="header__hours"><Icon name="clock" /> MON–FRI 9AM–6PM · SAT 9AM–5PM</span>
 
           <div className="site-menu">
-            <button type="button" className="site-menu__toggle" onClick={() => setDesktopMenuOpen((open) => !open)} aria-expanded={desktopMenuOpen}>
+            <button type="button" className="site-menu__toggle" onClick={() => setDesktopMenuOpen((open) => !open)} aria-expanded={desktopMenuOpen} aria-controls="desktop-site-menu">
               {lang === "es" ? "Menú" : "Menu"} <span aria-hidden="true">⌄</span>
             </button>
-            <div className={`site-menu__panel ${desktopMenuOpen ? "site-menu__panel--open" : ""}`}>
+            <div id="desktop-site-menu" className={`site-menu__panel ${desktopMenuOpen ? "site-menu__panel--open" : ""}`} aria-hidden={!desktopMenuOpen} inert={desktopMenuOpen ? undefined : ""}>
               <div className="site-menu__group">
                 <span>{lang === "es" ? "Principal" : "Main"}</span>
                 <a href="/">{lang === "es" ? "Inicio" : "Home"}</a>
