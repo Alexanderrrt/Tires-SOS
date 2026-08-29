@@ -336,9 +336,13 @@ h3 {
 .site-menu { position: relative; }
 .site-menu__toggle { display: flex; align-items: center; gap: .4rem; padding: .45rem .7rem; border: 1px solid #3a3a3a; border-radius: 8px; background: #111; color: #f5f5f5; font: 800 .9rem var(--display); letter-spacing: .04em; text-transform: uppercase; cursor: pointer; }
 .site-menu__toggle:hover,.site-menu__toggle[aria-expanded="true"] { border-color: var(--orange); color: var(--orange); }
-.site-menu__panel { position: absolute; top: calc(100% + .8rem); left: 50%; display: grid; width: 430px; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0; padding: .65rem; border: 1px solid rgba(248,96,0,.6); border-top: 3px solid var(--orange); border-radius: 0 0 14px 14px; background: linear-gradient(145deg,#181818,#090909); box-shadow: 0 22px 55px #000c; opacity: 0; pointer-events: none; transform: translate(-50%,-8px); transition: opacity .18s ease,transform .18s ease; }
-.site-menu__panel--open { opacity: 1; pointer-events: auto; transform: translate(-50%,0); }
-.site-menu__panel a { padding: .72rem .8rem; border-bottom: 1px solid #292929; font-size: .76rem; }
+.site-menu__panel { position: absolute; top: calc(100% + .8rem); right: 0; display: grid; width: 380px; gap: .45rem; padding: .75rem; border: 1px solid rgba(248,96,0,.6); border-top: 3px solid var(--orange); border-radius: 0 0 14px 14px; background: linear-gradient(145deg,#181818,#090909); box-shadow: 0 22px 55px #000c; opacity: 0; pointer-events: none; transform: translateY(-8px); transition: opacity .18s ease,transform .18s ease; }
+.site-menu__panel--open { opacity: 1; pointer-events: auto; transform: none; }
+.site-menu__group { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .25rem; padding: .65rem; border: 1px solid #2c2c2c; border-radius: 9px; background: rgba(255,255,255,.025); }
+.site-menu__group > span { grid-column: 1/-1; padding: 0 .35rem .45rem; color: var(--orange); font: 800 .58rem var(--display); letter-spacing: .14em; text-transform: uppercase; }
+.site-menu__group a { padding: .58rem .4rem; border: 0; border-radius: 6px; font-size: .72rem; text-align: center; }
+.site-menu__group a:hover { background: rgba(248,96,0,.12); }
+.site-menu__group--legal a { color: #aaa; font-size: .66rem; }
 
 .page-transition { position: fixed; z-index: 10000; inset: 0; display: grid; place-items: center; background: radial-gradient(circle at center,rgba(248,96,0,.16),transparent 35%),#050505; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .28s ease,visibility 0s linear .28s; }
 .page-transition--active { opacity: 1; visibility: visible; transition-delay: 0s; }
