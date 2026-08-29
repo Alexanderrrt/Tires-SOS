@@ -20,10 +20,11 @@ export default function HomePage() {
       <Header />
       <main>
         <Hero />
+        <CommercialVans placement="mobile" />
         <Marquee />
         <CinematicVideo />
         <Services />
-        <CommercialVans />
+        <CommercialVans placement="desktop" />
         <Gallery />
         <Promos />
         <OwnersRide />

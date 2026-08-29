@@ -1726,6 +1726,8 @@ body { background: #050505; color: var(--paper); }
     linear-gradient(135deg, #090909, #050505 60%);
 }
 
+.commercial-vans--mobile { display: none; }
+
 .commercial-vans::before {
   content: "FLEET";
   position: absolute;
@@ -1838,6 +1840,8 @@ body { background: #050505; color: var(--paper); }
 .commercial-vans__contact:hover { color: #fff; text-decoration-color: var(--orange); }
 
 @media (max-width: 820px) {
+  .commercial-vans--desktop { display: none; }
+  .commercial-vans--mobile { display: block; }
   .commercial-vans { padding-inline: .8rem; }
   .commercial-vans__inner { grid-template-columns: 1fr; border-radius: 20px; }
   .commercial-vans__media { width: calc(100% - 1.5rem); min-height: 0; aspect-ratio: 16 / 9; margin: .75rem; border: 1px solid rgba(255,90,0,.5); border-radius: 15px; }

@@ -30,11 +30,12 @@ const COPY = {
   whatsapp: { en: "Talk to the shop", es: "Habla con el taller" },
 };
 
-export default function CommercialVans() {
+export default function CommercialVans({ placement = "desktop" }) {
   const t = useT();
+  const titleId = `commercial-vans-title-${placement}`;
 
   return (
-    <section className="commercial-vans" aria-labelledby="commercial-vans-title">
+    <section className={`commercial-vans commercial-vans--${placement}`} aria-labelledby={titleId}>
       <Reveal className="commercial-vans__inner">
         <div className="commercial-vans__media" aria-label={t(COPY.mediaLabel)}>
           <Image
@@ -64,7 +65,7 @@ export default function CommercialVans() {
             <span>FLEET CARE</span>
           </div>
           <p className="commercial-vans__kicker">{t(COPY.kicker)}</p>
-          <h2 id="commercial-vans-title">{t(COPY.title)}</h2>
+          <h2 id={titleId}>{t(COPY.title)}</h2>
           <p className="commercial-vans__body">{t(COPY.body)}</p>
           <div className="commercial-vans__services" aria-label={t(COPY.kicker)}>
             <span>{t(COPY.tireLabel)}</span>
