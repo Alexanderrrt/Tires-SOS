@@ -1775,9 +1775,9 @@ body { background: #050505; color: var(--paper); }
   position: absolute;
   z-index: 0;
   inset: -18px;
-  background: linear-gradient(rgba(0,0,0,.38),rgba(0,0,0,.62)), url("/commercial-vans/commercial-van-alignment-hero.webp") center / cover;
-  filter: blur(13px);
-  transform: scale(1.06);
+  background: linear-gradient(rgba(0,0,0,.18),rgba(0,0,0,.46)), url("/commercial-vans/commercial-van-alignment-hero.webp") center / cover;
+  filter: blur(8px);
+  transform: scale(1.04);
 }
 
 .commercial-vans__image {
@@ -1787,7 +1787,7 @@ body { background: #050505; color: var(--paper); }
   height: 100%;
   z-index: 1;
   object-fit: contain;
-  object-position: center;
+  object-position: center top;
   transition: transform .65s cubic-bezier(.2, .7, .2, 1);
 }
 
@@ -1811,18 +1811,18 @@ body { background: #050505; color: var(--paper); }
 .commercial-vans__media-copy strong { color: #fff; font: italic 800 clamp(1.2rem, 2.3vw, 1.9rem) var(--display); letter-spacing: .015em; }
 .commercial-vans__media-copy i { color: var(--orange); font-style: normal; }
 
-.commercial-vans__copy { position: relative; display: flex; flex-direction: column; justify-content: center; padding: clamp(2rem, 3.6vw, 3.5rem); }
+.commercial-vans__copy { position: relative; display: flex; flex-direction: column; justify-content: center; padding: clamp(1.8rem, 3vw, 2.8rem); }
 .commercial-vans__copy::after { content: "SOS"; position: absolute; right: -1.5rem; bottom: -.5rem; color: rgba(255,255,255,.025); font: italic 900 9rem/.8 var(--display); pointer-events: none; }
-.commercial-vans__topline { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.6rem; color: #777; font: 800 .58rem var(--display); letter-spacing: .18em; }
+.commercial-vans__topline { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.1rem; color: #777; font: 800 .58rem var(--display); letter-spacing: .18em; }
 .commercial-vans__topline i { width: 42px; height: 1px; background: linear-gradient(90deg, var(--orange), transparent); }
 .commercial-vans__kicker { display: flex; align-items: center; gap: .65rem; margin: 0 0 .85rem; color: var(--orange); font: 800 .78rem var(--display); letter-spacing: .16em; text-transform: uppercase; }
 .commercial-vans__kicker::before { content: ""; width: 30px; height: 2px; background: var(--orange); }
-.commercial-vans__copy h2 { position: relative; z-index: 1; max-width: 13ch; margin: 0; font: italic 800 clamp(2.4rem, 4vw, 3.8rem)/.93 var(--display); letter-spacing: -.025em; text-transform: uppercase; }
-.commercial-vans__body { position: relative; z-index: 1; max-width: 54ch; margin: 1.35rem 0 0; color: #b9b9b9; font-size: clamp(.95rem, 1.35vw, 1.06rem); line-height: 1.62; }
-.commercial-vans__services { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: .55rem; margin: 1.35rem 0; }
+.commercial-vans__copy h2 { position: relative; z-index: 1; max-width: 13ch; margin: 0; font: italic 800 clamp(2.35rem, 3.7vw, 3.45rem)/.94 var(--display); letter-spacing: -.025em; text-transform: uppercase; }
+.commercial-vans__body { position: relative; z-index: 1; max-width: 54ch; margin: 1rem 0 0; color: #b9b9b9; font-size: clamp(.92rem, 1.25vw, 1.02rem); line-height: 1.55; }
+.commercial-vans__services { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: .55rem; margin: 1rem 0; }
 .commercial-vans__services span { padding: .52rem .72rem; border: 1px solid #3c3c3c; border-radius: 999px; background: rgba(255,255,255,.025); color: #eee; font-size: .69rem; font-weight: 800; text-transform: uppercase; }
 .commercial-vans__services span::before { content: "✓"; margin-right: .45rem; color: var(--orange); }
-.commercial-vans__specs { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, 1fr); margin: .2rem 0 1.6rem; border-block: 1px solid #292929; }
+.commercial-vans__specs { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, 1fr); margin: .1rem 0 1.1rem; border-block: 1px solid #292929; }
 .commercial-vans__specs > div { display: flex; gap: .55rem; min-width: 0; padding: .85rem .55rem .85rem 0; border-right: 1px solid #292929; }
 .commercial-vans__specs > div + div { padding-left: .65rem; }
 .commercial-vans__specs > div:last-child { border-right: 0; }
