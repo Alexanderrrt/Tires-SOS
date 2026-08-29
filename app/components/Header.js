@@ -61,7 +61,7 @@ export default function Header() {
             <button type="button" className="site-menu__toggle" onClick={() => setDesktopMenuOpen((open) => !open)} aria-expanded={desktopMenuOpen} aria-controls="desktop-site-menu">
               {lang === "es" ? "Menú" : "Menu"} <span aria-hidden="true">⌄</span>
             </button>
-            <div id="desktop-site-menu" className={`site-menu__panel ${desktopMenuOpen ? "site-menu__panel--open" : ""}`} aria-hidden={!desktopMenuOpen} inert={desktopMenuOpen ? undefined : ""}>
+            <div id="desktop-site-menu" className={`site-menu__panel ${desktopMenuOpen ? "site-menu__panel--open" : ""}`} aria-hidden={!desktopMenuOpen} inert={desktopMenuOpen ? undefined : true}>
               <div className="site-menu__group">
                 <span>{lang === "es" ? "Principal" : "Main"}</span>
                 <a href="/">{lang === "es" ? "Inicio" : "Home"}</a>
