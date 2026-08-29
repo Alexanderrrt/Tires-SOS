@@ -47,6 +47,7 @@ export default function CommercialVans({ placement = "desktop" }) {
             })}
             fill
             sizes="(max-width: 820px) calc(100vw - 2.5rem), 55vw"
+            unoptimized
           />
           <div className="commercial-vans__division">
             <span aria-hidden="true" />

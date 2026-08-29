@@ -133,7 +133,19 @@ export default function Header() {
         <div className="mobile-menu__topline"><span>TIRES SOS</span><i />{lang === "es" ? "MENÚ" : "MENU"}</div>
         <a href="/" onClick={closeMobileMenu}>{lang === "es" ? "Inicio" : "Home"}</a>
         <a href="/quote" onClick={closeMobileMenu}>{t(COPY.nav.quote)}</a>
-        <a href="/services" onClick={closeMobileMenu}>{lang === "es" ? "Todos los servicios" : "All services"}</a>
+        <details className="mobile-menu__submenu">
+          <summary>{lang === "es" ? "Servicios" : "Services"}</summary>
+          <div>
+            <a href="/services" onClick={closeMobileMenu}>{lang === "es" ? "Ver todos" : "View all"}</a>
+            <a href="/services/new-tires" onClick={closeMobileMenu}>{lang === "es" ? "Llantas nuevas" : "New tires"}</a>
+            <a href="/services/flat-tire-repair" onClick={closeMobileMenu}>{lang === "es" ? "Ponchaduras" : "Flat repair"}</a>
+            <a href="/services/wheel-alignment" onClick={closeMobileMenu}>{lang === "es" ? "Alineación" : "Alignment"}</a>
+            <a href="/services/brake-service" onClick={closeMobileMenu}>{lang === "es" ? "Frenos" : "Brakes"}</a>
+            <a href="/services/oil-change" onClick={closeMobileMenu}>{lang === "es" ? "Cambio de aceite" : "Oil change"}</a>
+            <a href="/services/car-batteries" onClick={closeMobileMenu}>{lang === "es" ? "Baterías" : "Batteries"}</a>
+            <a href="/services/custom-wheels" onClick={closeMobileMenu}>{lang === "es" ? "Rines" : "Rims"}</a>
+          </div>
+        </details>
         <a href="/locations" onClick={closeMobileMenu}>{lang === "es" ? "Todas las ubicaciones" : "All locations"}</a>
         <a href="/#gallery" onClick={closeMobileMenu}>{t(COPY.nav.gallery)}</a>
         <a href="/#reviews" onClick={closeMobileMenu}>{t(COPY.nav.reviews)}</a>
