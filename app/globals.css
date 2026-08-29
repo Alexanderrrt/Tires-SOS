@@ -343,6 +343,15 @@ h3 {
 .site-menu__group a { padding: .58rem .4rem; border: 0; border-radius: 6px; font-size: .72rem; text-align: center; }
 .site-menu__group a:hover { background: rgba(248,96,0,.12); }
 .site-menu__group--legal a { color: #aaa; font-size: .66rem; }
+.site-menu__submenu { min-width: 0; }
+.site-menu__submenu summary { padding: .58rem .4rem; border-radius: 6px; color: #f5f5f5; font: 800 .72rem var(--display); text-align: center; text-decoration: underline; text-underline-offset: 3px; text-transform: uppercase; cursor: pointer; list-style: none; }
+.site-menu__submenu summary::-webkit-details-marker { display: none; }
+.site-menu__submenu summary::after { content: " +"; color: var(--orange); }
+.site-menu__submenu[open] { grid-column: 1/-1; }
+.site-menu__submenu[open] summary { width: calc((100% - .5rem)/3); background: rgba(248,96,0,.12); color: var(--orange); }
+.site-menu__submenu[open] summary::after { content: " −"; }
+.site-menu__submenu > div { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .2rem; margin-top: .45rem; padding-top: .45rem; border-top: 1px solid #333; }
+.site-menu__submenu > div a { display: block; padding: .55rem .5rem; background: #101010; text-align: left; }
 
 .page-transition { position: fixed; z-index: 10000; inset: 0; display: grid; place-items: center; background: radial-gradient(circle at center,rgba(248,96,0,.16),transparent 35%),#050505; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .28s ease,visibility 0s linear .28s; }
 .page-transition--active { opacity: 1; visibility: visible; transition-delay: 0s; }

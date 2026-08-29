@@ -62,7 +62,19 @@ export default function Header() {
               <div className="site-menu__group">
                 <span>{lang === "es" ? "Principal" : "Main"}</span>
                 <a href="/">{lang === "es" ? "Inicio" : "Home"}</a>
-                <a href="/services">{lang === "es" ? "Servicios" : "Services"}</a>
+                <details className="site-menu__submenu">
+                  <summary>{lang === "es" ? "Servicios" : "Services"}</summary>
+                  <div>
+                    <a href="/services">{lang === "es" ? "Ver todos" : "View all"}</a>
+                    <a href="/services/new-tires">{lang === "es" ? "Llantas nuevas" : "New tires"}</a>
+                    <a href="/services/flat-tire-repair">{lang === "es" ? "Ponchaduras" : "Flat repair"}</a>
+                    <a href="/services/wheel-alignment">{lang === "es" ? "Alineación" : "Alignment"}</a>
+                    <a href="/services/brake-service">{lang === "es" ? "Frenos" : "Brakes"}</a>
+                    <a href="/services/oil-change">{lang === "es" ? "Cambio de aceite" : "Oil change"}</a>
+                    <a href="/services/car-batteries">{lang === "es" ? "Baterías" : "Batteries"}</a>
+                    <a href="/services/custom-wheels">{lang === "es" ? "Rines" : "Rims"}</a>
+                  </div>
+                </details>
                 <a href="/locations">{lang === "es" ? "Ubicaciones" : "Locations"}</a>
               </div>
               <div className="site-menu__group">
