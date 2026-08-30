@@ -38,17 +38,35 @@ export default function CommercialVans({ placement = "desktop" }) {
     <section className={`commercial-vans commercial-vans--${placement}`} aria-labelledby={titleId}>
       <Reveal className="commercial-vans__inner">
         <div className="commercial-vans__media" aria-label={t(COPY.mediaLabel)}>
-          <Image
-            className="commercial-vans__image"
-            src="/commercial-vans/commercial-van-alignment-hero.webp"
-            alt={t({
-              en: "Commercial cargo van receiving a precision wheel alignment at Tires SOS Rescue",
-              es: "Van comercial recibiendo una alineación de precisión en Tires SOS Rescue",
-            })}
-            fill
-            sizes="(max-width: 820px) calc(100vw - 2.5rem), 55vw"
-            unoptimized
-          />
+          {placement === "desktop" ? (
+            <video
+              className="commercial-vans__video"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster="/commercial-vans/real-commercial-van-popup.webp"
+              aria-label={t({
+                en: "Commercial work van receiving wheel alignment service at Tires SOS Rescue",
+                es: "Van comercial recibiendo servicio de alineación en Tires SOS Rescue",
+              })}
+            >
+              <source src="/commercial-vans/real-commercial-van-service.mp4" type="video/mp4" />
+            </video>
+          ) : (
+            <Image
+              className="commercial-vans__image"
+              src="/commercial-vans/real-commercial-van-popup.webp"
+              alt={t({
+                en: "Commercial work van receiving wheel alignment service at Tires SOS Rescue",
+                es: "Van comercial recibiendo servicio de alineación en Tires SOS Rescue",
+              })}
+              fill
+              sizes="calc(100vw - 2.5rem)"
+              unoptimized
+            />
+          )}
           <div className="commercial-vans__division">
             <span aria-hidden="true" />
             {t(COPY.division)}

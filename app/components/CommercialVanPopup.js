@@ -61,13 +61,14 @@ export default function CommercialVanPopup() {
         </button>
         <div className="van-popup__media">
           <Image
-            src="/commercial-vans/commercial-van-popup.webp"
+            src="/commercial-vans/real-commercial-van-popup.webp"
             alt={t({
-              en: "Tires SOS commercial van receiving a wheel alignment with new commercial tires",
-              es: "Van comercial de Tires SOS recibiendo alineación con llantas comerciales nuevas",
+              en: "Commercial work van receiving wheel alignment service at Tires SOS Rescue",
+              es: "Van comercial recibiendo servicio de alineación en Tires SOS Rescue",
             })}
             fill
             sizes="(max-width: 640px) calc(100vw - 1.3rem), 300px"
+            unoptimized
           />
           <span className="van-popup__media-label">SPRINTER • TRANSIT • PROMASTER</span>
         </div>

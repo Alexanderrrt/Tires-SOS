@@ -1834,7 +1834,8 @@ body { background: #050505; color: var(--paper); }
   content: none;
 }
 
-.commercial-vans__image {
+.commercial-vans__image,
+.commercial-vans__video {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -1845,8 +1846,14 @@ body { background: #050505; color: var(--paper); }
   transition: transform .65s cubic-bezier(.2, .7, .2, 1);
 }
 
+.commercial-vans__video {
+  display: block;
+  filter: contrast(1.04) saturate(.92) brightness(.88);
+}
+
 .commercial-vans__media::after { content: ""; position: absolute; z-index: 1; inset: 0; background: linear-gradient(180deg, transparent 48%, rgba(0,0,0,.88)); pointer-events: none; }
-.commercial-vans__media:hover .commercial-vans__image { transform: scale(1.035); }
+.commercial-vans__media:hover .commercial-vans__image,
+.commercial-vans__media:hover .commercial-vans__video { transform: scale(1.035); }
 
 .commercial-vans__division { position: absolute; z-index: 2; top: 1.4rem; left: 1.4rem; display: flex; align-items: center; gap: .55rem; padding: .52rem .75rem; border: 1px solid rgba(255,255,255,.32); border-radius: 999px; background: rgba(5,5,5,.72); backdrop-filter: blur(12px); color: #fff; font: 800 .64rem var(--display); letter-spacing: .13em; text-transform: uppercase; }
 .commercial-vans__division span { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 12px var(--orange); }
