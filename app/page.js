@@ -12,6 +12,7 @@ import ChatBot from "./components/ChatBot";
 import CinematicVideo from "./components/CinematicVideo";
 import CommercialVans from "./components/CommercialVans";
 import CommercialVanPopup from "./components/CommercialVanPopup";
+import ShopMediaShowcase from "./components/ShopMediaShowcase";
 
 export default function HomePage() {
   return (
@@ -21,6 +22,7 @@ export default function HomePage() {
         <Hero />
         <CommercialVans placement="mobile" />
         <Marquee />
+        <ShopMediaShowcase />
         <CinematicVideo />
         <CommercialVans placement="desktop" />
         <Gallery />
