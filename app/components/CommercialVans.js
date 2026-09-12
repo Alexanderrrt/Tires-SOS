@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useT } from "../i18n/LanguageContext";
 import { SITE } from "../site.config";
 import Reveal from "./Reveal";
@@ -38,35 +37,26 @@ export default function CommercialVans({ placement = "desktop" }) {
     <section className={`commercial-vans commercial-vans--${placement}`} aria-labelledby={titleId}>
       <Reveal className="commercial-vans__inner">
         <div className="commercial-vans__media" aria-label={t(COPY.mediaLabel)}>
-          {placement === "desktop" ? (
-            <video
-              className="commercial-vans__video"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              poster="/commercial-vans/real-commercial-van-popup.webp"
-              aria-label={t({
-                en: "Commercial work van receiving wheel alignment service at Tires SOS Rescue",
-                es: "Van comercial recibiendo servicio de alineación en Tires SOS Rescue",
-              })}
-            >
-              <source src="/commercial-vans/real-commercial-van-service.mp4" type="video/mp4" />
-            </video>
-          ) : (
-            <Image
-              className="commercial-vans__image"
-              src="/commercial-vans/real-commercial-van-popup.webp"
-              alt={t({
-                en: "Commercial work van receiving wheel alignment service at Tires SOS Rescue",
-                es: "Van comercial recibiendo servicio de alineación en Tires SOS Rescue",
-              })}
-              fill
-              sizes="calc(100vw - 2.5rem)"
-              unoptimized
+          <video
+            className="commercial-vans__video"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster="/commercial-vans/commercial-van-01.jpeg"
+            aria-label={t({
+              en: "Commercial work van receiving wheel alignment service at Tires SOS Rescue",
+              es: "Van comercial recibiendo servicio de alineación en Tires SOS Rescue",
+            })}
+          >
+            <source
+              media="(max-width: 720px)"
+              src="/commercial-vans/commercial-van-service-mobile-enhanced.mp4"
+              type="video/mp4"
             />
-          )}
+            <source src="/commercial-vans/commercial-van-service-enhanced.mp4" type="video/mp4" />
+          </video>
           <div className="commercial-vans__division">
             <span aria-hidden="true" />
             {t(COPY.division)}

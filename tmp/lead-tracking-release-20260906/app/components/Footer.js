@@ -1,0 +1,97 @@
+"use client";
+
+import React from "react";
+import { useT } from "../i18n/LanguageContext";
+import { COPY, SITE } from "../site.config";
+import Reveal from "./Reveal";
+import PirelliBadge from "./PirelliBadge";
+
+export default function Footer() {
+  const t = useT();
+  const year = new Date().getFullYear();
+  const [locations, setLocations] = React.useState(SITE.locations.filter((loc) => loc.id !== "hayward"));
+  React.useEffect(() => { fetch("/api/locations", { cache: "no-store" }).then((r) => r.ok ? r.json() : null).then((data) => data?.locations && setLocations(data.locations)).catch(() => {}); }, []);
+  const legalLinks = [
+    { href: "/privacy", label: { en: "Privacy Policy", es: "Política de Privacidad" } },
+    { href: "/terms", label: { en: "Terms of Use", es: "Términos de Uso" } },
+    { href: "/disclaimer", label: { en: "Disclaimer", es: "Aviso Legal" } },
+  ];
+
+  return (
+    <footer className="footer">
+      <Reveal className="footer__flyer-wrapper">
+        <a
+          href={SITE.whatsappHref || SITE.phoneHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="footer__flyer"
+          aria-label="Contact Tires SOS Rescue on WhatsApp for tires and auto services"
+        >
+          <img
+            src="/M3Servicecard.png"
+            alt="Tires SOS Rescue — tires and auto services: llantas, cambio de aceite, frenos, alineación, balanceo, diagnóstico básico. 408-332-8962, @tiressosrescue, 623 E Taylor St, San José, CA"
+          />
+        </a>
+      </Reveal>
+
+      <Reveal className="footer__inner">
+        <div>
+          <div className="footer__brand">
+            <img className="footer__logo" src="/logo-mark.png" alt={SITE.name} />
+            <div className="footer__brand-copy">
+              <span className="footer__brand-name">{SITE.nameShort}</span>
+              <span className="footer__brand-flag" aria-hidden="true">
+                <span className="footer__brand-tire footer__brand-tire--yellow" />
+                <span className="footer__brand-tire footer__brand-tire--blue" />
+                <span className="footer__brand-tire footer__brand-tire--red" />
+              </span>
+            </div>
+          </div>
+          <PirelliBadge compact className="footer__pirelli" />
+          {locations.filter((loc) => loc.status !== "mystery").map((loc) => (
+            <p key={loc.id}>{loc.full}</p>
+          ))}
+          <a href={SITE.whatsappHref || SITE.phoneHref} target="_blank" rel="noreferrer">
+            WhatsApp
+          </a>
+          <p className="footer__payments">
+            <span className="afterpay-chip">Snap Finance</span>
+            <span className="afterpay-chip afterpay-chip--mint">Afterpay</span>
+            · Visa · Mastercard · Cash
+          </p>
+        </div>
+
+        <div>
+          <p className="footer__label">{t(COPY.footer.followUs)}</p>
+          <div className="footer__social">
+            <a href={SITE.social.instagram} target="_blank" rel="noopener noreferrer">
+              Instagram
+            </a>
+            <a href={SITE.social.tiktok} target="_blank" rel="noopener noreferrer">
+              TikTok
+            </a>
+            <a href={SITE.social.facebook} target="_blank" rel="noopener noreferrer">
+              Facebook
+            </a>
+          </div>
+          <p className="footer__label footer__label--legal">Legal</p>
+          <div className="footer__legal">
+            <a href="/services">{t({ en: "All services", es: "Todos los servicios" })}</a>
+            <a href="/locations">{t({ en: "All locations", es: "Todas las ubicaciones" })}</a>
+          </div>
+          <div className="footer__legal">
+            {legalLinks.map((link) => (
+              <a key={link.href} href={link.href}>
+                {t(link.label)}
+              </a>
+            ))}
+          </div>
+        </div>
+      </Reveal>
+
+      <p className="footer__copyright">
+        © {year} {SITE.name}. {t(COPY.footer.rights)}
+      </p>
+    </footer>
+  );
+}

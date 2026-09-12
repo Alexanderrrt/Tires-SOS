@@ -21,10 +21,17 @@ const COPY = {
 // creative still receive the redesigned compact popup once.
 const DISMISSED_KEY = "tsr-commercial-van-popup-v2-dismissed";
 const VISIBILITY_EVENT = "commercial-van-popup:visibility";
+const POPUP_IMAGES = [
+  "/commercial-vans/commercial-van-01.jpeg",
+  "/commercial-vans/commercial-van-02.jpeg",
+  "/commercial-vans/commercial-van-03.jpeg",
+  "/commercial-vans/commercial-van-04.jpeg",
+];
 
 export default function CommercialVanPopup() {
   const t = useT();
   const [visible, setVisible] = useState(false);
+  const [imageIndex, setImageIndex] = useState(0);
 
   useEffect(() => {
     if (window.sessionStorage.getItem(DISMISSED_KEY) === "1") return undefined;
@@ -46,6 +53,15 @@ export default function CommercialVanPopup() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [visible]);
 
+  useEffect(() => {
+    if (!visible) return undefined;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    const timer = window.setInterval(() => {
+      setImageIndex((current) => (current + 1) % POPUP_IMAGES.length);
+    }, 3500);
+    return () => window.clearInterval(timer);
+  }, [visible]);
+
   const dismiss = () => {
     window.sessionStorage.setItem(DISMISSED_KEY, "1");
     setVisible(false);
@@ -61,7 +77,9 @@ export default function CommercialVanPopup() {
         </button>
         <div className="van-popup__media">
           <Image
-            src="/commercial-vans/real-commercial-van-popup.webp"
+            key={POPUP_IMAGES[imageIndex]}
+            className="van-popup__image"
+            src={POPUP_IMAGES[imageIndex]}
             alt={t({
               en: "Commercial work van receiving wheel alignment service at Tires SOS Rescue",
               es: "Van comercial recibiendo servicio de alineación en Tires SOS Rescue",
@@ -71,6 +89,18 @@ export default function CommercialVanPopup() {
             unoptimized
           />
           <span className="van-popup__media-label">SPRINTER • TRANSIT • PROMASTER</span>
+          <div className="van-popup__dots" role="group" aria-label="Commercial van photo navigation">
+            {POPUP_IMAGES.map((image, index) => (
+              <button
+                key={image}
+                type="button"
+                className={`van-popup__dot ${index === imageIndex ? "van-popup__dot--active" : ""}`}
+                onClick={() => setImageIndex(index)}
+                aria-label={`Show commercial van photo ${index + 1}`}
+                aria-current={index === imageIndex ? "true" : undefined}
+              />
+            ))}
+          </div>
         </div>
         <div className="van-popup__content">
           <p className="van-popup__kicker">{t(COPY.kicker)}</p>

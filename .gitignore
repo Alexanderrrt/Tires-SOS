@@ -1,5 +1,8 @@
 # dependencies
 /node_modules
+.clerk/
+__pycache__/
+*.py[cod]
 
 # next.js
 /.next/

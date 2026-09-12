@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { useLanguage, useT } from "../i18n/LanguageContext";
 import { CHAT, SITE } from "../site.config";
 import { formatShopSlot, getShopDateTime } from "../../lib/shop-time";
 import TurnstileChallenge from "./TurnstileChallenge";
 import { captureAnalytics } from "./PostHogAnalytics";
+import { trackConfirmedLead } from "../../lib/google-lead-tracking";
 
 const QUOTE_CHAT = {
   title: { en: "Service Desk", es: "Servicio y Citas" },
@@ -469,6 +471,7 @@ export default function ChatBot({
         body: JSON.stringify({ lang, context: mode, privacyConsent: true, messages: requestMessages }),
       });
       const data = await res.json().catch(() => ({}));
+      trackConfirmedLead(data?.status);
 
       if (!res.ok) {
         if (res.status === 401) handleSessionExpired();
@@ -612,7 +615,7 @@ export default function ChatBot({
             <header className="chat-panel__header">
               <div className="chat-panel__brand">
                 <div className="chat-panel__logo-wrap" aria-hidden="true">
-                  <img className="chat-panel__logo" src="/logo-mark.png" alt="" />
+                  <Image className="chat-panel__logo" src="/logo-mark.png" alt="" width={48} height={48} />
                 </div>
                 <div>
                   <p className="chat-panel__kicker">Tires SOS Rescue</p>
