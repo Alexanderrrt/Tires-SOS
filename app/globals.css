@@ -1883,7 +1883,7 @@ body { background: #050505; color: var(--paper); }
 .shop-media__exterior { display: grid; grid-template-columns: .7fr 1.3fr; gap: clamp(1.5rem, 5vw, 5rem); align-items: center; padding-top: 1rem; border-top: 1px solid var(--line); }
 .shop-media__exterior-copy h3 { max-width: 14ch; color: #fff; font-size: clamp(1.8rem, 3vw, 3.2rem); line-height: .95; }
 .shop-media__photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .7rem; }
-.shop-media__photo-grid img { width: 100%; aspect-ratio: 1.45; object-fit: cover; border: 1px solid rgba(255,255,255,.12); filter: saturate(.82); transition: transform .25s ease, filter .25s ease; }
+.shop-media__photo-grid img { width: 100%; height: auto; aspect-ratio: 1.45; object-fit: cover; border: 1px solid rgba(255,255,255,.12); filter: saturate(.82); transition: transform .25s ease, filter .25s ease; }
 .shop-media__photo-grid img:nth-child(2), .shop-media__photo-grid img:nth-child(4) { transform: translateY(.8rem); }
 .shop-media__photo-grid img:hover { z-index: 1; transform: translateY(-.35rem) scale(1.035); filter: saturate(1.05); border-color: var(--orange); }
 @media (max-width: 800px) {
