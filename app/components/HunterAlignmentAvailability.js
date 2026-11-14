@@ -27,7 +27,7 @@ export default function HunterAlignmentAvailability() {
         <p className="hunter-availability__eyebrow">{t(COPY.available)}</p>
         <h2>Hunter alignment machine</h2>
         <p>{t(COPY.body)}</p>
-        <Link className="seo-text-link" href="/services/wheel-alignment">{t(COPY.link)} →</Link>
+        <Link className="seo-text-link" href="/locations/west-a-street-hayward">{t(COPY.link)} →</Link>
       </div>
     </section>
   );
