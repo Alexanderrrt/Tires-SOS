@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useT } from "../i18n/LanguageContext";
 import { BRAND_SHOWCASE, SITE } from "../site.config";
 import Icon from "./Icons";
@@ -16,6 +16,14 @@ const COPY = {
 };
 
 const SOLD_BRANDS = BRAND_SHOWCASE.filter((brand) => brand.name !== "Pirelli");
+
+const HOME_REEL = [
+  "/commercial-vans/home-reel/angel-video-4.mp4",
+  "/commercial-vans/home-reel/angel-video-5.mp4",
+  "/commercial-vans/home-reel/angel-video-6.mp4",
+  "/commercial-vans/home-reel/angel-august.mp4",
+  "/commercial-vans/home-reel/angel-september.mp4",
+];
 
 function PlayGlyph({ paused }) {
   return paused ? (
@@ -43,6 +51,15 @@ export default function CinematicVideo() {
   const videoRef = useRef(null);
   const [paused, setPaused] = useState(false);
   const [muted, setMuted] = useState(true);
+  const [reelIndex, setReelIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setReelIndex((current) => (current + 1) % HOME_REEL.length);
+    }, 9000);
+
+    return () => window.clearInterval(timer);
+  }, []);
 
   function togglePlayback() {
     const video = videoRef.current;
@@ -88,17 +105,18 @@ export default function CinematicVideo() {
           <span className="cinema__sprockets cinema__sprockets--left" aria-hidden="true" />
           <span className="cinema__sprockets cinema__sprockets--right" aria-hidden="true" />
           <video
+            key={HOME_REEL[reelIndex]}
             ref={videoRef}
             className="cinema__video"
-            src="/sobre-ruedas-web.mp4"
+            src={HOME_REEL[reelIndex]}
             poster="/sobre-ruedas-poster.jpg"
             muted
             autoPlay
-            loop
             playsInline
             preload="auto"
             onPlay={() => setPaused(false)}
             onPause={() => setPaused(true)}
+            onEnded={() => setReelIndex((current) => (current + 1) % HOME_REEL.length)}
           />
           <div className="cinema__controls">
             <button type="button" onClick={togglePlayback} aria-label={t(paused ? COPY.play : COPY.pause)}>
