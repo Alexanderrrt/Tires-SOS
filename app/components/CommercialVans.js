@@ -1,9 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useT } from "../i18n/LanguageContext";
 import { SITE } from "../site.config";
 import Reveal from "./Reveal";
+
+const HOME_REEL = [
+  "/commercial-vans/home-reel/angel-video-4.mp4",
+  "/commercial-vans/home-reel/angel-video-5.mp4",
+  "/commercial-vans/home-reel/angel-video-6.mp4",
+  "/commercial-vans/home-reel/angel-august.mp4",
+  "/commercial-vans/home-reel/angel-september.mp4",
+];
 
 const COPY = {
   kicker: { en: "Commercial van service", es: "Servicio para vans comerciales" },
@@ -32,12 +41,24 @@ const COPY = {
 export default function CommercialVans({ placement = "desktop" }) {
   const t = useT();
   const titleId = `commercial-vans-title-${placement}`;
+  const [reelIndex, setReelIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setReelIndex((current) => (current + 1) % HOME_REEL.length);
+    }, 9000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const reelSource = HOME_REEL[reelIndex];
 
   return (
     <section className={`commercial-vans commercial-vans--${placement}`} aria-labelledby={titleId}>
       <Reveal className="commercial-vans__inner">
         <div className="commercial-vans__media" aria-label={t(COPY.mediaLabel)}>
           <video
+            key={reelSource}
             className="commercial-vans__video"
             autoPlay
             muted
@@ -45,17 +66,13 @@ export default function CommercialVans({ placement = "desktop" }) {
             playsInline
             preload="metadata"
             poster="/commercial-vans/commercial-van-01.jpeg"
+            onEnded={() => setReelIndex((current) => (current + 1) % HOME_REEL.length)}
             aria-label={t({
               en: "Commercial work van receiving wheel alignment service at Tires SOS Rescue",
               es: "Van comercial recibiendo servicio de alineación en Tires SOS Rescue",
             })}
           >
-            <source
-              media="(max-width: 720px)"
-              src="/commercial-vans/commercial-van-service-mobile-enhanced.mp4"
-              type="video/mp4"
-            />
-            <source src="/commercial-vans/commercial-van-service-enhanced.mp4" type="video/mp4" />
+            <source src={reelSource} type="video/mp4" />
           </video>
           <div className="commercial-vans__division">
             <span aria-hidden="true" />
