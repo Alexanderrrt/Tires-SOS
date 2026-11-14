@@ -12,6 +12,7 @@ import BrandPopups from "./components/BrandPopups";
 import ChatBot from "./components/ChatBot";
 import CinematicVideo from "./components/CinematicVideo";
 import HaywardLaunch from "./components/HaywardLaunch";
+import HunterAlignmentAvailability from "./components/HunterAlignmentAvailability";
 
 export default function HomePage() {
   return (
@@ -20,6 +21,7 @@ export default function HomePage() {
       <main>
         <Hero />
         <HaywardLaunch />
+        <HunterAlignmentAvailability />
         <Marquee />
         <CinematicVideo />
         <Services />
