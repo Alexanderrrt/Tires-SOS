@@ -7,11 +7,11 @@ import { SITE } from "../site.config";
 import Reveal from "./Reveal";
 
 const HOME_REEL = [
-  "/commercial-vans/home-reel/angel-video-4.mp4?v=4",
-  "/commercial-vans/home-reel/angel-video-5.mp4?v=4",
-  "/commercial-vans/home-reel/angel-video-6.mp4?v=4",
-  "/commercial-vans/home-reel/angel-august.mp4?v=4",
-  "/commercial-vans/home-reel/angel-september.mp4?v=4",
+  "/commercial-vans/home-reel/angel-video-4.mp4",
+  "/commercial-vans/home-reel/angel-video-5.mp4",
+  "/commercial-vans/home-reel/angel-video-6.mp4",
+  "/commercial-vans/home-reel/angel-august.mp4",
+  "/commercial-vans/home-reel/angel-september.mp4",
 ];
 
 const COPY = {
