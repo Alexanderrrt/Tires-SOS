@@ -1902,7 +1902,7 @@ body { background: #050505; color: var(--paper); }
   .shop-media__film-label { left: .8rem; }
   .shop-media__film-time { right: .8rem; }
   .shop-media__card { display: block; }
-  .shop-media__card-media { aspect-ratio: auto; }
+  .shop-media__card-media { aspect-ratio: auto; min-height: 0; }
   .shop-media__card-media video { height: auto; aspect-ratio: auto; object-fit: contain; background: #050505; }
   .shop-media__photo-grid { gap: .35rem; }
   .shop-media__photo-grid img:nth-child(2), .shop-media__photo-grid img:nth-child(4) { transform: translateY(.55rem); }
